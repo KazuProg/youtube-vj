@@ -107,8 +107,11 @@ function setSwitchingDuration() {
   switchingDuration = parseFloat(input);
 }
 
+const speedStep = 0.05;
+const _speedStep = 1 / speedStep;
+
 function setLSpeed(val) {
-  val = parseFloat(val);
+  val = Math.round(parseFloat(val) * _speedStep) / _speedStep;
   VJC[ch1].setData("speed", val);
   document.querySelector(".deck.ch1 .speed input[type=range]").value =
     val.toFixed(2);
@@ -117,7 +120,7 @@ function setLSpeed(val) {
 }
 
 function setRSpeed(val) {
-  val = parseFloat(val);
+  val = Math.round(parseFloat(val) * _speedStep) / _speedStep;
   VJC[ch2].setData("speed", val);
   document.querySelector(".deck.ch2 .speed input[type=range]").value =
     val.toFixed(2);
