@@ -50,7 +50,7 @@ window.addEventListener("load", () => {
   });
 
   changeVideo(relayElement.value);
-  calcOpacity();
+  setCrossfader(-1);
   OpenProjectionWindow();
 });
 
@@ -94,7 +94,7 @@ function switchVideo() {
   const interval = setInterval(() => {
     val += switchingVal;
     crossFader.value = val;
-    calcOpacity();
+    setCrossfader(val);
     if (Math.abs(val) >= 1) {
       clearInterval(interval);
     }
@@ -128,21 +128,14 @@ function setRSpeed(val) {
     val.toFixed(2);
 }
 
-function calcOpacity() {
-  var l = parseFloat(document.querySelector("#Lopacity").value);
-  var r = parseFloat(document.querySelector("#Ropacity").value);
-  var s = parseFloat(document.querySelector("#cross-fader").value);
-  if (s < 0) {
-    VJC[ch1].setData("zIndex", 0);
-    VJC[ch2].setData("zIndex", 1);
-    r *= (1 - Math.abs(s)) * 0.5;
-  } else {
-    VJC[ch1].setData("zIndex", 1);
-    VJC[ch2].setData("zIndex", 0);
-    l *= (1 - Math.abs(s)) * 0.5;
-  }
-  VJC[ch1].setData("opacity", l);
-  VJC[ch2].setData("opacity", r);
+function setCrossfader(val) {
+  localStorage.setItem(
+    "ytvj_sys",
+    JSON.stringify({
+      ...JSON.parse(localStorage.getItem("ytvj_sys")),
+      crossfader: val,
+    })
+  );
 }
 
 function OpenProjectionWindow() {

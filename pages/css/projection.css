@@ -4,6 +4,14 @@ body {
   background: black;
 }
 
+.player_container {
+  background: black;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
 .player {
   position: fixed;
   inset: 0;
