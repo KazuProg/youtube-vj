@@ -82,6 +82,12 @@ class VJPlayer {
         },
       })
     );
+
+    if (this.#options.isProjection) {
+      setInterval(() => {
+        this.syncTiming();
+      }, 3000);
+    }
   }
 
   #applyData(key, value) {
