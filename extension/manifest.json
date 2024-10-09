@@ -1,8 +1,13 @@
 {
+  "manifest_version": 3,
+  "name": "YouTube-VJ",
+  "version": "0.9",
+  "description": "You can perform VJ using YouTube videos.",
   "action": {
     "default_popup": "html/popup.html",
     "default_title": "YouTube-VJ"
   },
+  "permissions": ["storage"],
   "content_scripts": [
     {
       "all_frames": true,
@@ -17,10 +22,5 @@
       "js": ["js/youtube_embed.js"],
       "all_frames": true
     }
-  ],
-  "description": "You can perform VJ using YouTube videos.",
-  "manifest_version": 3,
-  "name": "YouTube-VJ",
-  "permissions": ["storage"],
-  "version": "0.1"
+  ]
 }

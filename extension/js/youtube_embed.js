@@ -1,3 +1,5 @@
+"use strict";
+
 const customCSS = `
 /* Hide all elements except video elements */
 #movie_player > *:not(.html5-video-container) {

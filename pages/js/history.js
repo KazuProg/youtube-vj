@@ -1,3 +1,5 @@
+"use strict";
+
 window.onload = () => {
   window.addEventListener("storage", (event) => {
     if (event.key === "ytvj_history") {

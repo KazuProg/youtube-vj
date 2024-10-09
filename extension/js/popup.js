@@ -1,3 +1,5 @@
+"use strict";
+
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.querySelector("#open_windows");
   btn.addEventListener("click", () => {

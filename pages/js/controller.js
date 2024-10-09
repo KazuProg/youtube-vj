@@ -1,13 +1,14 @@
-const VJC = [];
-const ch1 = 1;
-const ch2 = 2;
+"use strict";
+
+const ch = [];
+
 window.addEventListener("load", () => {
   const eventHandlers = {
     onChangeVideo: (channel, videoId) => {
       document.querySelector("#loadedVideoId").value = videoId;
-      VJC[channel].unMute();
-      VJC[channel == ch1 ? ch2 : ch1].mute();
-      addHistory(videoId, VJC[channel].player.YTPlayer.videoTitle);
+      ch[channel].unMute();
+      ch[(channel + 1) % 2].mute();
+      addHistory(videoId, ch[channel].player.YTPlayer.videoTitle);
     },
     onSuspendPreview: (channel) => {
       const overlay = document.querySelector(`.deck.ch${channel} .suspend`);
@@ -17,31 +18,43 @@ window.addEventListener("load", () => {
       const overlay = document.querySelector(`.deck.ch${channel} .suspend`);
       overlay.classList.add("hidden");
     },
-    onSyncStart: (channel) => {
+    onTimeSyncStart: (channel) => {
       const overlay = document.querySelector(`.deck.ch${channel} .syncing`);
       overlay.classList.remove("hidden");
     },
-    onSyncEnd: (channel) => {
+    onTimeSyncEnd: (channel) => {
       const overlay = document.querySelector(`.deck.ch${channel} .syncing`);
       overlay.classList.add("hidden");
     },
+    onDataApplied: (channel, key, val) => {
+      switch (key) {
+        case "speed":
+          const deck = document.querySelector(`.deck.ch${channel}`);
+          val = val.toFixed(2);
+          deck.querySelector(`.speed input[type=range]`).value = val;
+          deck.querySelector(`.speed input[type=number]`).value = val;
+          break;
+        case "opacity":
+          document.querySelector(`.opacity .ch${channel}`).value = val;
+          break;
+      }
+    },
   };
 
-  VJC[ch1] = new VJController(1, { events: eventHandlers, autoplay: true });
-  VJC[ch2] = new VJController(2, { events: eventHandlers });
+  ch[0] = new VJController(0, { events: eventHandlers, autoplay: true });
+  ch[1] = new VJController(1, { events: eventHandlers });
 
+  // 拡張機能とのデータのやり取り
   const relayElement = document.querySelector("#videoId");
-
-  var observer = new MutationObserver(() => {
+  new MutationObserver(() => {
     console.log("YTVJ:C 変更検知(videoId)");
     changeVideo(relayElement.value);
-  });
-
-  observer.observe(relayElement, {
+  }).observe(relayElement, {
     attributes: true,
     childList: true,
     characterData: true,
   });
+  changeVideo(relayElement.value);
 
   document.addEventListener("keydown", (event) => {
     if (event.ctrlKey && event.key === "h") {
@@ -103,29 +116,7 @@ function switchVideo() {
 
 function setSwitchingDuration() {
   const input = prompt("Switching Duration (ms)", switchingDuration);
-  console.log(input);
-  switchingDuration = parseFloat(input);
-}
-
-const speedStep = 0.05;
-const _speedStep = 1 / speedStep;
-
-function setLSpeed(val) {
-  val = Math.round(parseFloat(val) * _speedStep) / _speedStep;
-  VJC[ch1].setData("speed", val);
-  document.querySelector(".deck.ch1 .speed input[type=range]").value =
-    val.toFixed(2);
-  document.querySelector(".deck.ch1 .speed input[type=number]").value =
-    val.toFixed(2);
-}
-
-function setRSpeed(val) {
-  val = Math.round(parseFloat(val) * _speedStep) / _speedStep;
-  VJC[ch2].setData("speed", val);
-  document.querySelector(".deck.ch2 .speed input[type=range]").value =
-    val.toFixed(2);
-  document.querySelector(".deck.ch2 .speed input[type=number]").value =
-    val.toFixed(2);
+  switchingDuration = parseInt(input);
 }
 
 function setCrossfader(val) {

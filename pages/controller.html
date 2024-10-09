@@ -12,12 +12,12 @@
     <script src="./js/vj-player.js"></script>
   </head>
   <body>
-    <div class="deck ch1">
+    <div class="deck ch0">
       <fieldset>
-        <legend onclick="VJC[ch1].suspendPreview()">Preview</legend>
+        <legend onclick="ch[0].suspendPreview()">Preview</legend>
         <div class="preview">
-          <div class="yt-player" id="vj_player_ch1"></div>
-          <div class="suspend hidden" onclick="VJC[ch1].resumePreview()">
+          <div class="yt-player" id="vj_player_ch0"></div>
+          <div class="suspend hidden" onclick="ch[0].resumePreview()">
             Suspending<br />Preview
           </div>
           <div class="syncing hidden">Syncing...</div>
@@ -27,19 +27,19 @@
         <fieldset>
           <legend>Adjust</legend>
           <div class="adjust">
-            <button onclick="VJC[ch1].adjustTiming(-1)">&lt;</button>
+            <button onclick="ch[0].adjustTiming(-1)">&lt;</button>
             <span>1s</span>
-            <button onclick="VJC[ch1].adjustTiming(+1)">&gt;</button>
-            <button onclick="VJC[ch1].adjustTiming(-0.1)">&lt;</button>
+            <button onclick="ch[0].adjustTiming(+1)">&gt;</button>
+            <button onclick="ch[0].adjustTiming(-0.1)">&lt;</button>
             <span>0.1s</span>
-            <button onclick="VJC[ch1].adjustTiming(+0.1)">&gt;</button>
-            <button onclick="VJC[ch1].adjustTiming(-0.01)">&lt;</button>
+            <button onclick="ch[0].adjustTiming(+0.1)">&gt;</button>
+            <button onclick="ch[0].adjustTiming(-0.01)">&lt;</button>
             <span>0.01s</span>
-            <button onclick="VJC[ch1].adjustTiming(+0.01)">&gt;</button>
+            <button onclick="ch[0].adjustTiming(+0.01)">&gt;</button>
           </div>
         </fieldset>
         <fieldset class="speed">
-          <legend onclick="setLSpeed(1)">Speed</legend>
+          <legend onclick="ch[0].setSpeed(1)">Speed</legend>
           <div class="fader-container vertical-fader reverse">
             <input
               type="range"
@@ -47,7 +47,7 @@
               value="1.0"
               min="0.25"
               max="2"
-              oninput="setLSpeed(this.value)"
+              oninput="ch[0].setSpeed(this.value)"
             />
           </div>
           <input
@@ -56,20 +56,16 @@
             value="1.00"
             min="0.25"
             max="2"
-            oninput="setLSpeed(this.value)"
+            oninput="ch[0].setSpeed(this.value)"
           />
         </fieldset>
       </div>
     </div>
     <div class="mixer">
       <div class="load">
-        <button onclick="VJC[ch1].setData('videoId', prepareVideoId)">
-          Load
-        </button>
+        <button onclick="ch[0].setVideo(prepareVideoId)">Load</button>
         <button onclick="OpenProjectionWindow()"></button>
-        <button onclick="VJC[ch2].setData('videoId', prepareVideoId)">
-          Load
-        </button>
+        <button onclick="ch[1].setVideo(prepareVideoId)">Load</button>
       </div>
       <fieldset class="load-track">
         <legend>Load Track</legend>
@@ -79,32 +75,34 @@
         <input
           type="text"
           id="input-videoId"
-          placeholder="enter YouTube id"
+          placeholder="Enter YouTube ID"
           oninput="changeVideo(this.value)"
           onfocus="this.select()"
         />
       </fieldset>
-      <fieldset style="padding: 0">
+      <fieldset class="opacity" style="padding: 0">
         <legend>Opacity</legend>
         <div class="vertical-fader-container">
           <div class="fader-container vertical-fader">
             <input
+              class="ch0"
               type="range"
               step="0.01"
               value="1.0"
               min="0"
               max="1"
-              oninput="VJC[ch1].setData('opacity', parseFloat(this.value))"
+              oninput="ch[0].setData('opacity', parseFloat(this.value))"
             />
           </div>
           <div class="fader-container vertical-fader">
             <input
+              class="ch1"
               type="range"
               step="0.01"
               value="1.0"
               min="0"
               max="1"
-              oninput="VJC[ch2].setData('opacity', parseFloat(this.value))"
+              oninput="ch[1].setData('opacity', parseFloat(this.value))"
             />
           </div>
         </div>
@@ -129,12 +127,12 @@
         </div>
       </fieldset>
     </div>
-    <div class="deck ch2">
+    <div class="deck ch1">
       <fieldset>
-        <legend onclick="VJC[ch2].suspendPreview()">Preview</legend>
+        <legend onclick="ch[1].suspendPreview()">Preview</legend>
         <div class="preview">
-          <div class="yt-player" id="vj_player_ch2"></div>
-          <div class="suspend hidden" onclick="VJC[ch2].resumePreview()">
+          <div class="yt-player" id="vj_player_ch1"></div>
+          <div class="suspend hidden" onclick="ch[1].resumePreview()">
             Suspending<br />Preview
           </div>
           <div class="syncing hidden">Syncing...</div>
@@ -144,20 +142,20 @@
         <fieldset>
           <legend>Adjust</legend>
           <div class="adjust">
-            <button onclick="VJC[ch2].adjustTiming(-1)">&lt;</button>
+            <button onclick="ch[1].adjustTiming(-1)">&lt;</button>
             <span>1s</span>
-            <button onclick="VJC[ch2].adjustTiming(+1)">&gt;</button>
-            <button onclick="VJC[ch2].adjustTiming(-0.1)">&lt;</button>
+            <button onclick="ch[1].adjustTiming(+1)">&gt;</button>
+            <button onclick="ch[1].adjustTiming(-0.1)">&lt;</button>
             <span>0.1s</span>
-            <button onclick="VJC[ch2].adjustTiming(+0.1)">&gt;</button>
-            <button onclick="VJC[ch2].adjustTiming(-0.01)">&lt;</button>
+            <button onclick="ch[1].adjustTiming(+0.1)">&gt;</button>
+            <button onclick="ch[1].adjustTiming(-0.01)">&lt;</button>
             <span>0.01s</span>
-            <button onclick="VJC[ch2].adjustTiming(+0.01)">&gt;</button>
+            <button onclick="ch[1].adjustTiming(+0.01)">&gt;</button>
           </div>
         </fieldset>
 
         <fieldset class="speed">
-          <legend onclick="setRSpeed(1)">Speed</legend>
+          <legend onclick="ch[1].setSpeed(1)">Speed</legend>
           <div class="fader-container vertical-fader reverse">
             <input
               type="range"
@@ -165,7 +163,7 @@
               value="1.0"
               min="0.25"
               max="2"
-              oninput="setRSpeed(this.value)"
+              oninput="ch[1].setSpeed(this.value)"
             />
           </div>
           <input
@@ -174,7 +172,7 @@
             value="1.00"
             min="0.25"
             max="2"
-            oninput="setRSpeed(this.value)"
+            oninput="ch[1].setSpeed(this.value)"
           />
         </fieldset>
       </div>

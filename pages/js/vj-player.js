@@ -1,3 +1,5 @@
+"use strict";
+
 class VJPlayer {
   #player;
   #playerId;
@@ -11,8 +13,14 @@ class VJPlayer {
     this.#localStorageKey = `ytvj_ch${channel}`;
     this.#options = {
       isProjection: false,
-      events: {},
       ...options,
+      events: {
+        onStateChange: () => {},
+        onTimeSyncStart: () => {},
+        onTimeSyncEnd: () => {},
+        onDataApplied: () => {},
+        ...options.events,
+      },
     };
     this.#data = {
       speed: 1,
@@ -33,9 +41,7 @@ class VJPlayer {
         onStateChange: (e) => {
           this.#onPlayerStateChange(e);
 
-          if (this.#options.events.onStateChange) {
-            this.#options.events.onStateChange(e);
-          }
+          this.#options.events.onStateChange(e);
         },
       },
       playerVars: {
@@ -54,7 +60,7 @@ class VJPlayer {
   }
 
   #onPlayerReady() {
-    console.log(`YTVJ:P YouTube Player Ready`);
+    //console.log(`YTVJ:P YouTube Player Ready`);
 
     this.#player.mute();
 
@@ -82,7 +88,7 @@ class VJPlayer {
     if (JSON.stringify(this.#data[key]) === JSON.stringify(value)) {
       return;
     }
-    console.log(`YTVJ:P 設定適用 ${key} = ${JSON.stringify(value)}`);
+    //console.log(`YTVJ:P 設定適用 ${key} = ${JSON.stringify(value)}`);
     this.#data[key] = value;
     switch (key) {
       case "videoId":
@@ -112,7 +118,11 @@ class VJPlayer {
           document.querySelector(`#${this.#playerId}`).style.zIndex = value;
         }
         break;
+      default:
+        console.warn(`YTVJ:P Unsupported ${key}`);
+        return;
     }
+    this.#options.events.onDataApplied(key, value);
   }
 
   #onPlayerStateChange(event) {
@@ -124,7 +134,7 @@ class VJPlayer {
      * 1: PLAYING
      *-1: UNSTARTED
      */
-    console.log("YTVJ:P onPlayerStateChange:" + event.data);
+    //console.log("YTVJ:P onPlayerStateChange:" + event.data);
 
     if (event.data == YT.PlayerState.ENDED) {
       event.target.seekTo(0);
@@ -153,9 +163,8 @@ class VJPlayer {
     this.#syncing = true;
     console.log(`YTVJ:P 同期処理`);
 
-    if (this.#options.events.onSyncStart) {
-      this.#options.events.onSyncStart();
-    }
+    this.#options.events.onTimeSyncStart();
+
     const process = () => {
       if (this.#data.pause) {
         this.stopSync();
@@ -193,9 +202,7 @@ class VJPlayer {
         }, 100);
       } else {
         this.#player.setPlaybackRate(this.#data.speed);
-        if (this.#options.events.onSyncEnd) {
-          this.#options.events.onSyncEnd();
-        }
+        this.#options.events.onTimeSyncEnd();
       }
     };
     process();

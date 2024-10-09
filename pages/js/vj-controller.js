@@ -1,3 +1,5 @@
+"use strict";
+
 class VJController {
   #channel;
   #data = {};
@@ -14,14 +16,19 @@ class VJController {
         onStateChange: (e) => {
           this._onPlayerStateChange(e);
         },
-        onSyncStart: () => {
-          if (this.#events.onSyncStart) {
-            this.#events.onSyncStart(this.#channel);
+        onTimeSyncStart: () => {
+          if (this.#events.onTimeSyncStart) {
+            this.#events.onTimeSyncStart(this.#channel);
           }
         },
-        onSyncEnd: () => {
-          if (this.#events.onSyncEnd) {
-            this.#events.onSyncEnd(this.#channel);
+        onTimeSyncEnd: () => {
+          if (this.#events.onTimeSyncEnd) {
+            this.#events.onTimeSyncEnd(this.#channel);
+          }
+        },
+        onDataApplied: (key, value) => {
+          if (this.#events.onDataApplied) {
+            this.#events.onDataApplied(this.#channel, key, value);
           }
         },
       },
@@ -123,6 +130,22 @@ class VJController {
       timestamp: +new Date() / 1000,
       playerTime: this.player.YTPlayer.getCurrentTime(),
     };
+  }
+
+  setVideo(id) {
+    this.setData("videoId", id);
+  }
+
+  setSpeed(val) {
+    const speedStep = 0.05;
+    const _speedStep = 1 / speedStep;
+
+    val = Math.round(parseFloat(val) * _speedStep) / _speedStep;
+
+    if (val < 0.25) val = 0.25;
+    if (2 < val) val = 2;
+
+    this.setData("speed", val);
   }
 
   mute() {
