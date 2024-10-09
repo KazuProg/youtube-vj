@@ -208,60 +208,119 @@ class VJPlayer extends EventTarget {
   }
 
   syncTiming() {
-    if (this.#syncing) return;
-
-    if (this.#data.timing.timestamp == 0) return;
+    if (this.#syncing || this.#data.timing.timestamp == 0 || this.#data.pause) {
+      return;
+    }
 
     this.#syncing = true;
-    console.log(`YTVJ:P 同期処理`);
-
+    console.log(`YTVJ:P Sync process start`);
     this.dispatchEvent(new Event("onTimeSyncStart"));
 
-    const process = () => {
-      if (this.#data.pause) {
+    const jumpToSync = () => {
+      const t = getTimeInfo();
+
+      if (t.expectPlayerTime < 0 || t.duration < t.expectPlayerTime) {
+        // 計算上の再生位置がマイナス or 動画の長さよりも長ければ同期中止
+        console.log(`YTVJ:P Sync: out of video duration`);
         this.stopSync();
         return;
       }
-      const timing = this.#data.timing;
-      const elapsedRealTime = new Date() / 1000 - timing.timestamp;
 
-      const expectPlayerTime =
-        timing.playerTime + elapsedRealTime * this.#data.speed;
-
-      if (this.#YTPlayer.getDuration() < expectPlayerTime) {
-        // 計算上の再生位置が動画の長さよりも長ければ同期中止
-        this.stopSync();
-        console.log(`YTVJ:P 同期中止`);
-      } else {
-        const syncOffset = expectPlayerTime - this.#YTPlayer.getCurrentTime();
-
-        console.log(`YTVJ:P ズレ：${parseInt(syncOffset * 1000)}ms`);
-        if (Math.abs(syncOffset) < 0.01) {
-          this.stopSync();
-          console.log(`YTVJ:P 同期完了`);
-        } else if (Math.abs(syncOffset) > 5) {
-          this.#YTPlayer.seekTo(expectPlayerTime + 0.5);
-          console.log(`YTVJ:P 強制同期`);
-        } else {
-          const offsetSpd =
-            Math.sign(syncOffset) * Math.max(0.1, Math.abs(syncOffset));
-          this.#YTPlayer.setPlaybackRate(this.#data.speed + offsetSpd);
-        }
+      if (Math.abs(t.syncOffset) < 0.5) {
+        refineSync();
+        return;
       }
-      if (this.#syncing) {
-        setTimeout(() => {
-          process();
-        }, 100);
+
+      if (t.expectPlayerTime <= t.bufferedDuration) {
+        console.log("YTVJ:P Sync: Jump");
+        const listener = (e) => {
+          if (e.detail.data === YT.PlayerState.PLAYING) {
+            this.removeEventListener("onYTPlayerStateChange", listener);
+            refineSync();
+          }
+        };
+        this.addEventListener("onYTPlayerStateChange", listener);
+        this.#YTPlayer.seekTo(t.expectPlayerTime);
       } else {
-        this.#YTPlayer.setPlaybackRate(this.#data.speed);
-        this.dispatchEvent(new Event("onTimeSyncEnd"));
+        console.log("YTVJ:P Sync: Buffering");
+        let buffered = false;
+        const listener = (e) => {
+          if (e.detail.data === YT.PlayerState.PLAYING) {
+            if (buffered) {
+              this.removeEventListener("onYTPlayerStateChange", listener);
+              refineSync();
+              return;
+            }
+
+            const t = getTimeInfo();
+            if (t.expectPlayerTime <= t.bufferedDuration) {
+              buffered = true;
+            }
+            this.#YTPlayer.seekTo(t.expectPlayerTime);
+          }
+        };
+        this.addEventListener("onYTPlayerStateChange", listener);
+        this.#YTPlayer.seekTo(t.expectPlayerTime);
       }
     };
-    process();
+
+    let refineSync_cnt = 0;
+    const refineSync = () => {
+      console.log("YTVJ:P Sync: RefineSync");
+      const _refineSync = () => {
+        const t = getTimeInfo();
+        console.log(`YTVJ:P Sync: Offset: ${parseInt(t.syncOffset * 1000)}ms`);
+        if (0.5 < Math.abs(t.syncOffset)) {
+          clearInterval(interval);
+          jumpToSync();
+          return;
+        }
+
+        if (Math.abs(t.syncOffset) < 0.01) {
+          refineSync_cnt++;
+          if (5 <= refineSync_cnt) {
+            console.log(`YTVJ:P Sync: done!`);
+            clearInterval(interval);
+            this.stopSync();
+          }
+          this.#YTPlayer.setPlaybackRate(this.#data.speed);
+        } else {
+          refineSync_cnt = 0;
+          const newSpeed =
+            this.#data.speed + 0.05 * parseInt(t.syncOffset * 100);
+          this.#YTPlayer.setPlaybackRate(newSpeed);
+        }
+      };
+
+      const interval = setInterval(_refineSync, 50);
+      _refineSync();
+    };
+
+    const getTimeInfo = () => {
+      const timing = this.#data.timing;
+      const buffered = this.#YTPlayer.getVideoLoadedFraction();
+      const duration = this.#YTPlayer.getDuration();
+
+      const bufferedDuration = duration * buffered;
+      const elapsedRealTime = new Date() / 1000 - timing.timestamp;
+      const expectPlayerTime =
+        timing.playerTime + elapsedRealTime * this.#data.speed;
+      const syncOffset = expectPlayerTime - this.#YTPlayer.getCurrentTime();
+
+      return {
+        expectPlayerTime,
+        syncOffset,
+        duration,
+        bufferedDuration,
+      };
+    };
+
+    jumpToSync();
   }
 
   stopSync() {
     this.#syncing = false;
+    this.dispatchEvent(new Event("onTimeSyncEnd"));
   }
 
   play() {
