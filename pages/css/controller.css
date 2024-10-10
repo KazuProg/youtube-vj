@@ -20,6 +20,10 @@ body > div.deck {
   flex-grow: 1; /* 左右の要素が残りのスペースを占める */
 }
 
+body > div.deck.selected {
+  background: #444;
+}
+
 body > div.mixer {
   width: var(--mixer-width);
   border-left: solid 1px #555;

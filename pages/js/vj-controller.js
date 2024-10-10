@@ -2,7 +2,10 @@
 
 class VJController {
   #channel;
-  #data = {};
+  #data = {
+    speed: 1,
+    opacity: 1,
+  };
   #events;
   #isSuspendPreview = false;
   #isChangeTiming = false;
@@ -136,7 +139,11 @@ class VJController {
     this.setData("videoId", id);
   }
 
-  setSpeed(val) {
+  setSpeed(val, relative = false) {
+    if (relative) {
+      val = this.#data["speed"] + val;
+    }
+
     const speedStep = 0.05;
     const _speedStep = 1 / speedStep;
 
@@ -148,12 +155,47 @@ class VJController {
     this.setData("speed", val);
   }
 
+  setOpacity(val, relative = false) {
+    if (relative) {
+      val = this.#data["opacity"] + val;
+    }
+
+    if (val < 0) val = 0;
+    if (1 < val) val = 1;
+
+    this.setData("opacity", val);
+  }
+
+  play() {
+    this.player.YTPlayer.playVideo();
+  }
+
+  pause() {
+    this.player.YTPlayer.pauseVideo();
+  }
+
+  togglePlayPause() {
+    if (this.player.YTPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+      this.pause();
+    } else {
+      this.play();
+    }
+  }
+
   mute() {
     this.player.YTPlayer.mute();
   }
 
   unMute() {
     this.player.YTPlayer.unMute();
+  }
+
+  toggleMuteUnmute() {
+    if (this.player.YTPlayer.isMuted()) {
+      this.unMute();
+    } else {
+      this.mute();
+    }
   }
 
   suspendPreview() {

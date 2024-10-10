@@ -85,24 +85,24 @@
         <div class="vertical-fader-container">
           <div class="fader-container vertical-fader">
             <input
-              class="ch0"
+              class="deck0"
               type="range"
               step="0.01"
               value="1.0"
               min="0"
               max="1"
-              oninput="ch[0].setData('opacity', parseFloat(this.value))"
+              oninput="ch[0].setOpacity(parseFloat(this.value))"
             />
           </div>
           <div class="fader-container vertical-fader">
             <input
-              class="ch1"
+              class="deck1"
               type="range"
               step="0.01"
               value="1.0"
               min="0"
               max="1"
-              oninput="ch[1].setData('opacity', parseFloat(this.value))"
+              oninput="ch[1].setOpacity(parseFloat(this.value))"
             />
           </div>
         </div>

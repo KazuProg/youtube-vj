@@ -1,6 +1,7 @@
 "use strict";
 
 const ch = [];
+let selCh = null;
 
 window.addEventListener("load", () => {
   const eventHandlers = {
@@ -35,7 +36,7 @@ window.addEventListener("load", () => {
           deck.querySelector(`.speed input[type=number]`).value = val;
           break;
         case "opacity":
-          document.querySelector(`.opacity .ch${channel}`).value = val;
+          document.querySelector(`.opacity .deck${channel}`).value = val;
           break;
       }
     },
@@ -59,6 +60,105 @@ window.addEventListener("load", () => {
   document.addEventListener("keydown", (event) => {
     if (event.ctrlKey && event.key === "h") {
       window.open("./history.html", "History", "width=800,height=600");
+    }
+    if (event.ctrlKey && event.key === "1") {
+      selCh = ch[0];
+      document.querySelector(".deck.ch0").classList.add("selected");
+      document.querySelector(".deck.ch1").classList.remove("selected");
+      event.preventDefault();
+      document.querySelector("#input-videoId").blur();
+    }
+    if (event.ctrlKey && event.key === "2") {
+      selCh = ch[1];
+      document.querySelector(".deck.ch0").classList.remove("selected");
+      document.querySelector(".deck.ch1").classList.add("selected");
+      event.preventDefault();
+      document.querySelector("#input-videoId").blur();
+    }
+
+    // ID入力中は以降の処理をスキップ
+    const activeElement = document.activeElement;
+    if (
+      activeElement.tagName === "INPUT" ||
+      activeElement.tagName === "TEXTAREA" ||
+      activeElement.isContentEditable
+    ) {
+      return;
+    }
+
+    if (event.key === "Escape") {
+      selCh = null;
+      document.querySelector(".deck.ch0").classList.remove("selected");
+      document.querySelector(".deck.ch1").classList.remove("selected");
+      event.preventDefault();
+    }
+    if (event.key === "/") {
+      document.querySelector("#input-videoId").focus();
+      selCh = null;
+      document.querySelector(".deck.ch0").classList.remove("selected");
+      document.querySelector(".deck.ch1").classList.remove("selected");
+      event.preventDefault();
+    }
+    if (event.key === "s") {
+      switchVideo();
+      event.preventDefault();
+    }
+    if (event.key === "t" || event.key === "f") {
+      OpenProjectionWindow();
+      event.preventDefault();
+    }
+
+    if (selCh) {
+      switch (event.key) {
+        case " ":
+        case "k":
+          if (event.shiftKey) {
+            selCh.suspendPreview();
+          } else {
+            selCh.togglePlayPause();
+          }
+          break;
+        case "m":
+          selCh.toggleMuteUnmute();
+          break;
+        case "ArrowLeft":
+          selCh.adjustTiming(-5);
+          break;
+        case "ArrowRight":
+          selCh.adjustTiming(5);
+          break;
+        case "j":
+          selCh.adjustTiming(-10);
+          break;
+        case "l":
+          if (event.ctrlKey) {
+            selCh.setVideo(prepareVideoId);
+          } else {
+            selCh.adjustTiming(10);
+          }
+          break;
+        case ",":
+          selCh.adjustTiming(-0.1);
+          break;
+        case ".":
+          selCh.adjustTiming(+0.1);
+          break;
+        case "<":
+          selCh.setSpeed(-0.05, true);
+          break;
+        case ">":
+          selCh.setSpeed(+0.05, true);
+          break;
+        case "ArrowUp":
+          selCh.setOpacity(+0.05, true);
+          break;
+        case "ArrowDown":
+          selCh.setOpacity(-0.05, true);
+          break;
+        default:
+          return;
+      }
+      event.preventDefault();
     }
   });
 
