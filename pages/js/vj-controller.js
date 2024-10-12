@@ -2,11 +2,8 @@
 
 class VJController {
   #channel;
-  #data = {
-    speed: 1,
-    opacity: 1,
-  };
   #events;
+  #VJPlayer = null;
   #isSuspendPreview = false;
   #isChangeTiming = false;
   #isChangeVideoId = false;
@@ -14,10 +11,10 @@ class VJController {
   constructor(channel, options = {}) {
     this.#channel = channel;
     this.#events = options.events;
-    this.player = new VJPlayer(channel, {
+    this.#VJPlayer = new VJPlayer(channel, {
       events: {
         onStateChange: (e) => {
-          this._onPlayerStateChange(e);
+          this.#onPlayerStateChange(e);
         },
         onTimeSyncStart: () => {
           if (this.#events.onTimeSyncStart) {
@@ -37,111 +34,27 @@ class VJController {
       },
     });
 
-    localStorage.removeItem(this.player.localStorageKey);
+    localStorage.removeItem(this.#VJPlayer.localStorageKey);
     if (options.autoplay) {
-      this.setData("pause", false);
+      this.#setData("pause", false);
     }
   }
 
-  _onPlayerStateChange(e) {
-    /**
-     * 3: BUFFERING
-     * 5: CUED
-     * 0: ENDED
-     * 2: PAUSED
-     * 1: PLAYING
-     *-1: UNSTARTED
-     */
-    /**
-     * 動画変更時
-     * PAUSED -> UNSTARTED -> BUFFERING -> UNSTARTED -> BUFFERING -> PLAYING
-     * 再生位置変更時の遷移
-     * PAUSED -> BUFFERING -> PLAYING
-     * 動画終了時(自動再生)
-     * ENDED -> PLAYING -> BUFFERING -> PLAYING
-     */
-    // 再生位置変更(単純なローディングはしらん)
-    if (e.data == YT.PlayerState.BUFFERING) {
-      this.setData("pause", false);
-    }
-    // 動画変更時は自動再生、タイミング通知
-    if (e.data == YT.PlayerState.UNSTARTED) {
-      this.setData("pause", false);
-      this.#isChangeTiming = true;
-      this.#isChangeVideoId = true;
-    }
-    if (e.data == YT.PlayerState.PAUSED) {
-      if (this.#isSuspendPreview) {
-        return;
-      }
-      this.setData("pause", true);
-      this.#isChangeTiming = true;
-    }
-
-    if (e.data == YT.PlayerState.ENDED) {
-      this.#isChangeTiming = true;
-    }
-
-    if (e.data == YT.PlayerState.PLAYING) {
-      // 再生されたらプレビューの一時停止は解除
-      if (this.#isSuspendPreview) {
-        if (this.#events.onResumePreview) {
-          this.#events.onResumePreview(this.#channel);
-        }
-        this.#isSuspendPreview = false;
-      }
-      if (this.#isChangeTiming) {
-        this.setData("timing", this.#getTimingData());
-        this.#isChangeTiming = false;
-      } else {
-        this.player.syncTiming();
-      }
-      if (this.#isChangeVideoId) {
-        this.#isChangeVideoId = false;
-        if (this.#data.videoId && this.#events.onChangeVideo) {
-          this.#events.onChangeVideo(this.#channel, this.#data.videoId);
-        }
-      }
-    }
+  get videoTitle() {
+    return this.#VJPlayer.videoTitle;
   }
 
-  setData(key, value) {
-    this.#data[key] = value;
-    if (key === "speed") {
-      // 速度変更なら、タイミング情報も送信
-      this.#data["timing"] = this.#getTimingData();
-    }
-
-    localStorage.setItem(
-      this.player.localStorageKey,
-      JSON.stringify(this.#data)
-    );
-
-    // カスタムイベントを作成して発火
-    document.dispatchEvent(
-      new CustomEvent("VJPlayerUpdated", {
-        detail: {
-          key: this.player.localStorageKey,
-          value: JSON.stringify(this.#data),
-        },
-      })
-    );
-  }
-
-  #getTimingData() {
-    return {
-      timestamp: +new Date() / 1000,
-      playerTime: this.player.YTPlayer.getCurrentTime(),
-    };
+  get channelNumber() {
+    return this.#channel;
   }
 
   setVideo(id) {
-    this.setData("videoId", id);
+    this.#setData("videoId", id);
   }
 
   setSpeed(val, relative = false) {
     if (relative) {
-      val = this.#data["speed"] + val;
+      val = this.#VJPlayer.getData("speed") + val;
     }
 
     const speedStep = 0.05;
@@ -152,50 +65,18 @@ class VJController {
     if (val < 0.25) val = 0.25;
     if (2 < val) val = 2;
 
-    this.setData("speed", val);
+    this.#setData("speed", val);
   }
 
   setOpacity(val, relative = false) {
     if (relative) {
-      val = this.#data["opacity"] + val;
+      val = this.#VJPlayer.getData("opacity") + val;
     }
 
     if (val < 0) val = 0;
     if (1 < val) val = 1;
 
-    this.setData("opacity", val);
-  }
-
-  play() {
-    this.player.YTPlayer.playVideo();
-  }
-
-  pause() {
-    this.player.YTPlayer.pauseVideo();
-  }
-
-  togglePlayPause() {
-    if (this.player.YTPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
-      this.pause();
-    } else {
-      this.play();
-    }
-  }
-
-  mute() {
-    this.player.YTPlayer.mute();
-  }
-
-  unMute() {
-    this.player.YTPlayer.unMute();
-  }
-
-  toggleMuteUnmute() {
-    if (this.player.YTPlayer.isMuted()) {
-      this.unMute();
-    } else {
-      this.mute();
-    }
+    this.#setData("opacity", val);
   }
 
   suspendPreview() {
@@ -205,20 +86,125 @@ class VJController {
       }
       this.#isSuspendPreview = true;
     }
-    this.player.stopSync();
-    this.player.YTPlayer.pauseVideo();
+    this.#VJPlayer.stopSync();
+    this.#VJPlayer.pause();
   }
 
   resumePreview() {
     if (this.#isSuspendPreview) {
-      this.player.YTPlayer.playVideo();
+      this.#VJPlayer.play();
     }
   }
 
   adjustTiming(sec) {
-    this.setData("timing", {
-      timestamp: this.#data.timing.timestamp,
-      playerTime: this.#data.timing.playerTime + sec,
-    });
+    let timing = this.#VJPlayer.getData("timing");
+    timing.playerTime += sec;
+    this.#setData("timing", timing);
+  }
+
+  play() {
+    this.#VJPlayer.play();
+  }
+
+  pause() {
+    this.#VJPlayer.pause();
+  }
+
+  togglePlayPause() {
+    if (this.#VJPlayer.YTPlayerState === YT.PlayerState.PLAYING) {
+      this.pause();
+    } else {
+      this.play();
+    }
+  }
+
+  mute() {
+    this.#VJPlayer.mute();
+  }
+
+  unMute() {
+    this.#VJPlayer.unMute();
+  }
+
+  toggleMuteUnmute() {
+    if (this.#VJPlayer.isMuted) {
+      this.unMute();
+    } else {
+      this.mute();
+    }
+  }
+
+  #onPlayerStateChange(e) {
+    switch (e.data) {
+      case YT.PlayerState.BUFFERING:
+        // 再生位置変更(単純なローディングはしらん)
+        this.#setData("pause", false);
+        break;
+      case YT.PlayerState.UNSTARTED:
+        // 動画変更時は自動再生、タイミング通知
+        this.#setData("pause", false);
+        this.#isChangeTiming = true;
+        this.#isChangeVideoId = true;
+        break;
+      case YT.PlayerState.PAUSED:
+        if (this.#isSuspendPreview) return;
+        this.#setData("pause", true);
+        this.#isChangeTiming = true;
+        break;
+      case YT.PlayerState.ENDED:
+        this.#isChangeTiming = true;
+        break;
+      case YT.PlayerState.PLAYING:
+        // 再生されたらプレビューの一時停止は解除
+        if (this.#isSuspendPreview) {
+          if (this.#events.onResumePreview) {
+            this.#events.onResumePreview(this.#channel);
+          }
+          this.#isSuspendPreview = false;
+        }
+        if (this.#isChangeTiming) {
+          this.#setData("timing", this.#getTimingData());
+          this.#isChangeTiming = false;
+        } else {
+          this.#VJPlayer.syncTiming();
+        }
+        if (this.#isChangeVideoId) {
+          this.#isChangeVideoId = false;
+          const videoId = this.#VJPlayer.getData("videoId");
+          if (videoId && this.#events.onChangeVideo) {
+            this.#events.onChangeVideo(this.#channel, videoId);
+          }
+        }
+        break;
+    }
+  }
+
+  #setData(key, value) {
+    let data = this.#VJPlayer.getData();
+
+    data[key] = value;
+    if (key === "speed") {
+      // 速度変更なら、タイミング情報も送信
+      data["timing"] = this.#getTimingData();
+    }
+
+    localStorage.setItem(this.#VJPlayer.localStorageKey, JSON.stringify(data));
+
+    // カスタムイベントを作成して発火
+    document.dispatchEvent(
+      new CustomEvent("VJPlayerUpdated", {
+        detail: {
+          key: this.#VJPlayer.localStorageKey,
+          value: JSON.stringify(data),
+        },
+      })
+    );
+  }
+
+  #getTimingData() {
+    return {
+      timestamp: +new Date() / 1000,
+      playerTime: this.#VJPlayer.currentTime,
+    };
   }
 }

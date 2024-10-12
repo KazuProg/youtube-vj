@@ -7,9 +7,10 @@ window.addEventListener("load", () => {
   const eventHandlers = {
     onChangeVideo: (channel, videoId) => {
       document.querySelector("#loadedVideoId").value = videoId;
-      ch[channel].unMute();
-      ch[(channel + 1) % 2].mute();
-      addHistory(videoId, ch[channel].player.YTPlayer.videoTitle);
+      for (const c of ch) {
+        c.channelNumber === channel ? c.unMute() : c.mute();
+      }
+      addHistory(videoId, ch[channel].videoTitle);
     },
     onSuspendPreview: (channel) => {
       const overlay = document.querySelector(`.deck.ch${channel} .suspend`);
@@ -62,18 +63,12 @@ window.addEventListener("load", () => {
       window.open("./history.html", "History", "width=800,height=600");
     }
     if (event.ctrlKey && event.key === "1") {
-      selCh = ch[0];
-      document.querySelector(".deck.ch0").classList.add("selected");
-      document.querySelector(".deck.ch1").classList.remove("selected");
+      selectCh(0);
       event.preventDefault();
-      document.querySelector("#input-videoId").blur();
     }
     if (event.ctrlKey && event.key === "2") {
-      selCh = ch[1];
-      document.querySelector(".deck.ch0").classList.remove("selected");
-      document.querySelector(".deck.ch1").classList.add("selected");
+      selectCh(1);
       event.preventDefault();
-      document.querySelector("#input-videoId").blur();
     }
 
     // ID入力中は以降の処理をスキップ
@@ -87,16 +82,12 @@ window.addEventListener("load", () => {
     }
 
     if (event.key === "Escape") {
-      selCh = null;
-      document.querySelector(".deck.ch0").classList.remove("selected");
-      document.querySelector(".deck.ch1").classList.remove("selected");
+      selectCh(null);
       event.preventDefault();
     }
     if (event.key === "/") {
       document.querySelector("#input-videoId").focus();
-      selCh = null;
-      document.querySelector(".deck.ch0").classList.remove("selected");
-      document.querySelector(".deck.ch1").classList.remove("selected");
+      selectCh(null);
       event.preventDefault();
     }
     if (event.key === "s") {
@@ -229,6 +220,20 @@ function setCrossfader(val) {
   );
 }
 
+function selectCh(channel = null) {
+  selCh = ch[channel];
+  for (const c of ch) {
+    const cNum = c.channelNumber;
+    const deck = document.querySelector(`.deck.ch${cNum}`);
+    if (cNum === channel) {
+      deck.classList.add("selected");
+    } else {
+      deck.classList.remove("selected");
+    }
+  }
+  document.querySelector("#input-videoId").blur();
+}
+
 function OpenProjectionWindow() {
   window.open("./projection.html", "Projection", "width=640,height=360");
 }
@@ -238,7 +243,7 @@ function addHistory(videoId, videoTitle) {
 
   let history = JSON.parse(localStorage.getItem(localStorageKey) || "[]");
 
-  if (history[0] && history[0].id === videoId) {
+  if (history[0] && history[history.length - 1].id === videoId) {
     return;
   }
 

@@ -1,15 +1,14 @@
 "use strict";
 
 class VJPlayer {
-  #player;
-  #playerId;
+  #YTPlayer;
   #localStorageKey;
   #options;
   #syncing = false;
   #data = {};
 
   constructor(channel, options = {}) {
-    this.#playerId = `vj_player_ch${channel}`;
+    const playerId = `vj_player_ch${channel}`;
     this.#localStorageKey = `ytvj_ch${channel}`;
     this.#options = {
       isProjection: false,
@@ -24,16 +23,17 @@ class VJPlayer {
     };
     this.#data = {
       speed: 1,
+      opacity: 1,
       pause: true,
       timing: {
         timestamp: 0,
         playerTime: 0,
       },
-      videoId: "BLeUas72Mzk", //【フリー動画素材】ローディング動画4秒【ダウンロード可能】
+      videoId: null,
     };
 
-    this.#player = new YT.Player(this.#playerId, {
-      videoId: this.#data.videoId,
+    this.#YTPlayer = new YT.Player(playerId, {
+      videoId: "BLeUas72Mzk", //【フリー動画素材】ローディング動画4秒【ダウンロード可能】
       events: {
         onReady: (e) => {
           this.#onPlayerReady(e);
@@ -55,14 +55,26 @@ class VJPlayer {
     return this.#localStorageKey;
   }
 
-  get YTPlayer() {
-    return this.#player;
+  get videoTitle() {
+    return this.#YTPlayer.videoTitle;
+  }
+
+  get currentTime() {
+    return this.#YTPlayer.getCurrentTime();
+  }
+
+  get isMuted() {
+    return this.#YTPlayer.isMuted();
+  }
+
+  get YTPlayerState() {
+    return this.#YTPlayer.getPlayerState();
   }
 
   #onPlayerReady() {
     //console.log(`YTVJ:P YouTube Player Ready`);
 
-    this.#player.mute();
+    this.#YTPlayer.mute();
 
     document.addEventListener("VJPlayerUpdated", (event) => {
       if (event.detail.key === this.#localStorageKey) {
@@ -98,30 +110,30 @@ class VJPlayer {
     this.#data[key] = value;
     switch (key) {
       case "videoId":
-        this.#player.loadVideoById(value);
+        this.#YTPlayer.loadVideoById(value);
         break;
       case "pause":
         if (value === true) {
-          this.#player.pauseVideo();
+          this.#YTPlayer.pauseVideo();
         } else {
-          this.#player.playVideo();
+          this.#YTPlayer.playVideo();
         }
         break;
       case "timing":
-        this.#player.playVideo();
+        this.#YTPlayer.playVideo();
         this.syncTiming();
         break;
       case "speed":
-        this.#player.setPlaybackRate(value);
+        this.#YTPlayer.setPlaybackRate(value);
         break;
       case "opacity":
         if (this.#options.isProjection) {
-          document.querySelector(`#${this.#playerId}`).style.opacity = value;
+          this.#YTPlayer.getIframe().style.opacity = value;
         }
         break;
       case "zIndex":
         if (this.#options.isProjection) {
-          document.querySelector(`#${this.#playerId}`).style.zIndex = value;
+          this.#YTPlayer.getIframe().style.zIndex = value;
         }
         break;
       default:
@@ -132,14 +144,6 @@ class VJPlayer {
   }
 
   #onPlayerStateChange(event) {
-    /**
-     * 3: BUFFERING
-     * 5: CUED
-     * 0: ENDED
-     * 2: PAUSED
-     * 1: PLAYING
-     *-1: UNSTARTED
-     */
     //console.log("YTVJ:P onPlayerStateChange:" + event.data);
 
     if (event.data == YT.PlayerState.ENDED) {
@@ -151,7 +155,7 @@ class VJPlayer {
       // 新動画読み込み時は自動再生されるっぽい？
       // 一時停止中にPreviewリロードで再生される対策
       if (this.#data.pause) {
-        this.#player.pauseVideo();
+        this.#YTPlayer.pauseVideo();
         return;
       }
       if (this.#options.isProjection) {
@@ -160,10 +164,17 @@ class VJPlayer {
     }
   }
 
+  getData(key = null) {
+    let result = this.#data;
+    if (key !== null) {
+      result = this.#data[key] || null;
+    }
+    return JSON.parse(JSON.stringify(result));
+  }
+
   syncTiming() {
     if (this.#syncing) return;
 
-    // コントローラーからデータを受け取っていない
     if (this.#data.timing.timestamp == 0) return;
 
     this.#syncing = true;
@@ -182,24 +193,24 @@ class VJPlayer {
       const expectPlayerTime =
         timing.playerTime + elapsedRealTime * this.#data.speed;
 
-      if (this.#player.getDuration() < expectPlayerTime) {
+      if (this.#YTPlayer.getDuration() < expectPlayerTime) {
         // 計算上の再生位置が動画の長さよりも長ければ同期中止
         this.stopSync();
         console.log(`YTVJ:P 同期中止`);
       } else {
-        const syncOffset = expectPlayerTime - this.#player.getCurrentTime();
+        const syncOffset = expectPlayerTime - this.#YTPlayer.getCurrentTime();
 
         console.log(`YTVJ:P ズレ：${parseInt(syncOffset * 1000)}ms`);
         if (Math.abs(syncOffset) < 0.01) {
           this.stopSync();
           console.log(`YTVJ:P 同期完了`);
         } else if (Math.abs(syncOffset) > 5) {
-          this.#player.seekTo(expectPlayerTime + 0.5);
+          this.#YTPlayer.seekTo(expectPlayerTime + 0.5);
           console.log(`YTVJ:P 強制同期`);
         } else {
           const offsetSpd =
             Math.sign(syncOffset) * Math.max(0.1, Math.abs(syncOffset));
-          this.#player.setPlaybackRate(this.#data.speed + offsetSpd);
+          this.#YTPlayer.setPlaybackRate(this.#data.speed + offsetSpd);
         }
       }
       if (this.#syncing) {
@@ -207,7 +218,7 @@ class VJPlayer {
           process();
         }, 100);
       } else {
-        this.#player.setPlaybackRate(this.#data.speed);
+        this.#YTPlayer.setPlaybackRate(this.#data.speed);
         this.#options.events.onTimeSyncEnd();
       }
     };
@@ -216,5 +227,21 @@ class VJPlayer {
 
   stopSync() {
     this.#syncing = false;
+  }
+
+  play() {
+    this.#YTPlayer.playVideo();
+  }
+
+  pause() {
+    this.#YTPlayer.pauseVideo();
+  }
+
+  mute() {
+    this.#YTPlayer.mute();
+  }
+
+  unMute() {
+    this.#YTPlayer.unMute();
   }
 }
