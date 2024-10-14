@@ -11,27 +11,24 @@ class VJController {
   constructor(channel, options = {}) {
     this.#channel = channel;
     this.#events = options.events;
-    this.#VJPlayer = new VJPlayer(channel, {
-      events: {
-        onStateChange: (e) => {
-          this.#onPlayerStateChange(e);
-        },
-        onTimeSyncStart: () => {
-          if (this.#events.onTimeSyncStart) {
-            this.#events.onTimeSyncStart(this.#channel);
-          }
-        },
-        onTimeSyncEnd: () => {
-          if (this.#events.onTimeSyncEnd) {
-            this.#events.onTimeSyncEnd(this.#channel);
-          }
-        },
-        onDataApplied: (key, value) => {
-          if (this.#events.onDataApplied) {
-            this.#events.onDataApplied(this.#channel, key, value);
-          }
-        },
-      },
+    this.#VJPlayer = new VJPlayer(channel);
+    this.#VJPlayer.addEventListener("onYTPlayerStateChange", (e) => {
+      this.#onYTPlayerStateChange(e);
+    });
+    this.#VJPlayer.addEventListener("onTimeSyncStart", (e) => {
+      if (this.#events.onTimeSyncStart) {
+        this.#events.onTimeSyncStart(this.#channel);
+      }
+    });
+    this.#VJPlayer.addEventListener("onTimeSyncEnd", (e) => {
+      if (this.#events.onTimeSyncEnd) {
+        this.#events.onTimeSyncEnd(this.#channel);
+      }
+    });
+    this.#VJPlayer.addEventListener("onDataApplied", (e) => {
+      if (this.#events.onDataApplied) {
+        this.#events.onDataApplied(this.#channel, e.detail.key, e.detail.value);
+      }
     });
 
     localStorage.removeItem(this.#VJPlayer.localStorageKey);
@@ -134,8 +131,8 @@ class VJController {
     }
   }
 
-  #onPlayerStateChange(e) {
-    switch (e.data) {
+  #onYTPlayerStateChange(e) {
+    switch (e.detail.data) {
       case YT.PlayerState.BUFFERING:
         // 再生位置変更(単純なローディングはしらん)
         this.#setData("pause", false);

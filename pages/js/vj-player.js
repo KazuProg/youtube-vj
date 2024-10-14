@@ -1,6 +1,6 @@
 "use strict";
 
-class VJPlayer {
+class VJPlayer extends EventTarget {
   #YTPlayer;
   #localStorageKey;
   #options;
@@ -8,18 +8,12 @@ class VJPlayer {
   #data = {};
 
   constructor(channel, options = {}) {
+    super();
     const playerId = `vj_player_ch${channel}`;
     this.#localStorageKey = `ytvj_ch${channel}`;
     this.#options = {
       isProjection: false,
       ...options,
-      events: {
-        onStateChange: () => {},
-        onTimeSyncStart: () => {},
-        onTimeSyncEnd: () => {},
-        onDataApplied: () => {},
-        ...options.events,
-      },
     };
     this.#data = {
       speed: 1,
@@ -35,13 +29,47 @@ class VJPlayer {
     this.#YTPlayer = new YT.Player(playerId, {
       videoId: "BLeUas72Mzk", //【フリー動画素材】ローディング動画4秒【ダウンロード可能】
       events: {
-        onReady: (e) => {
-          this.#onPlayerReady(e);
+        onReady: (event) => {
+          this.dispatchEvent(
+            new CustomEvent("onYTPlayerReady", {
+              detail: { ...event },
+            })
+          );
         },
-        onStateChange: (e) => {
-          this.#onPlayerStateChange(e);
-
-          this.#options.events.onStateChange(e);
+        onStateChange: (event) => {
+          this.dispatchEvent(
+            new CustomEvent("onYTPlayerStateChange", {
+              detail: { ...event },
+            })
+          );
+        },
+        onPlaybackQualityChange: (event) => {
+          this.dispatchEvent(
+            new CustomEvent("onYTPlayerPlaybackQualityChange", {
+              detail: { ...event },
+            })
+          );
+        },
+        onPlaybackRateChange: (event) => {
+          this.dispatchEvent(
+            new CustomEvent("onYTPlayerPlaybackRateChange", {
+              detail: { ...event },
+            })
+          );
+        },
+        onError: (event) => {
+          this.dispatchEvent(
+            new CustomEvent("onYTPlayerError", {
+              detail: { ...event },
+            })
+          );
+        },
+        onApiChange: (event) => {
+          this.dispatchEvent(
+            new CustomEvent("onYTPlayerApiChange", {
+              detail: { ...event },
+            })
+          );
         },
       },
       playerVars: {
@@ -49,6 +77,10 @@ class VJPlayer {
         iv_load_policy: 3, // アノテーション無効
       },
     });
+    this.addEventListener("onYTPlayerReady", (e) => this.#onPlayerReady(e));
+    this.addEventListener("onYTPlayerStateChange", (e) =>
+      this.#onPlayerStateChange(e)
+    );
   }
 
   get localStorageKey() {
@@ -72,8 +104,6 @@ class VJPlayer {
   }
 
   #onPlayerReady() {
-    //console.log(`YTVJ:P YouTube Player Ready`);
-
     this.#YTPlayer.mute();
 
     document.addEventListener("VJPlayerUpdated", (event) => {
@@ -140,18 +170,23 @@ class VJPlayer {
         console.warn(`YTVJ:P Unsupported ${key}`);
         return;
     }
-    this.#options.events.onDataApplied(key, value);
+
+    this.dispatchEvent(
+      new CustomEvent("onDataApplied", {
+        detail: { key, value },
+      })
+    );
   }
 
   #onPlayerStateChange(event) {
-    //console.log("YTVJ:P onPlayerStateChange:" + event.data);
+    const state = event.detail.data;
 
-    if (event.data == YT.PlayerState.ENDED) {
-      event.target.seekTo(0);
-      event.target.playVideo();
+    if (state == YT.PlayerState.ENDED) {
+      this.#YTPlayer.seekTo(0);
+      this.#YTPlayer.playVideo();
     }
 
-    if (event.data == YT.PlayerState.PLAYING) {
+    if (state == YT.PlayerState.PLAYING) {
       // 新動画読み込み時は自動再生されるっぽい？
       // 一時停止中にPreviewリロードで再生される対策
       if (this.#data.pause) {
@@ -180,7 +215,7 @@ class VJPlayer {
     this.#syncing = true;
     console.log(`YTVJ:P 同期処理`);
 
-    this.#options.events.onTimeSyncStart();
+    this.dispatchEvent(new Event("onTimeSyncStart"));
 
     const process = () => {
       if (this.#data.pause) {
@@ -219,7 +254,7 @@ class VJPlayer {
         }, 100);
       } else {
         this.#YTPlayer.setPlaybackRate(this.#data.speed);
-        this.#options.events.onTimeSyncEnd();
+        this.dispatchEvent(new Event("onTimeSyncEnd"));
       }
     };
     process();
