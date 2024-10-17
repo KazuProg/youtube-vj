@@ -1,0 +1,33 @@
+html {
+  text-align: center;
+}
+
+body {
+  margin: 0;
+  background: #333;
+  color: white;
+}
+
+main {
+  width: 100%;
+  max-width: 640px;
+  margin: auto;
+}
+
+.video {
+  text-align: left;
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.video > img {
+  width: 150px;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.video > div {
+  flex-grow: 1;
+  display: inline-block;
+}

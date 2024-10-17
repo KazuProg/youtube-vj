@@ -58,9 +58,32 @@ window.addEventListener("load", () => {
   });
   changeVideo(relayElement.value);
 
+  window.addEventListener("storage", (e) => {
+    if (e.key !== "ytvj_sys") return;
+    const oldVal = JSON.parse(e.oldValue);
+    const newVal = JSON.parse(e.newValue);
+
+    for (const key in newVal) {
+      if (JSON.stringify(oldVal[key]) === JSON.stringify(newVal[key])) {
+        continue;
+      }
+      switch (key) {
+        case "videoId":
+          changeVideo(newVal[key]);
+          break;
+      }
+    }
+  });
+
   document.addEventListener("keydown", (event) => {
+    if (event.ctrlKey && event.key === "p") {
+      openProjectionWindow();
+    }
     if (event.ctrlKey && event.key === "h") {
       window.open("./history.html", "History", "width=800,height=600");
+    }
+    if (event.ctrlKey && event.key === "l") {
+      openSetListWindow();
     }
     if (event.ctrlKey && event.key === "1") {
       selectCh(0);
@@ -155,7 +178,7 @@ window.addEventListener("load", () => {
 
   changeVideo(relayElement.value);
   setCrossfader(-1);
-  OpenProjectionWindow();
+  openProjectionWindow();
 });
 
 var prepareVideoId;
@@ -234,8 +257,12 @@ function selectCh(channel = null) {
   document.querySelector("#input-videoId").blur();
 }
 
-function OpenProjectionWindow() {
+function openProjectionWindow() {
   window.open("./projection.html", "Projection", "width=640,height=360");
+}
+
+function openSetListWindow() {
+  window.open("./setlist.html", "SetList", "width=640,height=960");
 }
 
 function addHistory(videoId, videoTitle) {
