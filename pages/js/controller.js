@@ -257,6 +257,7 @@ function setCrossfader(val) {
       crossfader: val,
     })
   );
+  document.querySelector("#cross-fader").value = val;
 }
 
 function selectCh(channel = null) {
