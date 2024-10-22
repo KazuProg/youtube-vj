@@ -2,6 +2,7 @@
 
 const ch = [];
 let selCh = null;
+let midi = null;
 
 window.addEventListener("load", () => {
   const eventHandlers = {
@@ -91,6 +92,21 @@ window.addEventListener("load", () => {
     }
     if (event.ctrlKey && event.key === "2") {
       selectCh(1);
+      event.preventDefault();
+    }
+    if (event.ctrlKey && event.key === "m") {
+      if (!midi) {
+        midi = new MIDIScriptManager({
+          executeScript: true,
+        });
+      }
+      midi.requestAccess();
+      event.preventDefault();
+    }
+    if (event.ctrlKey && event.shiftKey && event.key === "M") {
+      if (midi) {
+        midi.openCustomScriptEditor();
+      }
       event.preventDefault();
     }
 
