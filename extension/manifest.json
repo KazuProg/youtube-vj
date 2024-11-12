@@ -14,7 +14,7 @@
       "js": ["js/script.js"],
       "matches": [
         "https://www.youtube.com/*",
-        "https://kazuprog.work/release/youtube-vj/controller"
+        "https://kazuprog.github.io/youtube-vj/"
       ]
     },
     {
