@@ -224,7 +224,10 @@ function changeVideo(text) {
 }
 
 var switchingDuration = 1000;
+var switching = false;
 function switchVideo() {
+  if (switching) return;
+  switching = true;
   const intervalTime = 20;
   const croddFaderRange = 2;
   const crossFader = document.querySelector(".crossfader input");
@@ -240,6 +243,7 @@ function switchVideo() {
     setCrossfader(val);
     if (Math.abs(val) >= 1) {
       clearInterval(interval);
+      switching = false;
     }
   }, intervalTime);
 }
