@@ -41,6 +41,10 @@ class VJController {
     return this.#VJPlayer.videoTitle;
   }
 
+  get currentTime() {
+    return this.#VJPlayer.currentTime;
+  }
+
   get channelNumber() {
     return this.#channel;
   }
@@ -63,6 +67,13 @@ class VJController {
     if (2 < val) val = 2;
 
     this.#setData("speed", val);
+  }
+
+  setTime(sec) {
+    this.#setData("timing", {
+      timestamp: +new Date() / 1000,
+      playerTime: sec,
+    });
   }
 
   setOpacity(val, relative = false) {
