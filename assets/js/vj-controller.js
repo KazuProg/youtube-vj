@@ -10,7 +10,7 @@ class VJController {
 
   constructor(channel, options = {}) {
     this.#channel = channel;
-    this.#events = options.events;
+    this.#events = options.events || {};
     this.#VJPlayer = new VJPlayer(channel);
     this.#VJPlayer.addEventListener("onYTPlayerStateChange", (e) => {
       this.#onYTPlayerStateChange(e);
