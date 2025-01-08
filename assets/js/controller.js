@@ -96,7 +96,7 @@ window.addEventListener("load", () => {
     }
     if (event.ctrlKey && event.key === "m") {
       if (!midi) {
-        midi = new MIDIScriptManager({
+        midi = new MIDIScriptManager("YouTube-VJ", {
           executeScript: true,
         });
       }
