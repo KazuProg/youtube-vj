@@ -88,7 +88,7 @@ if (location.origin == "https://www.youtube.com") {
   ((callback) => {
     const dispatch = () => {
       chrome.storage.local.get("videoId", (items) => {
-        callback(items.videoId);
+        callback(items.videoId || "");
       });
     };
 

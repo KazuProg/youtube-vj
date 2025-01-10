@@ -13,169 +13,181 @@
     <script src="https://kazuprog.github.io/midi-script-manager-js/midi-script-manager.js"></script>
   </head>
   <body>
-    <div class="deck ch0">
-      <fieldset>
-        <legend onclick="ch[0].suspendPreview()">Preview</legend>
-        <div class="preview">
-          <div class="yt-player" id="vj_player_ch0"></div>
-          <div class="suspend hidden" onclick="ch[0].resumePreview()">
-            Suspending<br />Preview
-          </div>
-          <div class="syncing hidden">Syncing...</div>
-        </div>
-      </fieldset>
-      <div class="deck-control">
+    <div class="controller">
+      <div class="deck ch0">
         <fieldset>
-          <legend>Adjust</legend>
-          <div class="adjust">
-            <button onclick="ch[0].adjustTiming(-1)">&lt;</button>
-            <span>1s</span>
-            <button onclick="ch[0].adjustTiming(+1)">&gt;</button>
-            <button onclick="ch[0].adjustTiming(-0.1)">&lt;</button>
-            <span>0.1s</span>
-            <button onclick="ch[0].adjustTiming(+0.1)">&gt;</button>
-            <button onclick="ch[0].adjustTiming(-0.01)">&lt;</button>
-            <span>0.01s</span>
-            <button onclick="ch[0].adjustTiming(+0.01)">&gt;</button>
+          <legend onclick="ch[0].suspendPreview()">Preview</legend>
+          <div class="preview">
+            <div class="yt-player" id="vj_player_ch0"></div>
+            <div class="suspend hidden" onclick="ch[0].resumePreview()">
+              Suspending<br />Preview
+            </div>
+            <div class="syncing hidden">Syncing...</div>
           </div>
         </fieldset>
-        <fieldset class="speed">
-          <legend onclick="ch[0].setSpeed(1)">Speed</legend>
-          <div class="fader-container vertical-fader reverse">
+        <div class="deck-control">
+          <fieldset>
+            <legend>Adjust</legend>
+            <div class="adjust">
+              <button onclick="ch[0].adjustTiming(-1)">&lt;</button>
+              <span>1s</span>
+              <button onclick="ch[0].adjustTiming(+1)">&gt;</button>
+              <button onclick="ch[0].adjustTiming(-0.1)">&lt;</button>
+              <span>0.1s</span>
+              <button onclick="ch[0].adjustTiming(+0.1)">&gt;</button>
+              <button onclick="ch[0].adjustTiming(-0.01)">&lt;</button>
+              <span>0.01s</span>
+              <button onclick="ch[0].adjustTiming(+0.01)">&gt;</button>
+            </div>
+          </fieldset>
+          <fieldset class="speed">
+            <legend onclick="ch[0].setSpeed(1)">Speed</legend>
+            <div class="fader-container vertical-fader reverse">
+              <input
+                type="range"
+                step="0.05"
+                value="1.0"
+                min="0.25"
+                max="2"
+                oninput="ch[0].setSpeed(this.value)"
+              />
+            </div>
             <input
-              type="range"
+              type="number"
               step="0.05"
-              value="1.0"
+              value="1.00"
               min="0.25"
               max="2"
               oninput="ch[0].setSpeed(this.value)"
             />
-          </div>
+          </fieldset>
+        </div>
+      </div>
+      <div class="mixer">
+        <div class="load">
+          <button onclick="ch[0].setVideo(prepareVideoId)">Load</button>
+          <button onclick="openSetListWindow()"></button>
+          <button onclick="ch[1].setVideo(prepareVideoId)">Load</button>
+        </div>
+        <fieldset class="load-track">
+          <legend>Load Track</legend>
+          <data value="" id="videoId"></data>
+          <data value="" id="loadedVideoId"></data>
+          <img class="yt-thumbnail" />
           <input
-            type="number"
-            step="0.05"
-            value="1.00"
-            min="0.25"
-            max="2"
-            oninput="ch[0].setSpeed(this.value)"
+            type="text"
+            id="input-videoId"
+            placeholder="Enter YouTube ID"
+            oninput="changeVideo(this.value)"
+            onfocus="this.select()"
           />
         </fieldset>
-      </div>
-    </div>
-    <div class="mixer">
-      <div class="load">
-        <button onclick="ch[0].setVideo(prepareVideoId)">Load</button>
-        <button onclick="openSetListWindow()"></button>
-        <button onclick="ch[1].setVideo(prepareVideoId)">Load</button>
-      </div>
-      <fieldset class="load-track">
-        <legend>Load Track</legend>
-        <data value="" id="videoId"></data>
-        <data value="" id="loadedVideoId"></data>
-        <img class="yt-thumbnail" />
-        <input
-          type="text"
-          id="input-videoId"
-          placeholder="Enter YouTube ID"
-          oninput="changeVideo(this.value)"
-          onfocus="this.select()"
-        />
-      </fieldset>
-      <fieldset class="opacity" style="padding: 0">
-        <legend>Opacity</legend>
-        <div class="vertical-fader-container">
-          <div class="fader-container vertical-fader">
+        <fieldset class="opacity" style="padding: 0">
+          <legend>Opacity</legend>
+          <div class="vertical-fader-container">
+            <div class="fader-container vertical-fader">
+              <input
+                class="deck0"
+                type="range"
+                step="0.01"
+                value="1.0"
+                min="0"
+                max="1"
+                oninput="ch[0].setOpacity(parseFloat(this.value))"
+              />
+            </div>
+            <div class="fader-container vertical-fader">
+              <input
+                class="deck1"
+                type="range"
+                step="0.01"
+                value="1.0"
+                min="0"
+                max="1"
+                oninput="ch[1].setOpacity(parseFloat(this.value))"
+              />
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="crossfader" style="padding: 0">
+          <legend
+            onclick="switchVideo()"
+            oncontextmenu="setSwitchingDuration();return false"
+          >
+            Crossfader
+          </legend>
+          <div class="fader-container" style="width: 100%">
             <input
-              class="deck0"
               type="range"
+              id="cross-fader"
               step="0.01"
-              value="1.0"
-              min="0"
+              value="-1"
+              min="-1"
               max="1"
-              oninput="ch[0].setOpacity(parseFloat(this.value))"
+              oninput="setCrossfader(parseFloat(this.value))"
             />
           </div>
-          <div class="fader-container vertical-fader">
-            <input
-              class="deck1"
-              type="range"
-              step="0.01"
-              value="1.0"
-              min="0"
-              max="1"
-              oninput="ch[1].setOpacity(parseFloat(this.value))"
-            />
-          </div>
-        </div>
-      </fieldset>
-      <fieldset class="crossfader" style="padding: 0">
-        <legend
-          onclick="switchVideo()"
-          oncontextmenu="setSwitchingDuration();return false"
-        >
-          Crossfader
-        </legend>
-        <div class="fader-container" style="width: 100%">
-          <input
-            type="range"
-            id="cross-fader"
-            step="0.01"
-            value="-1"
-            min="-1"
-            max="1"
-            oninput="setCrossfader(parseFloat(this.value))"
-          />
-        </div>
-      </fieldset>
-    </div>
-    <div class="deck ch1">
-      <fieldset>
-        <legend onclick="ch[1].suspendPreview()">Preview</legend>
-        <div class="preview">
-          <div class="yt-player" id="vj_player_ch1"></div>
-          <div class="suspend hidden" onclick="ch[1].resumePreview()">
-            Suspending<br />Preview
-          </div>
-          <div class="syncing hidden">Syncing...</div>
-        </div>
-      </fieldset>
-      <div class="deck-control">
+        </fieldset>
+      </div>
+      <div class="deck ch1">
         <fieldset>
-          <legend>Adjust</legend>
-          <div class="adjust">
-            <button onclick="ch[1].adjustTiming(-1)">&lt;</button>
-            <span>1s</span>
-            <button onclick="ch[1].adjustTiming(+1)">&gt;</button>
-            <button onclick="ch[1].adjustTiming(-0.1)">&lt;</button>
-            <span>0.1s</span>
-            <button onclick="ch[1].adjustTiming(+0.1)">&gt;</button>
-            <button onclick="ch[1].adjustTiming(-0.01)">&lt;</button>
-            <span>0.01s</span>
-            <button onclick="ch[1].adjustTiming(+0.01)">&gt;</button>
+          <legend onclick="ch[1].suspendPreview()">Preview</legend>
+          <div class="preview">
+            <div class="yt-player" id="vj_player_ch1"></div>
+            <div class="suspend hidden" onclick="ch[1].resumePreview()">
+              Suspending<br />Preview
+            </div>
+            <div class="syncing hidden">Syncing...</div>
           </div>
         </fieldset>
+        <div class="deck-control">
+          <fieldset>
+            <legend>Adjust</legend>
+            <div class="adjust">
+              <button onclick="ch[1].adjustTiming(-1)">&lt;</button>
+              <span>1s</span>
+              <button onclick="ch[1].adjustTiming(+1)">&gt;</button>
+              <button onclick="ch[1].adjustTiming(-0.1)">&lt;</button>
+              <span>0.1s</span>
+              <button onclick="ch[1].adjustTiming(+0.1)">&gt;</button>
+              <button onclick="ch[1].adjustTiming(-0.01)">&lt;</button>
+              <span>0.01s</span>
+              <button onclick="ch[1].adjustTiming(+0.01)">&gt;</button>
+            </div>
+          </fieldset>
 
-        <fieldset class="speed">
-          <legend onclick="ch[1].setSpeed(1)">Speed</legend>
-          <div class="fader-container vertical-fader reverse">
+          <fieldset class="speed">
+            <legend onclick="ch[1].setSpeed(1)">Speed</legend>
+            <div class="fader-container vertical-fader reverse">
+              <input
+                type="range"
+                step="0.05"
+                value="1.0"
+                min="0.25"
+                max="2"
+                oninput="ch[1].setSpeed(this.value)"
+              />
+            </div>
             <input
-              type="range"
+              type="number"
               step="0.05"
-              value="1.0"
+              value="1.00"
               min="0.25"
               max="2"
               oninput="ch[1].setSpeed(this.value)"
             />
-          </div>
-          <input
-            type="number"
-            step="0.05"
-            value="1.00"
-            min="0.25"
-            max="2"
-            oninput="ch[1].setSpeed(this.value)"
-          />
-        </fieldset>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+    <div class="status">
+      <div id="midi-device-status" class="clickable">
+        <div class="indicator"></div>
+        MIDI Control
+      </div>
+      <div id="extension-status">
+        <div class="indicator"></div>
+        Extension
       </div>
     </div>
   </body>

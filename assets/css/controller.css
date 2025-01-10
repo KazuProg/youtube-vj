@@ -8,26 +8,63 @@ body {
   background: #333;
   color: white;
   display: flex;
+  flex-direction: column; /* 縦方向に配置 */
+  height: 100vh;
 }
 
-body > div {
-  height: 100vh;
+body > div.controller {
+  display: flex;
+  flex: 1;
+}
+
+body > div.controller > div {
   padding: 10px;
   box-sizing: border-box; /* widthにmarginも含める */
 }
 
-body > div.deck {
+body > div.controller > div.deck {
   flex-grow: 1; /* 左右の要素が残りのスペースを占める */
 }
 
-body > div.deck.selected {
+body > div.controller > div.deck.selected {
   background: #444;
 }
 
-body > div.mixer {
+body > div.controller > div.mixer {
   width: var(--mixer-width);
   border-left: solid 1px #555;
   border-right: solid 1px #555;
+}
+
+body > div.status {
+  background: #333;
+  padding: 0 0.5rem;
+  display: flex;
+  justify-content: flex-end; /* 右揃え */
+  gap: 1rem;
+  border-top: solid 1px #555;
+  text-align: right;
+}
+
+body > div.status > div {
+  display: inline-block;
+  padding: 2px;
+}
+
+body > div.status > div.clickable:hover {
+  background: #555;
+}
+
+body > div.status .indicator {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 1rem;
+  background: #f00;
+}
+
+body > div.status .indicator.active {
+  background: #0f0;
 }
 
 /**

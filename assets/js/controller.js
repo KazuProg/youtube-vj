@@ -51,6 +51,9 @@ window.addEventListener("load", () => {
   const relayElement = document.querySelector("#videoId");
   new MutationObserver(() => {
     console.log("YTVJ:C 変更検知(videoId)");
+    document
+      .querySelector("#extension-status .indicator")
+      .classList.add("active");
     changeVideo(relayElement.value);
   }).observe(relayElement, {
     attributes: true,
@@ -96,15 +99,8 @@ window.addEventListener("load", () => {
     }
     if (event.ctrlKey && event.key === "m") {
       if (!midi) {
-        midi = new MIDIScriptManager("YouTube-VJ", {
-          executeScript: true,
-        });
-      }
-      midi.requestAccess();
-      event.preventDefault();
-    }
-    if (event.ctrlKey && event.shiftKey && event.key === "M") {
-      if (midi) {
+        requestMidiAccess();
+      } else {
         midi.openCustomScriptEditor();
       }
       event.preventDefault();
@@ -192,10 +188,39 @@ window.addEventListener("load", () => {
     }
   });
 
+  document
+    .querySelector("#midi-device-status")
+    .addEventListener("click", () => {
+      if (!midi) {
+        requestMidiAccess();
+      } else {
+        midi.openCustomScriptEditor();
+      }
+    });
+
   changeVideo(relayElement.value);
   setCrossfader(-1);
   openProjectionWindow();
 });
+
+function requestMidiAccess() {
+  if (!midi) {
+    midi = new MIDIScriptManager("YouTube-VJ", {
+      executeScript: true,
+    });
+  }
+  midi
+    .requestAccess()
+    .then(() => {
+      document
+        .querySelector("#midi-device-status .indicator")
+        .classList.add("active");
+    })
+    .catch(() => {
+      alert("Failed to access MIDI device.");
+      midi = null;
+    });
+}
 
 var prepareVideoId;
 function changeVideo(text) {
