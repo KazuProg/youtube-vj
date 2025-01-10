@@ -13,7 +13,7 @@
     <script src="https://kazuprog.github.io/midi-script-manager-js/midi-script-manager.js"></script>
   </head>
   <body>
-    <div class="controller">
+    <div id="controller">
       <div class="deck ch0">
         <fieldset>
           <legend onclick="ch[0].suspendPreview()">Preview</legend>
@@ -25,7 +25,7 @@
             <div class="syncing hidden">Syncing...</div>
           </div>
         </fieldset>
-        <div class="deck-control">
+        <div class="controls">
           <fieldset>
             <legend>Adjust</legend>
             <div class="adjust">
@@ -63,7 +63,7 @@
           </fieldset>
         </div>
       </div>
-      <div class="mixer">
+      <div id="mixer">
         <div class="load">
           <button onclick="ch[0].setVideo(prepareVideoId)">Load</button>
           <button onclick="openSetListWindow()"></button>
@@ -140,7 +140,7 @@
             <div class="syncing hidden">Syncing...</div>
           </div>
         </fieldset>
-        <div class="deck-control">
+        <div class="controls">
           <fieldset>
             <legend>Adjust</legend>
             <div class="adjust">
@@ -180,7 +180,7 @@
         </div>
       </div>
     </div>
-    <div class="status">
+    <div id="status">
       <div id="midi-device-status" class="clickable">
         <div class="indicator"></div>
         MIDI Control

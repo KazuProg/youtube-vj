@@ -1,6 +1,7 @@
 html {
   --mixer-width: 180px;
   text-align: center;
+  height: 100%;
 }
 
 body {
@@ -9,34 +10,15 @@ body {
   color: white;
   display: flex;
   flex-direction: column; /* 縦方向に配置 */
-  height: 100vh;
+  height: 100%;
 }
 
-body > div.controller {
+body > #controller {
   display: flex;
   flex: 1;
 }
 
-body > div.controller > div {
-  padding: 10px;
-  box-sizing: border-box; /* widthにmarginも含める */
-}
-
-body > div.controller > div.deck {
-  flex-grow: 1; /* 左右の要素が残りのスペースを占める */
-}
-
-body > div.controller > div.deck.selected {
-  background: #444;
-}
-
-body > div.controller > div.mixer {
-  width: var(--mixer-width);
-  border-left: solid 1px #555;
-  border-right: solid 1px #555;
-}
-
-body > div.status {
+body > #status {
   background: #333;
   padding: 0 0.5rem;
   display: flex;
@@ -46,55 +28,56 @@ body > div.status {
   text-align: right;
 }
 
-body > div.status > div {
-  display: inline-block;
-  padding: 2px;
+/**
+ * Controller
+ */
+#controller > * {
+  padding: 10px;
+  box-sizing: border-box; /* widthにmarginも含める */
 }
 
-body > div.status > div.clickable:hover {
-  background: #555;
+#controller > .deck {
+  flex-grow: 1;
 }
 
-body > div.status .indicator {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 1rem;
-  background: #f00;
+#controller > .deck.selected {
+  background: #444;
 }
 
-body > div.status .indicator.active {
-  background: #0f0;
+#controller > #mixer {
+  width: var(--mixer-width);
+  border-left: solid 1px #555;
+  border-right: solid 1px #555;
 }
 
 /**
  * Controller-Deck
  */
-.preview {
+.deck .preview {
   width: 100%;
   height: auto;
   aspect-ratio: 16/9;
   position: relative;
 }
 
-.preview .yt-player {
+.deck .preview .yt-player {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
 
-.preview .suspend {
+.deck .preview .suspend {
   position: absolute;
   inset: 0;
-  display: flex; /* Flexboxを有効にする */
-  align-items: center; /* 縦方向中央揃え */
+  display: flex;
+  align-items: center;
   justify-content: center;
   background: #000b;
   font-size: 1.5em;
 }
 
-.preview .syncing {
+.deck .preview .syncing {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -102,40 +85,40 @@ body > div.status .indicator.active {
   font-size: 1.5em;
 }
 
-.deck-control {
+.deck .controls {
   margin-top: 10px;
   display: flex;
   gap: 10px;
 }
 
-.deck-control > * {
+.deck .controls > * {
   flex: 1;
 }
 
-.deck-control .adjust {
+.deck .controls .adjust {
   min-width: 150px;
   display: grid; /* Gridを有効にする */
   grid-template-columns: repeat(3, 1fr); /* 3列のレイアウトを作成 */
   row-gap: 0.5rem;
 }
 
-.deck-control .adjust > * {
+.deck .controls .adjust > * {
   line-height: 50px;
   height: 50px;
   padding: 0;
 }
 
-.deck-control .speed .fader-container {
+.deck .controls .speed .fader-container {
   --fader-range: 150px;
   height: var(--fader-range);
   margin: auto;
 }
 
-.deck-control .speed .fader-container input {
+.deck .controls .speed .fader-container input {
   width: var(--fader-range);
 }
 
-.deck-control .speed input[type="number"] {
+.deck .controls .speed input[type="number"] {
   width: 50px;
   background: none;
   border: none;
@@ -147,22 +130,23 @@ body > div.status .indicator.active {
 /**
  *  Controller-Mixer
  */
-.load {
+#mixer .load {
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
 }
 
-.load-track {
+#mixer .load-track {
   margin-bottom: 10px;
 }
-.load-track .yt-thumbnail {
+
+#mixer .load-track .yt-thumbnail {
   width: 100%;
   aspect-ratio: 16/9;
-  object-fit: cover; /* 中心部分を表示 */
+  object-fit: cover;
 }
 
-.load-track input#input-videoId {
+#mixer .load-track input#input-videoId {
   width: 100%;
   background: none;
   border: none;
@@ -171,19 +155,43 @@ body > div.status .indicator.active {
   color: white;
 }
 
-.vertical-fader-container {
+#mixer .vertical-fader-container {
   --fader-range: 130px;
   display: flex;
   justify-content: space-between;
   padding: 10px;
 }
 
-.vertical-fader-container > .fader-container {
+#mixer .vertical-fader-container > .fader-container {
   height: var(--fader-range);
 }
 
-.vertical-fader-container > .fader-container > input {
+#mixer .vertical-fader-container > .fader-container > input {
   width: var(--fader-range);
+}
+
+/**
+ * Status
+ */
+#status > div {
+  display: inline-block;
+  padding: 2px;
+}
+
+#status > div.clickable:hover {
+  background: #555;
+}
+
+#status .indicator {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 1rem;
+  background: #f00;
+}
+
+#status .indicator.active {
+  background: #0f0;
 }
 
 /**
