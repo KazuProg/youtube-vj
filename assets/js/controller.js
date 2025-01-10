@@ -201,9 +201,13 @@ window.addEventListener("load", () => {
   changeVideo(relayElement.value);
   setCrossfader(-1);
   openProjectionWindow();
+  requestMidiAccess(true);
 });
 
-function requestMidiAccess() {
+function requestMidiAccess(startup = false) {
+  if (startup && !loadSystemData()?.midiAccess) {
+    return;
+  }
   if (!midi) {
     midi = new MIDIScriptManager("YouTube-VJ", {
       executeScript: true,
@@ -212,13 +216,15 @@ function requestMidiAccess() {
   midi
     .requestAccess()
     .then(() => {
+      updateSystemData({ midiAccess: true });
       document
         .querySelector("#midi-device-status .indicator")
         .classList.add("active");
     })
     .catch(() => {
-      alert("Failed to access MIDI device.");
+      updateSystemData({ midiAccess: false });
       midi = null;
+      alert("Failed to access MIDI device.");
     });
 }
 
@@ -279,14 +285,22 @@ function setSwitchingDuration() {
 }
 
 function setCrossfader(val) {
+  updateSystemData({ crossfader: val });
+  document.querySelector("#cross-fader").value = val;
+}
+
+function loadSystemData() {
+  return JSON.parse(localStorage.getItem("ytvj_sys"));
+}
+
+function updateSystemData(obj) {
   localStorage.setItem(
     "ytvj_sys",
     JSON.stringify({
-      ...JSON.parse(localStorage.getItem("ytvj_sys")),
-      crossfader: val,
+      ...loadSystemData(),
+      ...obj,
     })
   );
-  document.querySelector("#cross-fader").value = val;
 }
 
 function selectCh(channel = null) {
