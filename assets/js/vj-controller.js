@@ -76,15 +76,12 @@ class VJController {
     });
   }
 
-  setOpacity(val, relative = false) {
-    if (relative) {
-      val = this.#VJPlayer.getData("opacity") + val;
-    }
-
-    if (val < 0) val = 0;
-    if (1 < val) val = 1;
-
-    this.#setData("opacity", val);
+  setFilter(val) {
+    const value = {
+      ...this.#VJPlayer.getData("filter"),
+      ...val,
+    };
+    this.#setData("filter", value);
   }
 
   suspendPreview() {

@@ -37,8 +37,9 @@ window.addEventListener("load", () => {
           deck.querySelector(`.speed input[type=range]`).value = val;
           deck.querySelector(`.speed input[type=number]`).value = val;
           break;
-        case "opacity":
-          document.querySelector(`.opacity .deck${channel}`).value = val;
+        case "filter":
+          document.querySelector(`.opacity .deck${channel}`).value =
+            val["opacity"];
           break;
       }
     },

@@ -17,7 +17,7 @@ class VJPlayer extends EventTarget {
     };
     this.#data = {
       speed: 1,
-      opacity: 1,
+      filter: {},
       pause: true,
       timing: {
         timestamp: 0,
@@ -137,7 +137,16 @@ class VJPlayer extends EventTarget {
       return;
     }
     //console.log(`YTVJ:P 設定適用 ${key} = ${JSON.stringify(value)}`);
-    this.#data[key] = value;
+    if (key === "filter") {
+      this.#data[key] = {
+        ...this.#data[key],
+        ...value,
+      };
+      value = this.#data[key];
+    } else {
+      this.#data[key] = value;
+    }
+
     switch (key) {
       case "videoId":
         this.#YTPlayer.loadVideoById(value);
@@ -156,9 +165,15 @@ class VJPlayer extends EventTarget {
       case "speed":
         this.#YTPlayer.setPlaybackRate(value);
         break;
-      case "opacity":
+      case "filter":
         if (this.#options.isProjection) {
-          this.#YTPlayer.getIframe().style.opacity = value;
+          let filter = [];
+          for (let key in value) {
+            let cssKey = key;
+            if (key == "hueRotate") cssKey = "hue-rotate";
+            filter.push(`${cssKey}(${value[key]})`);
+          }
+          this.#YTPlayer.getIframe().style.filter = filter.join(" ");
         }
         break;
       case "zIndex":
