@@ -189,6 +189,9 @@ window.addEventListener("load", () => {
     }
   });
 
+  document.querySelector("#projection-status").addEventListener("click", () => {
+    openProjectionWindow();
+  });
   document
     .querySelector("#midi-device-status")
     .addEventListener("click", () => {
@@ -319,7 +322,24 @@ function selectCh(channel = null) {
 }
 
 function openProjectionWindow() {
-  window.open("./projection.html", "Projection", "width=640,height=360");
+  const wnd = window.open(
+    "./projection.html",
+    "Projection",
+    "width=640,height=360"
+  );
+  if (wnd) {
+    document
+      .querySelector("#projection-status .indicator")
+      .classList.add("active");
+    let int = setInterval(() => {
+      if (wnd.closed) {
+        clearInterval(int);
+        document
+          .querySelector("#projection-status .indicator")
+          .classList.remove("active");
+      }
+    }, 500);
+  }
 }
 
 function openSetListWindow() {
