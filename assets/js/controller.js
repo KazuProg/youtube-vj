@@ -201,6 +201,9 @@ window.addEventListener("load", () => {
         midi.openCustomScriptEditor();
       }
     });
+  document.querySelector("#extension-status").addEventListener("click", () => {
+    window.open("./docs/chrome-extension.html");
+  });
 
   changeVideo(relayElement.value);
   setCrossfader(-1);
