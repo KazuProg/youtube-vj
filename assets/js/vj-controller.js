@@ -7,6 +7,7 @@ class VJController {
   #isSuspendPreview = false;
   #isChangeTiming = false;
   #isChangeVideoId = false;
+  #targetTime = null;
 
   constructor(channel, options = {}) {
     this.#channel = channel;
@@ -54,6 +55,11 @@ class VJController {
   }
 
   setVideo(id) {
+    this.#targetTime = null;
+    if (id.indexOf("@") !== -1) {
+      this.#targetTime = parseInt(id.split("@")[1]);
+      id = id.split("@")[0];
+    }
     this.#setData("videoId", id);
   }
 
@@ -152,7 +158,16 @@ class VJController {
       case YT.PlayerState.UNSTARTED:
         // 動画変更時は自動再生、タイミング通知
         this.#setData("pause", false);
-        this.#isChangeTiming = true;
+        if (this.#targetTime) {
+          this.#setData("timing", {
+            timestamp: +new Date() / 1000,
+            playerTime: this.#targetTime,
+          });
+          // タイミング変更なしにすることで強制Sync
+          this.#isChangeTiming = false;
+        } else {
+          this.#isChangeTiming = true;
+        }
         this.#isChangeVideoId = true;
         break;
       case YT.PlayerState.PAUSED:

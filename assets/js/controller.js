@@ -262,26 +262,36 @@ function requestMidiAccess(startup = false) {
 var prepareVideoId;
 function changeVideo(text) {
   let id;
+  let start = null;
+  if (text.indexOf("@") !== -1) {
+    start = text.split("@")[1];
+    text = text.split("@")[0];
+  }
   if (text.length === 11) {
     id = text;
   } else {
     if (/^(https?:\/\/)[^\s$.?#].[^\s]*$/i.test(text)) {
       const url = new URL(text);
+      const params = new URLSearchParams(url.search);
       if (url.hostname === "youtu.be") {
         id = url.pathname.substr(1, 11);
       }
       if (url.pathname === "/watch") {
-        const params = new URLSearchParams(url.search);
         id = params.get("v");
       }
+      start = params.get("t");
     }
   }
 
   if (id) {
+    let idPos = id;
+    if (start !== null) {
+      idPos = `${id}@${start}`;
+    }
     const url = `https://img.youtube.com/vi/${id}/default.jpg`;
     document.querySelector(".yt-thumbnail").src = url;
-    document.querySelector("#input-videoId").value = id;
-    prepareVideoId = id;
+    document.querySelector("#input-videoId").value = idPos;
+    prepareVideoId = idPos;
   }
 }
 
