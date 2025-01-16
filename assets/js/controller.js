@@ -51,7 +51,6 @@ window.addEventListener("load", () => {
   // 拡張機能とのデータのやり取り
   const relayElement = document.querySelector("#videoId");
   new MutationObserver(() => {
-    console.log("YTVJ:C 変更検知(videoId)");
     document
       .querySelector("#extension-status .indicator")
       .classList.add("active");

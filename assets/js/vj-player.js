@@ -136,7 +136,6 @@ class VJPlayer extends EventTarget {
     if (JSON.stringify(this.#data[key]) === JSON.stringify(value)) {
       return;
     }
-    //console.log(`YTVJ:P 設定適用 ${key} = ${JSON.stringify(value)}`);
     if (key === "filter") {
       this.#data[key] = {
         ...this.#data[key],
@@ -228,7 +227,6 @@ class VJPlayer extends EventTarget {
     }
 
     this.#syncing = true;
-    console.log(`YTVJ:P Sync process start`);
     this.dispatchEvent(new Event("onTimeSyncStart"));
 
     const jumpToSync = () => {
@@ -236,7 +234,6 @@ class VJPlayer extends EventTarget {
 
       if (t.expectPlayerTime < 0 || t.duration < t.expectPlayerTime) {
         // 計算上の再生位置がマイナス or 動画の長さよりも長ければ同期中止
-        console.log(`YTVJ:P Sync: out of video duration`);
         this.stopSync();
         return;
       }
@@ -247,7 +244,6 @@ class VJPlayer extends EventTarget {
       }
 
       if (t.expectPlayerTime <= t.bufferedDuration) {
-        console.log("YTVJ:P Sync: Jump");
         const listener = (e) => {
           if (e.detail.data === YT.PlayerState.PLAYING) {
             this.removeEventListener("onYTPlayerStateChange", listener);
@@ -257,7 +253,6 @@ class VJPlayer extends EventTarget {
         this.addEventListener("onYTPlayerStateChange", listener);
         this.#YTPlayer.seekTo(t.expectPlayerTime);
       } else {
-        console.log("YTVJ:P Sync: Buffering");
         let buffered = false;
         const listener = (e) => {
           if (e.detail.data === YT.PlayerState.PLAYING) {
@@ -281,10 +276,8 @@ class VJPlayer extends EventTarget {
 
     let refineSync_cnt = 0;
     const refineSync = () => {
-      console.log("YTVJ:P Sync: RefineSync");
       const _refineSync = () => {
         const t = getTimeInfo();
-        console.log(`YTVJ:P Sync: Offset: ${parseInt(t.syncOffset * 1000)}ms`);
         if (0.5 < Math.abs(t.syncOffset)) {
           clearInterval(interval);
           jumpToSync();
@@ -294,7 +287,6 @@ class VJPlayer extends EventTarget {
         if (Math.abs(t.syncOffset) < 0.01) {
           refineSync_cnt++;
           if (5 <= refineSync_cnt) {
-            console.log(`YTVJ:P Sync: done!`);
             clearInterval(interval);
             this.stopSync();
           }
