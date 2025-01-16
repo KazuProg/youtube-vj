@@ -189,6 +189,22 @@ window.addEventListener("load", () => {
     }
   });
 
+  let muteState = [];
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      for (let i = 0; i < ch.length; i++) {
+        muteState[i] = ch[i].isMuted;
+        ch[i].mute();
+      }
+    } else if (document.visibilityState === "visible") {
+      for (let i = 0; i < ch.length; i++) {
+        if (muteState[i] == false) {
+          ch[i].unMute();
+        }
+      }
+    }
+  });
+
   document.querySelector("#projection-status").addEventListener("click", () => {
     openProjectionWindow();
   });

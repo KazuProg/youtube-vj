@@ -49,6 +49,10 @@ class VJController {
     return this.#channel;
   }
 
+  get isMuted() {
+    return this.#VJPlayer.isMuted;
+  }
+
   setVideo(id) {
     this.#setData("videoId", id);
   }
@@ -132,7 +136,7 @@ class VJController {
   }
 
   toggleMuteUnmute() {
-    if (this.#VJPlayer.isMuted) {
+    if (this.isMuted) {
       this.unMute();
     } else {
       this.mute();
