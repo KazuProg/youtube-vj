@@ -1,11 +1,12 @@
 "use strict";
 
-var list = null;
-var index = 0;
+window.addEventListener("load", () => {
+  YouTubeTitleFetcher.init("#ytplayers");
+});
 
 function loadSetlist() {
   FileHandler.readText().then((content) => {
-    list = content.split(/\r\n|\r|\n/).map((text) => {
+    const list = content.split(/\r\n|\r|\n/).map((text) => {
       if (text.length == 11) return text;
       if (/^(https?:\/\/)[^\s$.?#].[^\s]*$/i.test(text)) {
         const url = new URL(text);
@@ -33,40 +34,12 @@ function loadSetlist() {
       div.onclick = () => {
         sendToController(id);
       };
+      YouTubeTitleFetcher.fetch(id).then((title) => {
+        div.querySelector("span").innerText = title;
+      });
       parent.appendChild(div);
     }
-
-    new YT.Player("ytplayer", {
-      videoId: list[index],
-      events: {
-        onReady: (e) => {
-          e.target.mute();
-          e.target.playVideo();
-        },
-        onStateChange: (e) => {
-          const data = e.target.getVideoData();
-          if (data.video_id == list[index]) {
-            document
-              .querySelectorAll("div#setlist > div")
-              [index].querySelector("span").innerText = e.target.videoTitle;
-            loadNext(e.target);
-          }
-        },
-        onError: (e) => {
-          loadNext(e.target);
-        },
-      },
-    });
   });
-}
-
-function loadNext(player) {
-  index++;
-  if (list[index]) {
-    player.cueVideoById(list[index]);
-  } else {
-    player.destroy();
-  }
 }
 
 function sendToController(id) {
