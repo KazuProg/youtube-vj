@@ -1,8 +1,7 @@
 "use strict";
 
-class VJController {
+class VJController extends EventEmitter {
   #channel;
-  #events;
   #VJPlayer = null;
   #isSuspendPreview = false;
   #isChangeTiming = false;
@@ -10,26 +9,21 @@ class VJController {
   #targetTime = null;
 
   constructor(channel, options = {}) {
+    super();
     this.#channel = channel;
-    this.#events = options.events || {};
     this.#VJPlayer = new VJPlayer(channel);
-    this.#VJPlayer.addEventListener("onYTPlayerStateChange", (e) => {
-      this.#onYTPlayerStateChange(e);
+    this.#VJPlayer.addEventListener(
+      "YTPlayerStateChange",
+      this.#onYTPlayerStateChange.bind(this)
+    );
+    this.#VJPlayer.addEventListener("timeSyncStart", () => {
+      this.dispatchEvent("timeSyncStart", this.#channel);
     });
-    this.#VJPlayer.addEventListener("onTimeSyncStart", (e) => {
-      if (this.#events.onTimeSyncStart) {
-        this.#events.onTimeSyncStart(this.#channel);
-      }
+    this.#VJPlayer.addEventListener("timeSyncEnd", () => {
+      this.dispatchEvent("timeSyncEnd", this.#channel);
     });
-    this.#VJPlayer.addEventListener("onTimeSyncEnd", (e) => {
-      if (this.#events.onTimeSyncEnd) {
-        this.#events.onTimeSyncEnd(this.#channel);
-      }
-    });
-    this.#VJPlayer.addEventListener("onDataApplied", (e) => {
-      if (this.#events.onDataApplied) {
-        this.#events.onDataApplied(this.#channel, e.detail.key, e.detail.value);
-      }
+    this.#VJPlayer.addEventListener("dataApplied", (key, val) => {
+      this.dispatchEvent("dataApplied", this.#channel, key, val);
     });
 
     localStorage.removeItem(this.#VJPlayer.localStorageKey);
@@ -96,9 +90,7 @@ class VJController {
 
   suspendPreview() {
     if (!this.#isSuspendPreview) {
-      if (this.#events.onSuspendPreview) {
-        this.#events.onSuspendPreview(this.#channel);
-      }
+      this.dispatchEvent("suspendPreview", this.#channel);
       this.#isSuspendPreview = true;
     }
     this.#VJPlayer.stopSync();
@@ -150,7 +142,7 @@ class VJController {
   }
 
   #onYTPlayerStateChange(e) {
-    switch (e.detail.data) {
+    switch (e.data) {
       case YT.PlayerState.BUFFERING:
         // 再生位置変更(単純なローディングはしらん)
         this.#setData("pause", false);
@@ -181,9 +173,7 @@ class VJController {
       case YT.PlayerState.PLAYING:
         // 再生されたらプレビューの一時停止は解除
         if (this.#isSuspendPreview) {
-          if (this.#events.onResumePreview) {
-            this.#events.onResumePreview(this.#channel);
-          }
+          this.dispatchEvent("resumePreview", this.#channel);
           this.#isSuspendPreview = false;
         }
         if (this.#isChangeTiming) {
@@ -195,8 +185,8 @@ class VJController {
         if (this.#isChangeVideoId) {
           this.#isChangeVideoId = false;
           const videoId = this.#VJPlayer.getData("videoId");
-          if (videoId && this.#events.onChangeVideo) {
-            this.#events.onChangeVideo(this.#channel, videoId);
+          if (videoId) {
+            this.dispatchEvent("changeVideo", this.#channel, videoId);
           }
         }
         break;

@@ -1,6 +1,6 @@
 "use strict";
 
-class VJPlayer extends EventTarget {
+class VJPlayer extends EventEmitter {
   #YTPlayer;
   #localStorageKey;
   #options;
@@ -30,46 +30,22 @@ class VJPlayer extends EventTarget {
       videoId: "BLeUas72Mzk", //【フリー動画素材】ローディング動画4秒【ダウンロード可能】
       events: {
         onReady: (event) => {
-          this.dispatchEvent(
-            new CustomEvent("onYTPlayerReady", {
-              detail: { ...event },
-            })
-          );
+          this.dispatchEvent("YTPlayerReady", event);
         },
         onStateChange: (event) => {
-          this.dispatchEvent(
-            new CustomEvent("onYTPlayerStateChange", {
-              detail: { ...event },
-            })
-          );
+          this.dispatchEvent("YTPlayerStateChange", event);
         },
         onPlaybackQualityChange: (event) => {
-          this.dispatchEvent(
-            new CustomEvent("onYTPlayerPlaybackQualityChange", {
-              detail: { ...event },
-            })
-          );
+          this.dispatchEvent("YTPlayerPlaybackQualityChange", event);
         },
         onPlaybackRateChange: (event) => {
-          this.dispatchEvent(
-            new CustomEvent("onYTPlayerPlaybackRateChange", {
-              detail: { ...event },
-            })
-          );
+          this.dispatchEvent("YTPlayerPlaybackRateChange", event);
         },
         onError: (event) => {
-          this.dispatchEvent(
-            new CustomEvent("onYTPlayerError", {
-              detail: { ...event },
-            })
-          );
+          this.dispatchEvent("YTPlayerError", event);
         },
         onApiChange: (event) => {
-          this.dispatchEvent(
-            new CustomEvent("onYTPlayerApiChange", {
-              detail: { ...event },
-            })
-          );
+          this.dispatchEvent("YTPlayerApiChange", event);
         },
       },
       playerVars: {
@@ -77,9 +53,10 @@ class VJPlayer extends EventTarget {
         iv_load_policy: 3, // アノテーション無効
       },
     });
-    this.addEventListener("onYTPlayerReady", (e) => this.#onPlayerReady(e));
-    this.addEventListener("onYTPlayerStateChange", (e) =>
-      this.#onPlayerStateChange(e)
+    this.addEventListener("YTPlayerReady", this.#onPlayerReady.bind(this));
+    this.addEventListener(
+      "YTPlayerStateChange",
+      this.#onPlayerStateChange.bind(this)
     );
   }
 
@@ -185,15 +162,11 @@ class VJPlayer extends EventTarget {
         return;
     }
 
-    this.dispatchEvent(
-      new CustomEvent("onDataApplied", {
-        detail: { key, value },
-      })
-    );
+    this.dispatchEvent("dataApplied", key, value);
   }
 
   #onPlayerStateChange(event) {
-    const state = event.detail.data;
+    const state = event.data;
 
     if (state == YT.PlayerState.ENDED) {
       this.#YTPlayer.seekTo(0);
@@ -227,7 +200,7 @@ class VJPlayer extends EventTarget {
     }
 
     this.#syncing = true;
-    this.dispatchEvent(new Event("onTimeSyncStart"));
+    this.dispatchEvent("timeSyncStart");
 
     const jumpToSync = () => {
       const t = getTimeInfo();
@@ -245,19 +218,19 @@ class VJPlayer extends EventTarget {
 
       if (t.expectPlayerTime <= t.bufferedDuration) {
         const listener = (e) => {
-          if (e.detail.data === YT.PlayerState.PLAYING) {
-            this.removeEventListener("onYTPlayerStateChange", listener);
+          if (e.data === YT.PlayerState.PLAYING) {
+            this.removeEventListener("YTPlayerStateChange", listener);
             refineSync();
           }
         };
-        this.addEventListener("onYTPlayerStateChange", listener);
+        this.addEventListener("YTPlayerStateChange", listener);
         this.#YTPlayer.seekTo(t.expectPlayerTime);
       } else {
         let buffered = false;
         const listener = (e) => {
-          if (e.detail.data === YT.PlayerState.PLAYING) {
+          if (e.data === YT.PlayerState.PLAYING) {
             if (buffered) {
-              this.removeEventListener("onYTPlayerStateChange", listener);
+              this.removeEventListener("YTPlayerStateChange", listener);
               refineSync();
               return;
             }
@@ -269,7 +242,7 @@ class VJPlayer extends EventTarget {
             this.#YTPlayer.seekTo(t.expectPlayerTime);
           }
         };
-        this.addEventListener("onYTPlayerStateChange", listener);
+        this.addEventListener("YTPlayerStateChange", listener);
         this.#YTPlayer.seekTo(t.expectPlayerTime);
       }
     };
@@ -327,7 +300,7 @@ class VJPlayer extends EventTarget {
 
   stopSync() {
     this.#syncing = false;
-    this.dispatchEvent(new Event("onTimeSyncEnd"));
+    this.dispatchEvent("timeSyncEnd");
   }
 
   play() {

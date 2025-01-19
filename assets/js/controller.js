@@ -45,8 +45,17 @@ window.addEventListener("load", () => {
     },
   };
 
-  ch[0] = new VJController(0, { events: eventHandlers, autoplay: true });
-  ch[1] = new VJController(1, { events: eventHandlers });
+  ch[0] = new VJController(0, { autoplay: true });
+  ch[1] = new VJController(1);
+
+  for (const c of ch) {
+    c.addEventListener("changeVideo", eventHandlers.onChangeVideo);
+    c.addEventListener("suspendPreview", eventHandlers.onSuspendPreview);
+    c.addEventListener("resumePreview", eventHandlers.onResumePreview);
+    c.addEventListener("timeSyncStart", eventHandlers.onTimeSyncStart);
+    c.addEventListener("timeSyncEnd", eventHandlers.onTimeSyncEnd);
+    c.addEventListener("dataApplied", eventHandlers.onDataApplied);
+  }
 
   // 拡張機能とのデータのやり取り
   const relayElement = document.querySelector("#videoId");
