@@ -6,22 +6,23 @@ window.addEventListener("load", () => {
 
 function loadSetlist() {
   FileHandler.readText().then((content) => {
-    const list = content.split(/\r\n|\r|\n/).map((text) => {
-      if (text.length == 11) return text;
-      if (/^(https?:\/\/)[^\s$.?#].[^\s]*$/i.test(text)) {
-        const url = new URL(text);
-        if (url.hostname === "youtu.be") {
-          return url.pathname.substr(1, 11);
+    const list = content
+      .split(/\r\n|\r|\n/)
+      .map((text) => {
+        if (text.length == 11) return text;
+        if (/^(https?:\/\/)[^\s$.?#].[^\s]*$/i.test(text)) {
+          const url = new URL(text);
+          if (url.hostname === "youtu.be") {
+            return url.pathname.substr(1, 11);
+          }
+          if (url.pathname === "/watch") {
+            const params = new URLSearchParams(url.search);
+            return params.get("v");
+          }
         }
-        if (url.pathname === "/watch") {
-          const params = new URLSearchParams(url.search);
-          return params.get("v");
-        }
-      }
-      return null;
-    });
-
-    list = list.filter((a) => a);
+        return null;
+      })
+      .filter((a) => a);
 
     const parent = document.querySelector("div#setlist");
     parent.innerHTML = "";
