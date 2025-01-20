@@ -11,7 +11,7 @@ window.addEventListener("load", () => {
       for (const c of ch) {
         c.channelNumber === channel ? c.unMute() : c.mute();
       }
-      addHistory(videoId, ch[channel].videoTitle);
+      HistoryManager.add(videoId);
     },
     onSuspendPreview: (channel) => {
       const overlay = document.querySelector(`.deck.ch${channel} .suspend`);
@@ -389,25 +389,4 @@ function openProjectionWindow() {
 
 function openSetListWindow() {
   window.open("./setlist.html", "SetList", "width=640,height=960");
-}
-
-function addHistory(videoId, videoTitle) {
-  const localStorageKey = "ytvj_history";
-
-  let history = JSON.parse(localStorage.getItem(localStorageKey) || "[]");
-
-  if (history[0] && history[history.length - 1].id === videoId) {
-    return;
-  }
-
-  history.push({
-    id: videoId,
-    title: videoTitle,
-  });
-
-  if (100 < history.length) {
-    history.shift();
-  }
-
-  localStorage.setItem(localStorageKey, JSON.stringify(history));
 }
