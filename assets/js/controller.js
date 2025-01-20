@@ -11,7 +11,7 @@ window.addEventListener("load", () => {
       for (const c of ch) {
         c.channelNumber === channel ? c.unMute() : c.mute();
       }
-      HistoryManager.add(videoId);
+      Library.addHistory(videoId, ch[channel].videoTitle);
     },
     onSuspendPreview: (channel) => {
       const overlay = document.querySelector(`.deck.ch${channel} .suspend`);
@@ -92,12 +92,6 @@ window.addEventListener("load", () => {
     if (event.ctrlKey && event.key === "p") {
       openProjectionWindow();
     }
-    if (event.ctrlKey && event.key === "h") {
-      window.open("./history.html", "History", "width=800,height=600");
-    }
-    if (event.ctrlKey && event.key === "l") {
-      openSetListWindow();
-    }
     if (event.ctrlKey && event.key === "1") {
       selectCh(0);
       event.preventDefault();
@@ -113,6 +107,17 @@ window.addEventListener("load", () => {
         midi.openCustomScriptEditor();
       }
       event.preventDefault();
+    }
+
+    if (event.key == "Tab") {
+      Library.actions.changeFocus();
+      event.preventDefault();
+    }
+    if (event.key == "ArrowUp") {
+      Library.actions.up();
+    }
+    if (event.key == "ArrowDown") {
+      Library.actions.down();
     }
 
     // ID入力中は以降の処理をスキップ
@@ -221,6 +226,16 @@ window.addEventListener("load", () => {
     }
   }
 
+  document.querySelector("#library-status").addEventListener("click", () => {
+    const indicator = document.querySelector("#library-status .indicator");
+    if (Library.isVisible) {
+      Library.hide();
+      indicator.classList.remove("active");
+    } else {
+      Library.show();
+      indicator.classList.add("active");
+    }
+  });
   document.querySelector("#projection-status").addEventListener("click", () => {
     openProjectionWindow();
   });
@@ -241,6 +256,8 @@ window.addEventListener("load", () => {
   setCrossfader(-1);
   openProjectionWindow();
   requestMidiAccess(true);
+  YouTubeTitleFetcher.init("#ytplayers");
+  Library.init();
   requestAnimationFrame(updateProgressbar);
 });
 
@@ -289,16 +306,10 @@ function changeVideo(text) {
   if (text.length === 11) {
     id = text;
   } else {
-    if (/^(https?:\/\/)[^\s$.?#].[^\s]*$/i.test(text)) {
-      const url = new URL(text);
-      const params = new URLSearchParams(url.search);
-      if (url.hostname === "youtu.be") {
-        id = url.pathname.substr(1, 11);
-      }
-      if (url.pathname === "/watch") {
-        id = params.get("v");
-      }
-      start = params.get("t");
+    const parsed = parseYouTubeURL(text);
+    if (parsed) {
+      id = parsed.id;
+      start = parsed.start;
     }
   }
 
@@ -312,6 +323,31 @@ function changeVideo(text) {
     document.querySelector("#input-videoId").value = idPos;
     prepareVideoId = idPos;
   }
+}
+function isURL(text) {
+  return /^(https?:\/\/)[^\s$.?#].[^\s]*$/i.test(text);
+}
+
+function parseYouTubeURL(url) {
+  if (!isURL(url)) {
+    return null;
+  }
+
+  let id, start;
+  url = new URL(url);
+  const params = new URLSearchParams(url.search);
+  if (url.hostname === "youtu.be") {
+    id = url.pathname.substr(1, 11);
+  }
+  if (url.pathname === "/watch") {
+    id = params.get("v");
+  }
+  start = params.get("t");
+
+  return {
+    id,
+    start,
+  };
 }
 
 var switchingDuration = 1000;

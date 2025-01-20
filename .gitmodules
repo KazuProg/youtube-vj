@@ -1,3 +1,9 @@
 [submodule "assets/lib/event-emitter-js"]
 	path = assets/lib/event-emitter-js
 	url = https://github.com/KazuProg/event-emitter-js.git
+[submodule "assets/lib/file-drop-js"]
+	path = assets/lib/file-drop-js
+	url = https://github.com/KazuProg/file-drop-js.git
+[submodule "assets/lib/file-handler-js"]
+	path = assets/lib/file-handler-js
+	url = https://github.com/KazuProg/file-handler-js.git

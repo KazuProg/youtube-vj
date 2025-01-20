@@ -10,12 +10,22 @@ body {
   color: white;
   display: flex;
   flex-direction: column; /* 縦方向に配置 */
-  height: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 body > #controller {
   display: flex;
   flex: 1;
+}
+
+body > #library {
+  display: flex;
+  flex: 1;
+  border-top: solid 1px #555;
+  text-align: left;
+  overflow: auto;
 }
 
 body > #status {
@@ -26,6 +36,7 @@ body > #status {
   gap: 1rem;
   border-top: solid 1px #555;
   text-align: right;
+  flex: 0 0 auto;
 }
 
 /**
@@ -177,6 +188,111 @@ body > #status {
 
 #mixer .vertical-fader-container > .fader-container > input {
   width: var(--fader-range);
+}
+
+/**
+ * Library
+ */
+#library {
+  position: relative;
+}
+
+#library > .drag-overlay {
+  display: grid;
+  position: absolute;
+  place-items: center;
+  inset: 0;
+  background: #fff8;
+  z-index: 9;
+  color: #000 !important;
+  font-size: 9em;
+}
+
+#library:not(.drag-over) > .drag-overlay {
+  display: none;
+}
+
+#library > :not(.focused) {
+  color: #999;
+}
+
+#library > .playlist {
+  width: 150px;
+  border-right: solid 1px #555;
+  text-align: center;
+}
+
+#library > .playlist > button {
+  margin: 8px auto;
+}
+
+#library > .playlist > ul {
+  text-align: left;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#library > .playlist > ul > li {
+  padding-left: 1rem;
+}
+
+#library > .playlist > ul li.focused,
+#library > .playlist > ul li:hover {
+  background: #fff3;
+}
+
+#library > .playlist {
+  width: 150px;
+  border-right: solid 1px #555;
+}
+
+#library > .videolist {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+}
+
+#library > .videolist > table {
+  width: 100%;
+  white-space: nowrap;
+  border-spacing: 0;
+}
+
+#library > .videolist > table thead {
+  z-index: 1;
+  position: sticky;
+  top: 0;
+  background: #222;
+}
+
+#library > .videolist > table thead th:nth-child(1) {
+  text-align: center;
+}
+
+#library > .videolist > table thead th:nth-child(2) {
+  padding-left: 10rem;
+}
+
+#library > .videolist > table tbody tr:nth-child(odd) {
+  background: #fff1;
+}
+
+#library > .videolist > table tbody tr.focused,
+#library > .videolist > table tbody tr:hover {
+  background: #fff3;
+}
+
+#library > .videolist > table tbody img {
+  display: block;
+  height: 1.6rem;
+  aspect-ratio: 10/4;
+  object-fit: cover;
+}
+
+#library > .videolist > table tbody td:nth-child(2) {
+  padding-left: 0.5rem;
 }
 
 /**
