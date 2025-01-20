@@ -36,6 +36,10 @@ class VJController extends EventEmitter {
     return this.#VJPlayer.videoTitle;
   }
 
+  get duration() {
+    return this.#VJPlayer.duration;
+  }
+
   get currentTime() {
     return this.#VJPlayer.currentTime;
   }
