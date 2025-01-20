@@ -1,0 +1,3 @@
+[submodule "assets/lib/event-emitter-js"]
+	path = assets/lib/event-emitter-js
+	url = https://github.com/KazuProg/event-emitter-js.git
