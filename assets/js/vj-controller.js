@@ -7,6 +7,7 @@ class VJController extends EventEmitter {
   #isChangeTiming = false;
   #isChangeVideoId = false;
   #targetTime = null;
+  #hotcues = [];
 
   constructor(channel, options = {}) {
     super();
@@ -59,6 +60,10 @@ class VJController extends EventEmitter {
       id = id.split("@")[0];
     }
     this.#setData("videoId", id);
+    for (const i in this.#hotcues) {
+      this.removeHotcue(i);
+    }
+    this.#hotcues = [];
   }
 
   setSpeed(val, relative = false) {
@@ -90,6 +95,33 @@ class VJController extends EventEmitter {
       ...val,
     };
     this.#setData("filter", value);
+  }
+
+  hotcue(index) {
+    if (this.#hotcues[index]) {
+      this.playHotcue(index);
+    } else {
+      this.addHotcue(index);
+    }
+  }
+
+  addHotcue(index) {
+    const time = this.currentTime;
+    this.#hotcues[index] = time;
+    this.dispatchEvent("hotcueAdded", this.#channel, index, time);
+  }
+
+  playHotcue(index) {
+    if (this.#hotcues[index]) {
+      this.setTime(this.#hotcues[index]);
+    }
+  }
+
+  removeHotcue(index) {
+    if (this.#hotcues[index]) {
+      this.#hotcues[index] = null;
+      this.dispatchEvent("hotcueRemoved", this.#channel, index);
+    }
   }
 
   suspendPreview() {

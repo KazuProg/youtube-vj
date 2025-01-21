@@ -43,6 +43,23 @@ window.addEventListener("load", () => {
           break;
       }
     },
+    onHotcueAdded: (channel, index, time) => {
+      const hotcues = document.querySelector(`.deck.ch${channel} .hotcues`);
+
+      const marker = document.createElement("span");
+      marker.className = `hotcue${index}`;
+      marker.innerText = index;
+      marker.style.left = `${(time / ch[channel].duration) * 100}%`;
+      hotcues.appendChild(marker);
+    },
+    onHotcueRemoved: (channel, index) => {
+      const marker = document.querySelector(
+        `.deck.ch${channel} .hotcue${index}`
+      );
+      if (marker) {
+        marker.remove();
+      }
+    },
   };
 
   ch[0] = new VJController(0, { autoplay: true });
@@ -55,6 +72,8 @@ window.addEventListener("load", () => {
     c.addEventListener("timeSyncStart", eventHandlers.onTimeSyncStart);
     c.addEventListener("timeSyncEnd", eventHandlers.onTimeSyncEnd);
     c.addEventListener("dataApplied", eventHandlers.onDataApplied);
+    c.addEventListener("hotcueAdded", eventHandlers.onHotcueAdded);
+    c.addEventListener("hotcueRemoved", eventHandlers.onHotcueRemoved);
   }
 
   // 拡張機能とのデータのやり取り

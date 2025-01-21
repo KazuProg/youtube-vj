@@ -105,6 +105,19 @@ body > #status {
   background: #f00;
 }
 
+.deck .preview .hotcues {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0.5em;
+}
+
+.deck .preview .hotcues span {
+  transform: translateX(-50%);
+  position: absolute;
+}
+
 .deck .controls {
   margin-top: 10px;
   display: flex;
