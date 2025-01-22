@@ -110,14 +110,17 @@ window.addEventListener("load", () => {
   document.addEventListener("keydown", (event) => {
     if (event.ctrlKey && event.key === "p") {
       openProjectionWindow();
+      return;
     }
     if (event.ctrlKey && event.key === "1") {
       selectCh(0);
       event.preventDefault();
+      return;
     }
     if (event.ctrlKey && event.key === "2") {
       selectCh(1);
       event.preventDefault();
+      return;
     }
     if (event.ctrlKey && event.key === "m") {
       if (!midi) {
@@ -126,17 +129,21 @@ window.addEventListener("load", () => {
         midi.openCustomScriptEditor();
       }
       event.preventDefault();
+      return;
     }
 
     if (event.key == "Tab") {
       Library.actions.changeFocus();
       event.preventDefault();
+      return;
     }
     if (event.key == "ArrowUp") {
       Library.actions.up();
+      return;
     }
     if (event.key == "ArrowDown") {
       Library.actions.down();
+      return;
     }
 
     // ID入力中は以降の処理をスキップ
@@ -152,19 +159,23 @@ window.addEventListener("load", () => {
     if (event.key === "Escape") {
       selectCh(null);
       event.preventDefault();
+      return;
     }
     if (event.key === "/") {
       document.querySelector("#input-videoId").focus();
       selectCh(null);
       event.preventDefault();
+      return;
     }
     if (event.key === "s") {
       switchVideo();
       event.preventDefault();
+      return;
     }
     if (event.key === "t" || event.key === "f") {
       OpenProjectionWindow();
       event.preventDefault();
+      return;
     }
 
     if (selCh) {
@@ -218,6 +229,7 @@ window.addEventListener("load", () => {
           return;
       }
       event.preventDefault();
+      return;
     }
   });
 
