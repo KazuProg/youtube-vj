@@ -179,6 +179,19 @@ window.addEventListener("load", () => {
     }
 
     if (selCh) {
+      if (event.code.substr(0, 5) === "Digit") {
+        const number = parseInt(event.code.substr(5, 1));
+        if (!isNaN(number)) {
+          if (event.shiftKey) {
+            selCh.removeHotcue(number);
+          } else {
+            selCh.hotcue(number);
+          }
+          event.preventDefault();
+          return;
+        }
+      }
+
       switch (event.key) {
         case " ":
         case "k":
