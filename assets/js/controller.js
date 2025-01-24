@@ -172,11 +172,6 @@ window.addEventListener("load", () => {
       event.preventDefault();
       return;
     }
-    if (event.key === "t" || event.key === "f") {
-      OpenProjectionWindow();
-      event.preventDefault();
-      return;
-    }
 
     if (selCh) {
       if (event.code.substr(0, 5) === "Digit") {
