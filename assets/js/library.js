@@ -66,6 +66,7 @@ class _Library {
       .split(/\r\n|\r|\n/)
       .map((text) => {
         if (!text) return null;
+        if (text.startsWith(";")) return null;
 
         const parsed = parseYouTubeURL(text);
         if (parsed) {
