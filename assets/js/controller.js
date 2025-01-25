@@ -249,7 +249,13 @@ window.addEventListener("load", () => {
       onActive();
     }
   });
-  window.addEventListener("blur", onInactive);
+  window.addEventListener("blur", () => {
+    setTimeout(() => {
+      if (!document.hasFocus()) {
+        onInactive();
+      }
+    }, 0);
+  });
   window.addEventListener("focus", onActive);
   function onActive() {
     for (let i = 0; i < ch.length; i++) {
