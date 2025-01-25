@@ -106,6 +106,7 @@ class VJController extends EventEmitter {
   }
 
   addHotcue(index) {
+    this.removeHotcue(index); // 上書き用
     const time = this.currentTime;
     this.#hotcues[index] = time;
     this.dispatchEvent("hotcueAdded", this.#channel, index, time);
