@@ -9,7 +9,7 @@ window.addEventListener("load", () => {
     onChangeVideo: (channel, videoId) => {
       document.querySelector("#loadedVideoId").value = videoId;
       for (const c of ch) {
-        c.channelNumber === channel ? c.unMute() : c.mute();
+        c.channelNumber === channel ? c.unmute() : c.mute();
       }
       Library.addHistory(videoId, ch[channel].videoTitle);
     },
@@ -254,7 +254,7 @@ window.addEventListener("load", () => {
   function onActive() {
     for (let i = 0; i < ch.length; i++) {
       if (muteState[i] == false) {
-        ch[i].unMute();
+        ch[i].unmute();
       }
     }
   }

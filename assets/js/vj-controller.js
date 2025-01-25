@@ -165,13 +165,13 @@ class VJController extends EventEmitter {
     this.#VJPlayer.mute();
   }
 
-  unMute() {
-    this.#VJPlayer.unMute();
+  unmute() {
+    this.#VJPlayer.unmute();
   }
 
   toggleMuteUnmute() {
     if (this.isMuted) {
-      this.unMute();
+      this.unmute();
     } else {
       this.mute();
     }

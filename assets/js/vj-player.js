@@ -319,7 +319,7 @@ class VJPlayer extends EventEmitter {
     this.#YTPlayer.mute();
   }
 
-  unMute() {
+  unmute() {
     this.#YTPlayer.unMute();
   }
 }
