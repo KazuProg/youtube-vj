@@ -294,7 +294,7 @@ window.addEventListener("load", () => {
       if (!midi) {
         requestMidiAccess();
       } else {
-        midi.openCustomScriptEditor();
+        midi.openCustomScriptEditor(templates);
       }
     });
   document.querySelector("#extension-status").addEventListener("click", () => {
