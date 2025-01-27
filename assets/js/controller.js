@@ -65,6 +65,10 @@ window.addEventListener("load", () => {
   ch[0] = new VJController(0, { autoplay: true });
   ch[1] = new VJController(1);
 
+  // for custom script
+  window.ch1 = ch[0];
+  window.ch2 = ch[1];
+
   for (const c of ch) {
     c.addEventListener("changeVideo", eventHandlers.onChangeVideo);
     c.addEventListener("suspendPreview", eventHandlers.onSuspendPreview);
