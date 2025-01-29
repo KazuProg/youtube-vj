@@ -289,6 +289,12 @@ window.addEventListener("load", () => {
     openProjectionWindow();
   });
   document
+    .querySelector("#projection-status")
+    .addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      openProjectionWindow(true);
+    });
+  document
     .querySelector("#midi-device-status")
     .addEventListener("click", () => {
       if (!midi) {
@@ -462,13 +468,13 @@ function selectCh(channel = null) {
   document.querySelector("#input-videoId").blur();
 }
 
-function openProjectionWindow() {
+function openProjectionWindow(preview = false) {
   const wnd = window.open(
     "./projection.html",
-    "Projection",
+    `YTVJ${preview ? "-Prev" : ""}`,
     "width=640,height=360"
   );
-  if (wnd) {
+  if (!preview && wnd) {
     document
       .querySelector("#projection-status .indicator")
       .classList.add("active");
