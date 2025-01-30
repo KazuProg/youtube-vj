@@ -88,14 +88,6 @@ body > #status {
   font-size: 1.5em;
 }
 
-.deck .preview .syncing {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: #000;
-  font-size: 1.5em;
-}
-
 .deck .progress-bar {
   position: relative;
   height: 1em;
@@ -109,6 +101,20 @@ body > #status {
   height: 3px;
   width: 0;
   background: #f00;
+  animation: none;
+}
+
+.deck .progress-bar.syncing .bar {
+  animation: blink 0.1s infinite alternate;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.7;
+  }
 }
 
 .deck .progress-bar .hotcues {

@@ -22,12 +22,12 @@ window.addEventListener("load", () => {
       overlay.classList.add("hidden");
     },
     onTimeSyncStart: (channel) => {
-      const overlay = document.querySelector(`.deck.ch${channel} .syncing`);
-      overlay.classList.remove("hidden");
+      const bar = document.querySelector(`.deck.ch${channel} .progress-bar`);
+      bar.classList.add("syncing");
     },
     onTimeSyncEnd: (channel) => {
-      const overlay = document.querySelector(`.deck.ch${channel} .syncing`);
-      overlay.classList.add("hidden");
+      const bar = document.querySelector(`.deck.ch${channel} .progress-bar`);
+      bar.classList.remove("syncing");
     },
     onDataApplied: (channel, key, val) => {
       switch (key) {
