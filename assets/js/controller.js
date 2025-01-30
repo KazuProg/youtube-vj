@@ -319,7 +319,7 @@ window.addEventListener("load", () => {
 function updateProgressbar() {
   for (let i = 0; i < ch.length; i++) {
     try {
-      const bar = document.querySelector(`.deck.ch${i} .progress-bar`);
+      const bar = document.querySelector(`.deck.ch${i} .progress-bar .bar`);
       bar.style.width = `${(ch[i].currentTime / ch[i].duration) * 100}%`;
     } catch (e) {}
   }

@@ -96,24 +96,29 @@ body > #status {
   font-size: 1.5em;
 }
 
-.deck .preview .progress-bar {
+.deck .progress-bar {
+  position: relative;
+  height: 1em;
+  line-height: 1em;
+}
+
+.deck .progress-bar .bar {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   height: 3px;
   width: 0;
   background: #f00;
 }
 
-.deck .preview .hotcues {
+.deck .progress-bar .hotcues {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
-  height: 0.5em;
 }
 
-.deck .preview .hotcues span {
+.deck .progress-bar .hotcues span {
   transform: translateX(-50%);
   position: absolute;
 }
