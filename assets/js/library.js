@@ -65,6 +65,7 @@ class _Library {
     const list = content
       .split(/\r\n|\r|\n/)
       .map((text) => {
+        text = text.trim();
         if (!text) return null;
         if (text.startsWith(";")) return null;
 

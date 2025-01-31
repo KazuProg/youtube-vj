@@ -402,6 +402,7 @@ function requestMidiAccess(startup = false) {
 
 var prepareVideoId;
 function changeVideo(text) {
+  text = text.trim();
   let id;
   let start = null;
   if (text.indexOf("@") !== -1) {
@@ -429,17 +430,22 @@ function changeVideo(text) {
     prepareVideoId = idPos;
   }
 }
+function extractURLs(text) {
+  const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/g;
+  return text.match(urlPattern) || [];
+}
 function isURL(text) {
   return /^(https?:\/\/)[^\s$.?#].[^\s]*$/i.test(text);
 }
 
-function parseYouTubeURL(url) {
-  if (!isURL(url)) {
+function parseYouTubeURL(text) {
+  const urls = extractURLs(text);
+  if (urls.length === 0) {
     return null;
   }
+  const url = new URL(urls[0]);
 
   let id, start;
-  url = new URL(url);
   const params = new URLSearchParams(url.search);
   if (url.hostname === "youtu.be") {
     id = url.pathname.substr(1, 11);
