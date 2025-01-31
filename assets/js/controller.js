@@ -22,11 +22,11 @@ window.addEventListener("load", () => {
       overlay.classList.add("hidden");
     },
     onTimeSyncStart: (channel) => {
-      const bar = document.querySelector(`.deck.ch${channel} .progress-bar`);
+      const bar = document.querySelector(`.deck.ch${channel} .seek-bar`);
       bar.classList.add("syncing");
     },
     onTimeSyncEnd: (channel) => {
-      const bar = document.querySelector(`.deck.ch${channel} .progress-bar`);
+      const bar = document.querySelector(`.deck.ch${channel} .seek-bar`);
       bar.classList.remove("syncing");
     },
     onDataApplied: (channel, key, val) => {
@@ -245,6 +245,46 @@ window.addEventListener("load", () => {
     }
   });
 
+  const ch0_seekBar = document.querySelector(".deck.ch0 .seek-bar");
+  const ch0_Indicator = ch0_seekBar.querySelector(".indicator");
+  ch0_seekBar.addEventListener("mousemove", (e) => {
+    const ratio = getRatio(ch0_seekBar, e);
+    ch0_Indicator.classList.add("hovering");
+    ch0_Indicator.style.left = `${ratio * 100}%`;
+  });
+  ch0_seekBar.addEventListener("mouseleave", () => {
+    ch0_Indicator.classList.remove("hovering");
+  });
+  ch0_seekBar.addEventListener("click", (e) => {
+    _seek(ch[0], ch0_seekBar, e);
+  });
+
+  const ch1_seekBar = document.querySelector(".deck.ch1 .seek-bar");
+  const ch1_Indicator = ch1_seekBar.querySelector(".indicator");
+  ch1_seekBar.addEventListener("mousemove", (e) => {
+    const ratio = getRatio(ch1_seekBar, e);
+    ch1_Indicator.classList.add("hovering");
+    ch1_Indicator.style.left = `${ratio * 100}%`;
+  });
+  ch1_seekBar.addEventListener("mouseleave", () => {
+    ch1_Indicator.classList.remove("hovering");
+  });
+  ch1_seekBar.addEventListener("click", (e) => {
+    _seek(ch[1], ch1_seekBar, e);
+  });
+
+  function getRatio(element, event) {
+    const rect = element.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    return clickX / rect.width;
+  }
+
+  function _seek(player, element, event) {
+    const ratio = getRatio(element, event);
+    const seekTime = player.duration * ratio;
+    player.setTime(seekTime);
+  }
+
   let muteState = [];
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
@@ -313,21 +353,27 @@ window.addEventListener("load", () => {
   requestMidiAccess(true);
   YouTubeTitleFetcher.init("#ytplayers");
   Library.init();
-  requestAnimationFrame(updateProgressbar);
+  requestAnimationFrame(updateSeekbar);
 });
 
-function updateProgressbar() {
+function updateSeekbar() {
   for (let i = 0; i < ch.length; i++) {
     try {
-      const bar = document.querySelector(`.deck.ch${i} .progress-bar .bar`);
-      const cur = document.querySelector(`.deck.ch${i} .time .current`);
-      const dur = document.querySelector(`.deck.ch${i} .time .duration`);
-      bar.style.width = `${(ch[i].currentTime / ch[i].duration) * 100}%`;
+      const deck = document.querySelector(`.deck.ch${i}`);
+      const bar = deck.querySelector(".seek-bar .bar");
+      const ind = deck.querySelector(".seek-bar .indicator");
+      const cur = deck.querySelector(".time .current");
+      const dur = deck.querySelector(".time .duration");
+      const cssValue = `${(ch[i].currentTime / ch[i].duration) * 100}%`;
+      bar.style.width = cssValue;
+      if (!ind.classList.contains("hovering")) {
+        ind.style.left = cssValue;
+      }
       cur.innerText = formatTime(ch[i].currentTime);
       dur.innerText = formatTime(ch[i].duration);
     } catch (e) {}
   }
-  requestAnimationFrame(updateProgressbar);
+  requestAnimationFrame(updateSeekbar);
 }
 
 function requestMidiAccess(startup = false) {

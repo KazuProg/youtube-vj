@@ -88,15 +88,14 @@ body > #status {
   font-size: 1.5em;
 }
 
-.deck .progress-bar {
+.deck .seek-bar {
   position: relative;
   height: 2em;
   line-height: 1em;
   background: linear-gradient(to bottom, #fff2, transparent);
-  border-right: solid 2px #fff4;
 }
 
-.deck .progress-bar .bar {
+.deck .seek-bar .bar {
   position: absolute;
   top: 0;
   left: 0;
@@ -104,12 +103,20 @@ body > #status {
   width: 0;
   background: linear-gradient(to bottom, #f006, transparent);
   box-sizing: border-box;
-  border-left: solid 2px #f008;
-  border-right: solid 2px #f008;
   animation: none;
 }
 
-.deck .progress-bar .hotcues {
+.deck .seek-bar .indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: #f008;
+}
+
+.deck .seek-bar .hotcues {
   position: absolute;
   top: 0.2em;
   left: 0;
@@ -119,12 +126,12 @@ body > #status {
   line-height: 0.7em;
 }
 
-.deck .progress-bar .hotcues span {
+.deck .seek-bar .hotcues span {
   transform: translateX(-50%);
   position: absolute;
 }
 
-.deck .progress-bar .time {
+.deck .seek-bar .time {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -134,7 +141,7 @@ body > #status {
   padding: 0 0.2em;
 }
 
-.deck .progress-bar.syncing .bar {
+.deck .seek-bar.syncing .bar {
   animation: blink 0.1s infinite alternate;
 }
 
