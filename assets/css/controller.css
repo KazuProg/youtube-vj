@@ -90,18 +90,48 @@ body > #status {
 
 .deck .progress-bar {
   position: relative;
-  height: 1em;
+  height: 2em;
   line-height: 1em;
+  background: linear-gradient(to bottom, #fff2, transparent);
+  border-right: solid 2px #fff4;
 }
 
 .deck .progress-bar .bar {
   position: absolute;
   top: 0;
   left: 0;
-  height: 3px;
+  height: 100%;
   width: 0;
-  background: #f00;
+  background: linear-gradient(to bottom, #f006, transparent);
+  box-sizing: border-box;
+  border-left: solid 2px #f008;
+  border-right: solid 2px #f008;
   animation: none;
+}
+
+.deck .progress-bar .hotcues {
+  position: absolute;
+  top: 0.2em;
+  left: 0;
+  right: 0;
+  height: 0.7em;
+  font-size: 0.7em;
+  line-height: 0.7em;
+}
+
+.deck .progress-bar .hotcues span {
+  transform: translateX(-50%);
+  position: absolute;
+}
+
+.deck .progress-bar .time {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.2em;
 }
 
 .deck .progress-bar.syncing .bar {
@@ -115,18 +145,6 @@ body > #status {
   100% {
     opacity: 0.7;
   }
-}
-
-.deck .progress-bar .hotcues {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-}
-
-.deck .progress-bar .hotcues span {
-  transform: translateX(-50%);
-  position: absolute;
 }
 
 .deck .controls {

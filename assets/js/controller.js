@@ -320,7 +320,11 @@ function updateProgressbar() {
   for (let i = 0; i < ch.length; i++) {
     try {
       const bar = document.querySelector(`.deck.ch${i} .progress-bar .bar`);
+      const cur = document.querySelector(`.deck.ch${i} .time .current`);
+      const dur = document.querySelector(`.deck.ch${i} .time .duration`);
       bar.style.width = `${(ch[i].currentTime / ch[i].duration) * 100}%`;
+      cur.innerText = formatTime(ch[i].currentTime);
+      dur.innerText = formatTime(ch[i].duration);
     } catch (e) {}
   }
   requestAnimationFrame(updateProgressbar);
@@ -491,4 +495,13 @@ function openProjectionWindow(preview = false) {
 
 function openSetListWindow() {
   window.open("./setlist.html", "SetList", "width=640,height=960");
+}
+
+function formatTime(sec) {
+  const minutes = Math.floor(sec / 60);
+  const seconds = Math.floor(sec % 60);
+
+  const formattedSeconds = String(seconds).padStart(2, "0");
+
+  return `${minutes}:${formattedSeconds}`;
 }
