@@ -149,6 +149,7 @@ class VJPlayer extends EventEmitter {
         if (this.#options.isProjection) {
           let filter = [];
           for (let key in value) {
+            if (key === "opacity") continue;
             let cssKey = key;
             if (key == "hueRotate") cssKey = "hue-rotate";
             filter.push(`${cssKey}(${value[key]})`);

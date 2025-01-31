@@ -1,8 +1,27 @@
 "use strict";
 
 window.addEventListener("load", () => {
-  new VJPlayer(0, { isProjection: true });
-  new VJPlayer(1, { isProjection: true });
+  let ch0_opacity = 1;
+  let ch1_opacity = 1;
+  let crossfader = 0;
+
+  const ch0 = new VJPlayer(0, { isProjection: true });
+  const ch1 = new VJPlayer(1, { isProjection: true });
+
+  ch0.addEventListener("dataApplied", (key, value) => {
+    if (key === "filter" && "opacity" in value) {
+      if (ch0_opacity == value.opacity) return;
+      ch0_opacity = value.opacity;
+      applyOpacity();
+    }
+  });
+  ch1.addEventListener("dataApplied", (key, value) => {
+    if (key === "filter" && "opacity" in value) {
+      if (ch1_opacity == value.opacity) return;
+      ch1_opacity = value.opacity;
+      applyOpacity();
+    }
+  });
 
   window.addEventListener("storage", (event) => {
     if (event.key === "ytvj_sys") {
@@ -30,18 +49,27 @@ window.addEventListener("load", () => {
       _sysDat[key] = data[key];
       switch (key) {
         case "crossfader":
-          const cf_value = parseFloat(data[key]);
-          const strength = 1 - Math.abs(cf_value);
-          const ch0_container = document.querySelector(`.player_container.ch0`);
-          const ch1_container = document.querySelector(`.player_container.ch1`);
-          ch0_container.style.opacity = cf_value < 0 ? 1 : strength * 0.5;
-          ch0_container.style.zIndex = cf_value < 0 ? 0 : 1;
-          ch1_container.style.opacity = cf_value < 0 ? strength * 0.5 : 1;
-          ch1_container.style.zIndex = cf_value < 0 ? 1 : 0;
+          crossfader = parseFloat(data[key]);
+          applyOpacity();
           break;
       }
     }
   }
 
   systemHandler();
+
+  function applyOpacity() {
+    const ch0_container = document.querySelector(`.player_container.ch0`);
+    const ch1_container = document.querySelector(`.player_container.ch1`);
+
+    const cf_weight = 1 - Math.abs(crossfader);
+    const ch0_weight = ch0_opacity * (0 < crossfader ? cf_weight : 1);
+    const ch1_weight = ch1_opacity * (crossfader < 0 ? cf_weight : 1);
+    const ch0_isFront = ch0_weight < ch1_weight;
+    const ch1_isFront = ch1_weight < ch0_weight;
+    ch0_container.style.zIndex = ch0_isFront ? 1 : 0;
+    ch1_container.style.zIndex = ch1_isFront ? 1 : 0;
+    ch0_container.style.opacity = ch0_isFront ? ch0_weight * 0.5 : ch0_weight;
+    ch1_container.style.opacity = ch1_isFront ? ch1_weight * 0.5 : ch1_weight;
+  }
 });
