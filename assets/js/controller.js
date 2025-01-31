@@ -539,8 +539,8 @@ function openProjectionWindow(preview = false) {
   }
 }
 
-function openSetListWindow() {
-  window.open("./setlist.html", "SetList", "width=640,height=960");
+function openYouTubeWindow() {
+  window.open("https://www.youtube.com/", "YouTube", "width=640,height=960");
 }
 
 function formatTime(sec) {

@@ -205,6 +205,13 @@ body > #status {
   margin-bottom: 8px;
 }
 
+#mixer .load .youtube {
+  background: red;
+  color: white;
+  border-radius: 9px;
+  border: 2px solid #333;
+}
+
 #mixer .load-track {
   margin-bottom: 10px;
 }
