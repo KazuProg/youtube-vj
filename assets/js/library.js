@@ -141,10 +141,16 @@ class _Library {
 
   #updateHistory() {
     const idx = this.#videolist.selectedIndex;
-    this.#playlist.insert("History", HistoryManager.getAll());
-    // リスト更新時にライブラリの選択中動画が先頭に戻ってしまう対策
+    const history = HistoryManager.getAll();
+    this.#playlist.insert("History", history);
+
+    // リスト更新時に先頭の動画が選択されてしまう対策
+    // 履歴の最後(=選択中だった動画)を選択させる
+    this.#onVideoSelected(history.at(-1));
+
+    // もともと選択されていた動画を選択
     if (idx !== -1) {
-      this.#videolist.selectByIndex(idx);
+      this.#videolist.selectByIndex(idx, false);
     }
   }
 }
@@ -255,7 +261,7 @@ class _Library_Videolist {
     this.#select(next);
   }
 
-  #select(element) {
+  #select(element, notify = true) {
     const focused = this.#UIElems.tbody.querySelector(".focused");
     if (focused) {
       focused.classList.remove("focused");
@@ -268,7 +274,9 @@ class _Library_Videolist {
       inline: "nearest",
     });
 
-    this.#onSelected(element.getAttribute("youtube-id"));
+    if (notify) {
+      this.#onSelected(element.getAttribute("youtube-id"));
+    }
   }
 
   get selectedIndex() {
@@ -285,9 +293,9 @@ class _Library_Videolist {
     return index;
   }
 
-  selectByIndex(index) {
+  selectByIndex(index, notify = true) {
     const target = this.#UIElems.tbody.children[index];
-    this.#select(target);
+    this.#select(target, notify);
   }
 
   update(videoIds) {
