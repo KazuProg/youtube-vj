@@ -32,6 +32,10 @@ let templates = [
     code: "if (data2 === 0x7f) {\n  ch1.toggleMuteUnmute();\n}",
   },
   {
+    name: "Ch1_Volume",
+    code: "const val = value / 0x7f;\n\nch1.setVolume(parseInt(val * 100));",
+  },
+  {
     name: "Ch1_Speed",
     code: "// x0.25～x2.00\nconst val = value / 0x7f;\nif (value < 0x40) {\n  speed = 0.25 + val * 1.5;\n} else {\n  speed = val * 2;\n}\nch1.setSpeed(speed);",
   },
@@ -118,6 +122,10 @@ let templates = [
   {
     name: "Ch2_Mute/Unmute",
     code: "if (data2 === 0x7f) {\n  ch2.toggleMuteUnmute();\n}",
+  },
+  {
+    name: "Ch2_Volume",
+    code: "const val = value / 0x7f;\n\nch2.setVolume(parseInt(val * 100));",
   },
   {
     name: "Ch2_Speed",

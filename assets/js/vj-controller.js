@@ -53,6 +53,10 @@ class VJController extends EventEmitter {
     return this.#VJPlayer.isMuted;
   }
 
+  get volume() {
+    return this.#VJPlayer.volume;
+  }
+
   setVideo(id) {
     this.#targetTime = null;
     if (id.indexOf("@") !== -1) {
@@ -176,6 +180,10 @@ class VJController extends EventEmitter {
     } else {
       this.mute();
     }
+  }
+
+  setVolume(val) {
+    this.#VJPlayer.setVolume(val);
   }
 
   #onYTPlayerStateChange(e) {

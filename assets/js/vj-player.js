@@ -80,6 +80,10 @@ class VJPlayer extends EventEmitter {
     return this.#YTPlayer.isMuted();
   }
 
+  get volume() {
+    return this.#YTPlayer.getVolume();
+  }
+
   get YTPlayerState() {
     return this.#YTPlayer.getPlayerState();
   }
@@ -322,5 +326,9 @@ class VJPlayer extends EventEmitter {
 
   unmute() {
     this.#YTPlayer.unMute();
+  }
+
+  setVolume(volume) {
+    this.#YTPlayer.setVolume(volume);
   }
 }
