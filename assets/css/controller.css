@@ -106,6 +106,10 @@ body > #status {
   animation: none;
 }
 
+.deck.muted .seek-bar .bar {
+  background: linear-gradient(to bottom, #fff6, transparent);
+}
+
 .deck .seek-bar .indicator {
   position: absolute;
   top: 0;

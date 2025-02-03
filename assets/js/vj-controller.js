@@ -31,6 +31,14 @@ class VJController extends EventEmitter {
     if (options.autoplay) {
       this.#setData("pause", false);
     }
+
+    let muteState = false;
+    setInterval(() => {
+      if (this.isMuted === muteState) return;
+
+      muteState = this.isMuted;
+      this.dispatchEvent("muteChange", this.#channel, this.isMuted);
+    }, 100);
   }
 
   get videoTitle() {

@@ -60,6 +60,14 @@ window.addEventListener("load", () => {
         marker.remove();
       }
     },
+    onMuteChange: (channel, isMute) => {
+      const deck = document.querySelector(`.deck.ch${channel}`);
+      if (isMute) {
+        deck.classList.add("muted");
+      } else {
+        deck.classList.remove("muted");
+      }
+    },
   };
 
   ch[0] = new VJController(0, { autoplay: true });
@@ -78,6 +86,7 @@ window.addEventListener("load", () => {
     c.addEventListener("dataApplied", eventHandlers.onDataApplied);
     c.addEventListener("hotcueAdded", eventHandlers.onHotcueAdded);
     c.addEventListener("hotcueRemoved", eventHandlers.onHotcueRemoved);
+    c.addEventListener("muteChange", eventHandlers.onMuteChange);
   }
 
   // 拡張機能とのデータのやり取り
