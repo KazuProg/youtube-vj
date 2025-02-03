@@ -78,16 +78,6 @@ body > #status {
   height: 100%;
 }
 
-.deck .preview .suspend {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #000b;
-  font-size: 1.5em;
-}
-
 .deck .seek-bar {
   position: relative;
   height: 2em;
