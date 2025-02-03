@@ -49,7 +49,8 @@ class VJPlayer extends EventEmitter {
         },
       },
       playerVars: {
-        fs: 0, // 全画面表示ボタンを非表示
+        controls: 0,
+        disablekb: 1,
         iv_load_policy: 3, // アノテーション無効
       },
     });
