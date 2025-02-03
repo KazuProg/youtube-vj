@@ -12,6 +12,7 @@ window.addEventListener("load", () => {
         c.channelNumber === channel ? c.unmute() : c.mute();
       }
       Library.addHistory(videoId, ch[channel].videoTitle);
+      selectCh(channel);
     },
     onSuspendPreview: (channel) => {
       const overlay = document.querySelector(`.deck.ch${channel} .suspend`);
@@ -20,6 +21,7 @@ window.addEventListener("load", () => {
     onResumePreview: (channel) => {
       const overlay = document.querySelector(`.deck.ch${channel} .suspend`);
       overlay.classList.add("hidden");
+      selectCh(channel);
     },
     onTimeSyncStart: (channel) => {
       const bar = document.querySelector(`.deck.ch${channel} .seek-bar`);
@@ -42,6 +44,7 @@ window.addEventListener("load", () => {
             val["opacity"];
           break;
       }
+      selectCh(channel);
     },
     onHotcueAdded: (channel, index, time) => {
       const hotcues = document.querySelector(`.deck.ch${channel} .hotcues`);
@@ -66,6 +69,7 @@ window.addEventListener("load", () => {
         deck.classList.add("muted");
       } else {
         deck.classList.remove("muted");
+        selectCh(channel);
       }
     },
   };
@@ -546,8 +550,12 @@ function selectCh(channel = null) {
     const deck = document.querySelector(`.deck.ch${cNum}`);
     if (cNum === channel) {
       deck.classList.add("selected");
+      c.unmute();
+      c.resumePreview();
     } else {
       deck.classList.remove("selected");
+      c.mute();
+      c.suspendPreview();
     }
   }
   document.querySelector("#input-videoId").blur();
