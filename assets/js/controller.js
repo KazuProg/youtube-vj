@@ -285,7 +285,9 @@ window.addEventListener("load", () => {
     player.setTime(seekTime);
   }
 
+  let active = true;
   let muteState = [];
+  let volumeState = [];
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
       onInactive();
@@ -302,17 +304,35 @@ window.addEventListener("load", () => {
   });
   window.addEventListener("focus", onActive);
   function onActive() {
+    active = true;
     for (let i = 0; i < ch.length; i++) {
       if (muteState[i] == false) {
+        ch[i].setVolume(volumeState[i]);
         ch[i].unmute();
       }
     }
   }
   function onInactive() {
+    active = false;
     for (let i = 0; i < ch.length; i++) {
       muteState[i] = ch[i].isMuted;
-      ch[i].mute();
+      volumeState[i] = ch[i].volume;
     }
+    const fadeout = setInterval(() => {
+      if (active) {
+        clearInterval(fadeout);
+        return;
+      }
+
+      for (let i = 0; i < ch.length; i++) {
+        if (ch[i].volume > 0) {
+          ch[i].setVolume(ch[i].volume - 1);
+        }
+      }
+      if (ch[0].volume <= 0 && ch[1].volume <= 0) {
+        clearInterval(fadeout);
+      }
+    }, 20);
   }
 
   document.querySelector("#library-status").addEventListener("click", () => {
