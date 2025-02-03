@@ -58,6 +58,10 @@ class VJController extends EventEmitter {
     const elapsed = +new Date() / 1000 - timing.timestamp;
     const current = timing.playerTime + elapsed * speed;
 
+    if (this.duration < current) {
+      current = this.duration;
+    }
+
     return current;
   }
 
