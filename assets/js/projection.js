@@ -74,14 +74,14 @@ function init(fullscreen = false) {
     const ch0_container = document.querySelector(`.player_container.ch0`);
     const ch1_container = document.querySelector(`.player_container.ch1`);
 
-    const cf_weight = 1 - Math.abs(crossfader);
-    const ch0_weight = ch0_opacity * (0 < crossfader ? cf_weight : 1);
-    const ch1_weight = ch1_opacity * (crossfader < 0 ? cf_weight : 1);
-    const ch0_isFront = ch0_weight < ch1_weight;
-    const ch1_isFront = ch1_weight < ch0_weight;
+    const cf_weight = Math.abs(crossfader) / 2;
+    const ch0_weight = ch0_opacity * (0.5 + (0 < crossfader ? 0 : cf_weight));
+    const ch1_weight = ch1_opacity * (0.5 + (crossfader < 0 ? 0 : cf_weight));
+    const ch0_isFront = ch0_weight > ch1_weight;
+    const ch1_isFront = ch1_weight > ch0_weight;
     ch0_container.style.zIndex = ch0_isFront ? 1 : 0;
     ch1_container.style.zIndex = ch1_isFront ? 1 : 0;
-    ch0_container.style.opacity = ch0_isFront ? ch0_weight * 0.5 : ch0_weight;
-    ch1_container.style.opacity = ch1_isFront ? ch1_weight * 0.5 : ch1_weight;
+    ch0_container.style.opacity = ch0_weight == 0.5 ? 1 : ch0_weight;
+    ch1_container.style.opacity = ch1_weight == 0.5 ? 1 : ch1_weight;
   }
 }
