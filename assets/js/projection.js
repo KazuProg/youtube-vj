@@ -1,6 +1,18 @@
 "use strict";
 
-window.addEventListener("load", () => {
+function init(fullscreen = false) {
+  if (fullscreen) {
+    const f =
+      document.body.requestFullscreen ||
+      document.body.webkitRequestFullscreen ||
+      document.body.mozRequestFullScreen ||
+      document.body.msRequestFullscreen;
+    if (f) {
+      f.call(document.body);
+    }
+  }
+  document.querySelector("#init_button").remove();
+
   let ch0_opacity = 1;
   let ch1_opacity = 1;
   let crossfader = 0;
@@ -72,4 +84,4 @@ window.addEventListener("load", () => {
     ch0_container.style.opacity = ch0_isFront ? ch0_weight * 0.5 : ch0_weight;
     ch1_container.style.opacity = ch1_isFront ? ch1_weight * 0.5 : ch1_weight;
   }
-});
+}
