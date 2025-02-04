@@ -16,11 +16,6 @@
         "https://www.youtube.com/*",
         "https://kazuprog.github.io/youtube-vj/"
       ]
-    },
-    {
-      "matches": ["https://www.youtube.com/embed/*"],
-      "js": ["js/youtube_embed.js"],
-      "all_frames": true
     }
   ]
 }
