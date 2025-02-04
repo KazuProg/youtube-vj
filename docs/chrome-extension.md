@@ -34,8 +34,8 @@ YouTube-VJ のデッキにロードされると、自動的に YouTube タブの
 1. Chrome ブラウザを開き、アドレスバーに `chrome://extensions` を入力
 2. 右上の「デベロッパー モード」スイッチをオンにする
 3. 「パッケージ化されていない拡張機能を読み込む」をクリック
-4. 展開したフォルダ(YouTube-VJ)を選択
-5. 拡張機能に YouTube-VJ が追加されることを確認
+4. 展開したフォルダ(YouTube-VJ_Plus)を選択
+5. 拡張機能に `YouTube-VJ Plus`が追加されることを確認
 
 ![alt text](chrome-extension-instllation.png)
 ![alt text](chrome-extension-instllation-result.png)
