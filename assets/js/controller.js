@@ -5,6 +5,13 @@ let selCh = null;
 let midi = null;
 
 window.addEventListener("load", () => {
+  document.querySelector("#terms-agree-btn").addEventListener("click", () => {
+    document.getElementById("terms").style.display = "none";
+    init();
+  });
+});
+
+function init() {
   const eventHandlers = {
     onChangeVideo: (channel, videoId) => {
       document.querySelector("#loadedVideoId").value = videoId;
@@ -387,7 +394,7 @@ window.addEventListener("load", () => {
   YouTubeTitleFetcher.init("#ytplayers");
   Library.init();
   requestAnimationFrame(updateSeekbar);
-});
+}
 
 function updateSeekbar() {
   for (let i = 0; i < ch.length; i++) {
