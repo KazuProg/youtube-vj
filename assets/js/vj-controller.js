@@ -50,19 +50,24 @@ class VJController extends EventEmitter {
   }
 
   get currentTime() {
-    const timing = this.#VJPlayer.getData("timing");
-    const speed = this.#VJPlayer.getData("speed");
+    const paused = this.#VJPlayer.getData("pause");
+    if (this.#isSuspendPreview && !paused) {
+      const timing = this.#VJPlayer.getData("timing");
+      const speed = this.#VJPlayer.getData("speed");
 
-    if (timing.timestamp == 0) return 0;
+      if (timing.timestamp == 0) return 0;
 
-    const elapsed = +new Date() / 1000 - timing.timestamp;
-    const current = timing.playerTime + elapsed * speed;
+      const elapsed = +new Date() / 1000 - timing.timestamp;
+      const current = timing.playerTime + elapsed * speed;
 
-    if (this.duration < current) {
-      current = this.duration;
+      if (this.duration < current) {
+        current = this.duration;
+      }
+
+      return current;
+    } else {
+      return this.#VJPlayer.currentTime;
     }
-
-    return current;
   }
 
   get channelNumber() {
