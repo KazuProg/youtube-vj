@@ -8,6 +8,8 @@ class VJController extends EventEmitter {
   #isChangeVideoId = false;
   #targetTime = null;
   #hotcues = [];
+  #volume = 100;
+  #isMuted = false;
 
   constructor(channel, options = {}) {
     super();
@@ -31,14 +33,6 @@ class VJController extends EventEmitter {
     if (options.autoplay) {
       this.#setData("pause", false);
     }
-
-    let muteState = false;
-    setInterval(() => {
-      if (this.isMuted === muteState) return;
-
-      muteState = this.isMuted;
-      this.dispatchEvent("muteChange", this.#channel, this.isMuted);
-    }, 100);
   }
 
   get videoTitle() {
@@ -75,11 +69,28 @@ class VJController extends EventEmitter {
   }
 
   get isMuted() {
-    return this.#VJPlayer.isMuted;
+    return this.#isMuted;
+  }
+
+  set isMuted(val) {
+    if (val) {
+      this.#VJPlayer.mute();
+    } else {
+      this.#VJPlayer.unmute();
+      this.setVolume(this.#volume);
+    }
+    if (val === this.#isMuted) return;
+    this.#isMuted = val;
+    this.dispatchEvent("muteChange", this.#channel, val);
   }
 
   get volume() {
-    return this.#VJPlayer.volume;
+    return this.#volume;
+  }
+
+  set volume(val) {
+    this.#volume = val;
+    this.#VJPlayer.setVolume(val);
   }
 
   setVideo(id) {
@@ -192,23 +203,35 @@ class VJController extends EventEmitter {
   }
 
   mute() {
-    this.#VJPlayer.mute();
+    this.isMuted = true;
   }
 
   unmute() {
-    this.#VJPlayer.unmute();
+    this.isMuted = false;
   }
 
   toggleMuteUnmute() {
-    if (this.isMuted) {
-      this.unmute();
-    } else {
-      this.mute();
-    }
+    this.isMuted = !this.isMuted;
   }
 
   setVolume(val) {
-    this.#VJPlayer.setVolume(val);
+    this.volume = val;
+  }
+
+  fadeoutVolume() {
+    this.#isMuted = true;
+    const fadeout = setInterval(() => {
+      if (!this.#isMuted) {
+        clearInterval(fadeout);
+        return;
+      }
+
+      this.#VJPlayer.setVolume(this.#VJPlayer.volume - 1);
+
+      if (this.#VJPlayer.volume <= 0) {
+        clearInterval(fadeout);
+      }
+    }, 20);
   }
 
   #onYTPlayerStateChange(e) {
