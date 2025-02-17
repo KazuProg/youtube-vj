@@ -50,7 +50,7 @@ class VJPlayer extends EventEmitter {
       },
       playerVars: {
         controls: 0,
-        disablekb: 1,
+        disablekb: this.#options.isProjection ? 0 : 1,
         iv_load_policy: 3, // アノテーション無効
       },
     });
