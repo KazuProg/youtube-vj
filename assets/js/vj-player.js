@@ -111,11 +111,9 @@ class VJPlayer extends EventEmitter {
       })
     );
 
-    if (this.#options.isProjection) {
-      setInterval(() => {
-        this.syncTiming();
-      }, 3000);
-    }
+    setInterval(() => {
+      this.syncTiming();
+    }, 3000);
   }
 
   #applyData(key, value) {
