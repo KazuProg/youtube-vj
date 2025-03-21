@@ -226,6 +226,7 @@
       <div class="drag-overlay">+</div>
     </div>
     <div id="status">
+      <div id="show-config-editor" class="clickable">Config</div>
       <div id="library-status" class="clickable">
         <div class="indicator"></div>
         Library
@@ -241,6 +242,20 @@
       <div id="extension-status" class="clickable">
         <div class="indicator"></div>
         Extension
+      </div>
+    </div>
+    <div id="config" class="hidden">
+      <div class="config-popup">
+        <h1>Config</h1>
+        <div class="inputs">
+          <label for="fadeout-volume">
+            <input id="conf-fadeout" type="checkbox" checked />
+            Fadeout volume when unfocus
+          </label>
+        </div>
+        <div class="buttons">
+          <button id="close-config-editor">Close</button>
+        </div>
       </div>
     </div>
   </body>

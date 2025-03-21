@@ -32,7 +32,6 @@ body > #status {
   background: #333;
   padding: 0 0.5rem;
   display: flex;
-  justify-content: flex-end; /* 右揃え */
   gap: 1rem;
   border-top: solid 1px #555;
   text-align: right;
@@ -353,6 +352,10 @@ body > #status {
   padding: 2px;
 }
 
+#status > div:nth-child(2) {
+  margin-left: auto;
+}
+
 #status > div.clickable:hover {
   background: #555;
 }
@@ -433,5 +436,52 @@ fieldset {
 }
 
 #terms #terms-agree-btn:hover {
+  background-color: #45a049;
+}
+
+/**
+ *  Config Popup
+ */
+#config {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+#config .config-popup {
+  background-color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  width: 60%;
+  max-width: 600px;
+  position: relative;
+}
+
+#config h1 {
+  margin-top: 0;
+}
+
+#config .inputs {
+  text-align: left;
+}
+
+#config .buttons {
+  text-align: right;
+}
+
+#config #close-config-editor {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#config #close-config-editor:hover {
   background-color: #45a049;
 }

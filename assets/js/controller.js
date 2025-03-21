@@ -3,6 +3,9 @@
 const ch = [];
 let selCh = null;
 let midi = null;
+const config = {
+  fadeoutVolume: true,
+};
 
 window.addEventListener("load", () => {
   document.querySelector("#terms-agree-btn").addEventListener("click", () => {
@@ -321,11 +324,27 @@ function init() {
   });
   window.addEventListener("focus", onActive);
   function onActive() {
-    selCh.unmute();
+    if (config.fadeoutVolume) {
+      selCh.unmute();
+    }
   }
   function onInactive() {
-    selCh.fadeoutVolume();
+    if (config.fadeoutVolume) {
+      selCh.fadeoutVolume();
+    }
   }
+
+  const configPopup = document.querySelector("#config");
+  document
+    .querySelector("#show-config-editor")
+    .addEventListener("click", () => {
+      configPopup.classList.remove("hidden");
+    });
+  document
+    .querySelector("#close-config-editor")
+    .addEventListener("click", () => {
+      configPopup.classList.add("hidden");
+    });
 
   document.querySelector("#library-status").addEventListener("click", () => {
     const indicator = document.querySelector("#library-status .indicator");
@@ -357,6 +376,10 @@ function init() {
     });
   document.querySelector("#extension-status").addEventListener("click", () => {
     window.open("./docs/chrome-extension.html");
+  });
+
+  document.querySelector("#conf-fadeout").addEventListener("input", (e) => {
+    config.fadeoutVolume = e.target.checked;
   });
 
   changeVideo(relayElement.value);
