@@ -378,8 +378,18 @@ function init() {
     window.open("./docs/chrome-extension.html");
   });
 
+  const savedConfig = localStorage.getItem("ytvj_config");
+  if (savedConfig) {
+    const parsed = JSON.parse(savedConfig);
+    for (const key in parsed) {
+      config[key] = parsed[key];
+    }
+  }
+  document.querySelector("#conf-fadeout").checked = config.fadeoutVolume;
+
   document.querySelector("#conf-fadeout").addEventListener("input", (e) => {
     config.fadeoutVolume = e.target.checked;
+    saveConfig();
   });
 
   changeVideo(relayElement.value);
@@ -586,6 +596,10 @@ function openProjectionWindow(preview = false) {
 
 function openYouTubeWindow() {
   window.open("https://www.youtube.com/", "YouTube", "width=640,height=960");
+}
+
+function saveConfig() {
+  localStorage.setItem("ytvj_config", JSON.stringify(config));
 }
 
 function formatTime(sec) {
