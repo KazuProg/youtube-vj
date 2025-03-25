@@ -5,6 +5,7 @@ let selCh = null;
 let midi = null;
 const config = {
   fadeoutVolume: true,
+  openLibrary: false,
 };
 
 window.addEventListener("load", () => {
@@ -351,9 +352,13 @@ function init() {
     if (Library.isVisible) {
       Library.hide();
       indicator.classList.remove("active");
+      config.openLibrary = false;
+      saveConfig();
     } else {
       Library.show();
       indicator.classList.add("active");
+      config.openLibrary = true;
+      saveConfig();
     }
   });
   document.querySelector("#projection-status").addEventListener("click", () => {
@@ -398,6 +403,12 @@ function init() {
   requestMidiAccess(true);
   YouTubeTitleFetcher.init("#ytplayers");
   Library.init();
+  if (config.openLibrary) {
+    Library.show();
+    document
+      .querySelector("#library-status .indicator")
+      .classList.add("active");
+  }
   requestAnimationFrame(updateSeekbar);
 }
 
