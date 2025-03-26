@@ -2,6 +2,7 @@
 
 class _Library {
   actions;
+  onVisibilityChanged;
   #playlist;
   #videolist;
   #focusedlist;
@@ -90,6 +91,9 @@ class _Library {
     this.#focusList(this.#UIElements.videolist);
     this.#updateHistory();
     this.#UIElements.library.classList.remove("hidden");
+    if (typeof this.onVisibilityChanged === "function") {
+      this.onVisibilityChanged(true);
+    }
   }
 
   #onPlaylistChanged(list) {
@@ -102,6 +106,9 @@ class _Library {
 
   hide() {
     this.#UIElements.library.classList.add("hidden");
+    if (typeof this.onVisibilityChanged === "function") {
+      this.onVisibilityChanged(false);
+    }
   }
 
   #up() {

@@ -348,17 +348,10 @@ function init() {
     });
 
   document.querySelector("#library-status").addEventListener("click", () => {
-    const indicator = document.querySelector("#library-status .indicator");
     if (Library.isVisible) {
       Library.hide();
-      indicator.classList.remove("active");
-      config.openLibrary = false;
-      saveConfig();
     } else {
       Library.show();
-      indicator.classList.add("active");
-      config.openLibrary = true;
-      saveConfig();
     }
   });
   document.querySelector("#projection-status").addEventListener("click", () => {
@@ -403,11 +396,19 @@ function init() {
   requestMidiAccess(true);
   YouTubeTitleFetcher.init("#ytplayers");
   Library.init();
+  Library.onVisibilityChanged = (isVisible) => {
+    const indicator = document.querySelector("#library-status .indicator");
+    if (isVisible) {
+      indicator.classList.add("active");
+    } else {
+      indicator.classList.remove("active");
+    }
+    config.openLibrary = isVisible;
+    saveConfig();
+  };
+
   if (config.openLibrary) {
     Library.show();
-    document
-      .querySelector("#library-status .indicator")
-      .classList.add("active");
   }
   requestAnimationFrame(updateSeekbar);
 }
