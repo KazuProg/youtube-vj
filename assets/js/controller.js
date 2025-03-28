@@ -3,10 +3,6 @@
 const ch = [];
 let selCh = null;
 let midi = null;
-const config = {
-  fadeoutVolume: true,
-  openLibrary: false,
-};
 
 window.addEventListener("load", () => {
   document.querySelector("#terms-agree-btn").addEventListener("click", () => {
@@ -325,12 +321,12 @@ function init() {
   });
   window.addEventListener("focus", onActive);
   function onActive() {
-    if (config.fadeoutVolume) {
+    if (ConfigManager.fadeoutVolume) {
       selCh.unmute();
     }
   }
   function onInactive() {
-    if (config.fadeoutVolume) {
+    if (ConfigManager.fadeoutVolume) {
       selCh.fadeoutVolume();
     }
   }
@@ -376,18 +372,10 @@ function init() {
     window.open("./docs/chrome-extension.html");
   });
 
-  const savedConfig = localStorage.getItem("ytvj_config");
-  if (savedConfig) {
-    const parsed = JSON.parse(savedConfig);
-    for (const key in parsed) {
-      config[key] = parsed[key];
-    }
-  }
-  document.querySelector("#conf-fadeout").checked = config.fadeoutVolume;
+  document.querySelector("#conf-fadeout").checked = ConfigManager.fadeoutVolume;
 
   document.querySelector("#conf-fadeout").addEventListener("input", (e) => {
-    config.fadeoutVolume = e.target.checked;
-    saveConfig();
+    ConfigManager.fadeoutVolume = e.target.checked;
   });
 
   changeVideo(relayElement.value);
@@ -403,11 +391,10 @@ function init() {
     } else {
       indicator.classList.remove("active");
     }
-    config.openLibrary = isVisible;
-    saveConfig();
+    ConfigManager.openLibrary = isVisible;
   };
 
-  if (config.openLibrary) {
+  if (ConfigManager.openLibrary) {
     Library.show();
   }
   requestAnimationFrame(updateSeekbar);
