@@ -321,12 +321,12 @@ function init() {
   });
   window.addEventListener("focus", onActive);
   function onActive() {
-    if (ConfigManager.fadeoutVolume) {
+    if (Config.fadeoutVolume) {
       selCh.unmute();
     }
   }
   function onInactive() {
-    if (ConfigManager.fadeoutVolume) {
+    if (Config.fadeoutVolume) {
       selCh.fadeoutVolume();
     }
   }
@@ -372,10 +372,10 @@ function init() {
     window.open("./docs/chrome-extension.html");
   });
 
-  document.querySelector("#conf-fadeout").checked = ConfigManager.fadeoutVolume;
+  document.querySelector("#conf-fadeout").checked = Config.fadeoutVolume;
 
   document.querySelector("#conf-fadeout").addEventListener("input", (e) => {
-    ConfigManager.fadeoutVolume = e.target.checked;
+    Config.fadeoutVolume = e.target.checked;
   });
 
   changeVideo(relayElement.value);
@@ -391,10 +391,10 @@ function init() {
     } else {
       indicator.classList.remove("active");
     }
-    ConfigManager.openLibrary = isVisible;
+    Config.openLibrary = isVisible;
   };
 
-  if (ConfigManager.openLibrary) {
+  if (Config.openLibrary) {
     Library.show();
   }
   requestAnimationFrame(updateSeekbar);

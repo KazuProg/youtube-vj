@@ -8,7 +8,6 @@ class _ConfigManager {
   #key;
 
   constructor(localStorageKey) {
-    console.log("ConfigManager constructor");
     this.#key = localStorageKey;
 
     const savedConfig = localStorage.getItem(this.#key);
@@ -42,4 +41,4 @@ class _ConfigManager {
     localStorage.setItem(this.#key, JSON.stringify(this.#configObj));
   }
 }
-const ConfigManager = new _ConfigManager("ytvj_config");
+const Config = new _ConfigManager("ytvj_config");

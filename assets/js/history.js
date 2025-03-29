@@ -33,4 +33,4 @@ class _HistoryManager {
     localStorage.removeItem(this.#key);
   }
 }
-const HistoryManager = new _HistoryManager("ytvj_history");
+const History = new _HistoryManager("ytvj_history");

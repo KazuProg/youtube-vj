@@ -142,13 +142,13 @@ class _Library {
   }
 
   addHistory(videoId) {
-    HistoryManager.add(videoId);
+    History.add(videoId);
     this.#updateHistory();
   }
 
   #updateHistory() {
     const idx = this.#videolist.selectedIndex;
-    const history = HistoryManager.getAll();
+    const history = History.getAll();
     this.#playlist.insert("History", history);
 
     // リスト更新時に先頭の動画が選択されてしまう対策
