@@ -265,6 +265,11 @@ class VJPlayer extends EventEmitter {
           return;
         }
 
+        if (t.syncOffset < -0.1) {
+          this.#YTPlayer.seekTo(t.expectPlayerTime);
+          return;
+        }
+
         if (Math.abs(t.syncOffset) < 0.01) {
           refineSync_cnt++;
           if (5 <= refineSync_cnt) {
