@@ -186,6 +186,25 @@ class VJController extends EventEmitter {
     this.#setData("timing", timing);
   }
 
+  loopStart() {
+    const loop = this.#VJPlayer.getData("loop");
+    loop.start = this.currentTime;
+    this.#setData("loop", loop);
+  }
+
+  loopEnd() {
+    const loop = this.#VJPlayer.getData("loop");
+    loop.end = this.currentTime;
+    this.#setData("loop", loop);
+  }
+
+  loopClear() {
+    const loop = this.#VJPlayer.getData("loop");
+    loop.start = -1;
+    loop.end = -1;
+    this.#setData("loop", loop);
+  }
+
   play() {
     this.#VJPlayer.play();
   }

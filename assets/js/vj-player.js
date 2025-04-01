@@ -24,6 +24,10 @@ class VJPlayer extends EventEmitter {
         playerTime: 0,
       },
       videoId: null,
+      loop: {
+        start: -1,
+        end: -1,
+      },
     };
 
     this.#YTPlayer = new YT.Player(playerId, {
@@ -114,6 +118,23 @@ class VJPlayer extends EventEmitter {
     setInterval(() => {
       this.syncTiming();
     }, 3000);
+
+    const onAnimationFrame = () => {
+      if (this.#data.loop.start < this.#data.loop.end) {
+        const currentTime = this.#YTPlayer.getCurrentTime();
+        if (this.#data.loop.end < currentTime) {
+          this.#data.timing.timestamp +=
+            currentTime - this.#data.timing.playerTime;
+          this.#data.timing.playerTime =
+            currentTime - (this.#data.loop.end - this.#data.loop.start);
+          this.syncTiming();
+        }
+      }
+      setTimeout(() => {
+        requestAnimationFrame(onAnimationFrame);
+      }, 500);
+    };
+    requestAnimationFrame(onAnimationFrame);
   }
 
   #applyData(key, value) {
