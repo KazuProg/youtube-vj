@@ -128,11 +128,13 @@ class VJPlayer extends EventEmitter {
           this.#data.timing.playerTime =
             currentTime - (this.#data.loop.end - this.#data.loop.start);
           this.syncTiming();
+          setTimeout(() => {
+            requestAnimationFrame(onAnimationFrame);
+          }, 500);
+          return;
         }
       }
-      setTimeout(() => {
-        requestAnimationFrame(onAnimationFrame);
-      }, 500);
+      requestAnimationFrame(onAnimationFrame);
     };
     requestAnimationFrame(onAnimationFrame);
   }
