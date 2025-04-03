@@ -123,10 +123,10 @@ class VJPlayer extends EventEmitter {
       if (this.#data.loop.start < this.#data.loop.end) {
         const currentTime = this.#YTPlayer.getCurrentTime();
         if (this.#data.loop.end < currentTime) {
-          this.#data.timing.timestamp +=
-            currentTime - this.#data.timing.playerTime;
-          this.#data.timing.playerTime =
-            currentTime - (this.#data.loop.end - this.#data.loop.start);
+          this.#data.timing.timestamp =
+            new Date() / 1000 -
+            (currentTime - this.#data.loop.end) * (1 / this.#data.speed);
+          this.#data.timing.playerTime = this.#data.loop.start;
           this.syncTiming();
           setTimeout(() => {
             requestAnimationFrame(onAnimationFrame);
