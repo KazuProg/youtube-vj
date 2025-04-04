@@ -188,6 +188,8 @@ class VJPlayer extends EventEmitter {
           this.#YTPlayer.getIframe().style.zIndex = value;
         }
         break;
+      case "loop":
+        break;
       default:
         console.warn(`YTVJ:P Unsupported ${key}`);
         return;
