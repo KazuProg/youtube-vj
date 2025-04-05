@@ -92,6 +92,18 @@ let templates = [
     code: "const index = 4;\n\nif (value === 0x7f) {\n  ch1.removeHotcue(index);\n}",
   },
   {
+    name: "Ch1_LoopStart",
+    code: "if (value === 0x7f) {\n  ch1.loopStart();\n}",
+  },
+  {
+    name: "Ch1_LoopEnd",
+    code: "if (value === 0x7f) {\n  ch1.loopEnd();\n}",
+  },
+  {
+    name: "Ch1_LoopClear",
+    code: "if (value === 0x7f) {\n  ch1.loopClear();\n}",
+  },
+  {
     name: "Ch1_Filter_Opacity",
     code: "const val = value / 0x7f;\nch1.setFilter({\n  opacity: val\n});",
   },
@@ -182,6 +194,18 @@ let templates = [
   {
     name: "Ch2_RemoveHotcue4",
     code: "const index = 4;\n\nif (value === 0x7f) {\n  ch2.removeHotcue(index);\n}",
+  },
+  {
+    name: "Ch2_LoopStart",
+    code: "if (value === 0x7f) {\n  ch2.loopStart();\n}",
+  },
+  {
+    name: "Ch2_LoopEnd",
+    code: "if (value === 0x7f) {\n  ch2.loopEnd();\n}",
+  },
+  {
+    name: "Ch2_LoopClear",
+    code: "if (value === 0x7f) {\n  ch2.loopClear();\n}",
   },
   {
     name: "Ch2_Filter_Opacity",
