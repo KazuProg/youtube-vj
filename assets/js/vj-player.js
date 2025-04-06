@@ -202,8 +202,8 @@ class VJPlayer extends EventEmitter {
     const state = event.data;
 
     if (state == YT.PlayerState.ENDED) {
-      this.#YTPlayer.seekTo(0);
-      this.#YTPlayer.playVideo();
+      this.#applyData("pause", true);
+      return;
     }
 
     if (state == YT.PlayerState.PLAYING) {
