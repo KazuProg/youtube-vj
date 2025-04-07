@@ -100,6 +100,7 @@ class VJController extends EventEmitter {
       id = id.split("@")[0];
     }
     this.#setData("videoId", id);
+    this.setTime(0);
     for (const i in this.#hotcues) {
       this.removeHotcue(i);
     }
