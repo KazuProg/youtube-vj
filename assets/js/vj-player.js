@@ -78,7 +78,25 @@ class VJPlayer extends EventEmitter {
   }
 
   get currentTime() {
-    return this.#YTPlayer.getCurrentTime();
+    const TIMING = this.#data.timing;
+    const TIMESTAMP_NOW = new Date() / 1000;
+
+    if (TIMING.timestamp == 0) return 0;
+    if (this.#data.pause) return TIMING.playerTime;
+
+    let expectPlayerTime =
+      TIMING.playerTime + (TIMESTAMP_NOW - TIMING.timestamp) * this.#data.speed;
+
+    if (this.isLoop && this.#data.loop.end < expectPlayerTime) {
+      this.#data.timing.timestamp =
+        TIMESTAMP_NOW -
+        (expectPlayerTime - this.#data.loop.end) / this.#data.speed;
+      this.#data.timing.playerTime = this.#data.loop.start;
+      expectPlayerTime -= this.#data.loop.end - this.#data.loop.start;
+      this.syncTiming();
+    }
+
+    return expectPlayerTime;
   }
 
   get isMuted() {
@@ -91,6 +109,10 @@ class VJPlayer extends EventEmitter {
 
   get YTPlayerState() {
     return this.#YTPlayer.getPlayerState();
+  }
+
+  get isLoop() {
+    return this.#data.loop.start < this.#data.loop.end;
   }
 
   #onPlayerReady() {
@@ -120,20 +142,7 @@ class VJPlayer extends EventEmitter {
     }, 3000);
 
     const onAnimationFrame = () => {
-      if (this.#data.loop.start < this.#data.loop.end) {
-        const currentTime = this.#YTPlayer.getCurrentTime();
-        if (this.#data.loop.end < currentTime) {
-          this.#data.timing.timestamp =
-            new Date() / 1000 -
-            (currentTime - this.#data.loop.end) * (1 / this.#data.speed);
-          this.#data.timing.playerTime = this.#data.loop.start;
-          this.syncTiming();
-          setTimeout(() => {
-            requestAnimationFrame(onAnimationFrame);
-          }, 500);
-          return;
-        }
-      }
+      this.currentTime;
       requestAnimationFrame(onAnimationFrame);
     };
     requestAnimationFrame(onAnimationFrame);
@@ -203,6 +212,11 @@ class VJPlayer extends EventEmitter {
 
     if (state == YT.PlayerState.ENDED) {
       this.#applyData("pause", true);
+      this.#applyData("timing", {
+        timestamp: 0,
+        playerTime: 0,
+      });
+
       return;
     }
 
@@ -315,14 +329,11 @@ class VJPlayer extends EventEmitter {
     };
 
     const getTimeInfo = () => {
-      const timing = this.#data.timing;
       const buffered = this.#YTPlayer.getVideoLoadedFraction();
       const duration = this.#YTPlayer.getDuration();
 
       const bufferedDuration = duration * buffered;
-      const elapsedRealTime = new Date() / 1000 - timing.timestamp;
-      const expectPlayerTime =
-        timing.playerTime + elapsedRealTime * this.#data.speed;
+      const expectPlayerTime = this.currentTime;
       const syncOffset = expectPlayerTime - this.#YTPlayer.getCurrentTime();
 
       return {
