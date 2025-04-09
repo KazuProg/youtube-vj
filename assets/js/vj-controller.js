@@ -28,6 +28,8 @@ class VJController extends EventEmitter {
     this.#VJPlayer.addEventListener("dataApplied", (key, val) => {
       this.dispatchEvent("dataApplied", this.#channel, key, val);
     });
+    this.#VJPlayer.addEventListener("paused", this.#onPaused.bind(this));
+    this.#VJPlayer.addEventListener("resumed", this.#onResumed.bind(this));
 
     localStorage.removeItem(this.#VJPlayer.localStorageKey);
     if (options.autoplay) {
@@ -258,7 +260,7 @@ class VJController extends EventEmitter {
     switch (e.data) {
       case YT.PlayerState.BUFFERING:
         // 再生位置変更(単純なローディングはしらん)
-        this.#setData("pause", false);
+        //this.#setData("pause", false);
         break;
       case YT.PlayerState.UNSTARTED:
         // 動画変更時は自動再生、タイミング通知
@@ -274,11 +276,6 @@ class VJController extends EventEmitter {
           this.#isChangeTiming = true;
         }
         this.#isChangeVideoId = true;
-        break;
-      case YT.PlayerState.PAUSED:
-        if (this.#isSuspendPreview) return;
-        this.#setData("pause", true);
-        this.#isChangeTiming = true;
         break;
       case YT.PlayerState.ENDED:
         this.#isChangeTiming = true;
@@ -304,6 +301,19 @@ class VJController extends EventEmitter {
         }
         break;
     }
+  }
+
+  #onPaused() {
+    if (this.#isSuspendPreview) return;
+    this.#setData("timing", this.#getTimingData());
+    this.#setData("pause", true);
+    this.#isChangeTiming = true;
+  }
+
+  #onResumed() {
+    this.#setData("timing", this.#getTimingData());
+    this.#setData("pause", false);
+    this.#isChangeTiming = true;
   }
 
   #setData(key, value) {

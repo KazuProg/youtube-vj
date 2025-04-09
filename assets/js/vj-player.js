@@ -149,6 +149,7 @@ class VJPlayer extends EventEmitter {
   }
 
   #applyData(key, value) {
+    console.log(arguments);
     if (JSON.stringify(this.#data[key]) === JSON.stringify(value)) {
       return;
     }
@@ -168,8 +169,10 @@ class VJPlayer extends EventEmitter {
         break;
       case "pause":
         if (value === true) {
+          this.#data.timing.playerTime = this.currentTime;
           this.#YTPlayer.pauseVideo();
         } else {
+          this.#data.timing.timestamp = new Date() / 1000;
           this.#YTPlayer.playVideo();
         }
         break;
@@ -209,6 +212,15 @@ class VJPlayer extends EventEmitter {
 
   #onPlayerStateChange(event) {
     const state = event.data;
+
+    if (state === YT.PlayerState.PAUSED && this.#data.pause === false) {
+      this.dispatchEvent("paused");
+      return;
+    }
+    if (state === YT.PlayerState.PLAYING && this.#data.pause === true) {
+      this.dispatchEvent("resumed");
+      return;
+    }
 
     if (state == YT.PlayerState.ENDED) {
       this.#applyData("pause", true);
