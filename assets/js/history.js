@@ -29,6 +29,10 @@ class _HistoryManager {
     return true;
   }
 
+  replaceAll(videoIds) {
+    localStorage.setItem(this.#key, JSON.stringify(videoIds));
+  }
+
   clear() {
     localStorage.removeItem(this.#key);
   }

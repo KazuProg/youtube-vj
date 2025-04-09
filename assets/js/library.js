@@ -35,7 +35,8 @@ class _Library {
     );
     this.#videolist = new _Library_Videolist(
       this.#UIElements.videolist,
-      this.#onVideoSelected.bind(this)
+      this.#onVideoSelected.bind(this),
+      this.#onVideoListChanged.bind(this)
     );
   }
 
@@ -102,6 +103,10 @@ class _Library {
 
   #onVideoSelected(videoId) {
     changeVideo(videoId);
+  }
+
+  #onVideoListChanged(videoIds) {
+    History.replaceAll(videoIds);
   }
 
   hide() {
@@ -240,14 +245,16 @@ class _Library_Playlist {
 class _Library_Videolist {
   #UIElems;
   #onSelected;
+  #onChanged;
   actions;
 
-  constructor(parentElement, onSelectedCallback) {
+  constructor(parentElement, onSelectedCallback, onChangedCallback) {
     this.#UIElems = {
       parent: parentElement,
       tbody: parentElement.querySelector("tbody"),
     };
     this.#onSelected = onSelectedCallback;
+    this.#onChanged = onChangedCallback;
     this.actions = {
       up: this.#up.bind(this),
       down: this.#down.bind(this),
@@ -283,6 +290,24 @@ class _Library_Videolist {
 
     if (notify) {
       this.#onSelected(element.getAttribute("youtube-id"));
+    }
+  }
+
+  #remove(element) {
+    if (confirm("削除してもよろしいですか？")) {
+      if (element.classList.contains("focused")) {
+        const next =
+          element.nextElementSibling || element.previousElementSibling;
+        this.#select(next);
+      }
+      element.remove();
+
+      const videoList = [...this.#UIElems.tbody.children].map((tr) =>
+        tr.getAttribute("youtube-id")
+      );
+      if (this.#onChanged) {
+        this.#onChanged(videoList);
+      }
     }
   }
 
@@ -328,6 +353,10 @@ class _Library_Videolist {
       `<td>Loading title...</td>`;
     tr.addEventListener("click", () => {
       this.#select(tr);
+    });
+    tr.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      this.#remove(tr);
     });
     YouTubeTitleFetcher.fetch(videoId).then((title) => {
       tr.querySelectorAll("td")[1].innerText = title;
