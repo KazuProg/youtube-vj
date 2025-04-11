@@ -28,8 +28,10 @@ class VJController extends EventEmitter {
     this.#VJPlayer.addEventListener("dataApplied", (key, val) => {
       this.dispatchEvent("dataApplied", this.#channel, key, val);
     });
+    this.#VJPlayer.addEventListener("changed", this.#onChanged.bind(this));
     this.#VJPlayer.addEventListener("paused", this.#onPaused.bind(this));
     this.#VJPlayer.addEventListener("resumed", this.#onResumed.bind(this));
+    this.#VJPlayer.addEventListener("ended", this.#onEnded.bind(this));
 
     localStorage.removeItem(this.#VJPlayer.localStorageKey);
     if (options.autoplay) {
@@ -262,24 +264,6 @@ class VJController extends EventEmitter {
         // 再生位置変更(単純なローディングはしらん)
         //this.#setData("pause", false);
         break;
-      case YT.PlayerState.UNSTARTED:
-        // 動画変更時は自動再生、タイミング通知
-        this.#setData("pause", false);
-        if (this.#targetTime) {
-          this.#setData("timing", {
-            timestamp: +new Date() / 1000,
-            playerTime: this.#targetTime,
-          });
-          // タイミング変更なしにすることで強制Sync
-          this.#isChangeTiming = false;
-        } else {
-          this.#isChangeTiming = true;
-        }
-        this.#isChangeVideoId = true;
-        break;
-      case YT.PlayerState.ENDED:
-        this.#isChangeTiming = true;
-        break;
       case YT.PlayerState.PLAYING:
         // 再生されたらプレビューの一時停止は解除
         if (this.#isSuspendPreview) {
@@ -303,6 +287,22 @@ class VJController extends EventEmitter {
     }
   }
 
+  #onChanged() {
+    // 動画変更時は自動再生、タイミング通知
+    this.#setData("pause", false);
+    if (this.#targetTime) {
+      this.#setData("timing", {
+        timestamp: +new Date() / 1000,
+        playerTime: this.#targetTime,
+      });
+      // タイミング変更なしにすることで強制Sync
+      this.#isChangeTiming = false;
+    } else {
+      this.#isChangeTiming = true;
+    }
+    this.#isChangeVideoId = true;
+  }
+
   #onPaused() {
     if (this.#isSuspendPreview) return;
     this.#setData("timing", this.#getTimingData());
@@ -314,6 +314,14 @@ class VJController extends EventEmitter {
     this.#setData("timing", this.#getTimingData());
     this.#setData("pause", false);
     this.#isChangeTiming = true;
+  }
+
+  #onEnded() {
+    this.#setData("pause", true);
+    this.#setData("timing", {
+      timestamp: 0,
+      playerTime: 0,
+    });
   }
 
   #setData(key, value) {
