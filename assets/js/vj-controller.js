@@ -116,11 +116,6 @@ class VJController extends EventEmitter {
       val = this.#VJPlayer.getData("speed") + val;
     }
 
-    const speedStep = 0.05;
-    const _speedStep = 1 / speedStep;
-
-    val = Math.round(parseFloat(val) * _speedStep) / _speedStep;
-
     if (val < 0.25) val = 0.25;
     if (2 < val) val = 2;
 
