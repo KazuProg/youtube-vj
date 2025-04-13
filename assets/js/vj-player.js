@@ -176,11 +176,9 @@ class VJPlayer extends EventEmitter {
         }
         break;
       case "timing":
+      case "speed":
         this.#YTPlayer.playVideo();
         this.syncTiming();
-        break;
-      case "speed":
-        this.#YTPlayer.setPlaybackRate(value);
         break;
       case "filter":
         if (this.#options.isProjection) {
@@ -261,85 +259,6 @@ class VJPlayer extends EventEmitter {
     this.#syncing = true;
     this.dispatchEvent("timeSyncStart");
 
-    const jumpToSync = () => {
-      const t = getTimeInfo();
-
-      if (t.expectPlayerTime < 0 || t.duration < t.expectPlayerTime) {
-        // 計算上の再生位置がマイナス or 動画の長さよりも長ければ同期中止
-        this.stopSync();
-        return;
-      }
-
-      if (Math.abs(t.syncOffset) < 0.5) {
-        refineSync();
-        return;
-      }
-
-      if (t.expectPlayerTime <= t.bufferedDuration) {
-        const listener = (e) => {
-          if (e.data === YT.PlayerState.PLAYING) {
-            this.removeEventListener("YTPlayerStateChange", listener);
-            refineSync();
-          }
-        };
-        this.addEventListener("YTPlayerStateChange", listener);
-        this.#YTPlayer.seekTo(t.expectPlayerTime);
-      } else {
-        let buffered = false;
-        const listener = (e) => {
-          if (e.data === YT.PlayerState.PLAYING) {
-            if (buffered) {
-              this.removeEventListener("YTPlayerStateChange", listener);
-              refineSync();
-              return;
-            }
-
-            const t = getTimeInfo();
-            if (t.expectPlayerTime <= t.bufferedDuration) {
-              buffered = true;
-            }
-            this.#YTPlayer.seekTo(t.expectPlayerTime);
-          }
-        };
-        this.addEventListener("YTPlayerStateChange", listener);
-        this.#YTPlayer.seekTo(t.expectPlayerTime);
-      }
-    };
-
-    let refineSync_cnt = 0;
-    const refineSync = () => {
-      const _refineSync = () => {
-        const t = getTimeInfo();
-        if (0.5 < Math.abs(t.syncOffset)) {
-          clearInterval(interval);
-          jumpToSync();
-          return;
-        }
-
-        if (t.syncOffset < -0.1) {
-          this.#YTPlayer.seekTo(t.expectPlayerTime);
-          return;
-        }
-
-        if (Math.abs(t.syncOffset) < 0.01) {
-          refineSync_cnt++;
-          if (5 <= refineSync_cnt) {
-            clearInterval(interval);
-            this.stopSync();
-          }
-          this.#YTPlayer.setPlaybackRate(this.#data.speed);
-        } else {
-          refineSync_cnt = 0;
-          const newSpeed =
-            this.#data.speed + 0.05 * parseInt(t.syncOffset * 100);
-          this.#YTPlayer.setPlaybackRate(newSpeed);
-        }
-      };
-
-      const interval = setInterval(_refineSync, 50);
-      _refineSync();
-    };
-
     const getTimeInfo = () => {
       const buffered = this.#YTPlayer.getVideoLoadedFraction();
       const duration = this.#YTPlayer.getDuration();
@@ -354,6 +273,72 @@ class VJPlayer extends EventEmitter {
         duration,
         bufferedDuration,
       };
+    };
+
+    const jumpToSync = () => {
+      const t = getTimeInfo();
+
+      if (t.expectPlayerTime < 0 || t.duration < t.expectPlayerTime) {
+        // 計算上の再生位置がマイナス or 動画の長さよりも長ければ同期中止
+        this.stopSync();
+        return;
+      }
+
+      if (Math.abs(t.syncOffset) < 0.5) {
+        refineSync();
+        return;
+      }
+
+      const listener = (e) => {
+        if (e.data === YT.PlayerState.PLAYING) {
+          this.removeEventListener("YTPlayerStateChange", listener);
+          jumpToSync();
+        }
+      };
+      this.addEventListener("YTPlayerStateChange", listener);
+      this.#YTPlayer.seekTo(t.expectPlayerTime);
+    };
+
+    const refineSync = () => {
+      let isChecking = false;
+      let checkCount = 0;
+      const _refineSync = () => {
+        const t = getTimeInfo();
+
+        if (0.5 < Math.abs(t.syncOffset)) {
+          jumpToSync();
+          return;
+        }
+
+        if (t.syncOffset < -0.1) {
+          this.#YTPlayer.seekTo(t.expectPlayerTime);
+        } else {
+          if (isChecking && Math.abs(t.syncOffset) < 0.01) {
+            checkCount++;
+            if (checkCount == 10) {
+              this.stopSync();
+              return;
+            }
+          } else {
+            isChecking = false;
+
+            let speed = this.#data.speed;
+            let offsetSpeed = 0;
+
+            if (Math.abs(t.syncOffset) < 0.005) {
+              isChecking = true;
+              checkCount = 0;
+            } else {
+              offsetSpeed = 0.05 * Math.max(1, parseInt(t.syncOffset * 20));
+            }
+            const playerSpeed = Math.floor((speed + offsetSpeed) / 0.05) * 0.05;
+            this.#YTPlayer.setPlaybackRate(playerSpeed);
+          }
+        }
+        requestAnimationFrame(_refineSync);
+      };
+
+      requestAnimationFrame(_refineSync);
     };
 
     jumpToSync();
