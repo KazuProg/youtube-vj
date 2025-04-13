@@ -260,10 +260,8 @@ class VJPlayer extends EventEmitter {
     this.dispatchEvent("timeSyncStart");
 
     const getTimeInfo = () => {
-      const buffered = this.#YTPlayer.getVideoLoadedFraction();
       const duration = this.#YTPlayer.getDuration();
 
-      const bufferedDuration = duration * buffered;
       const expectPlayerTime = this.currentTime;
       const syncOffset = expectPlayerTime - this.#YTPlayer.getCurrentTime();
 
@@ -271,7 +269,6 @@ class VJPlayer extends EventEmitter {
         expectPlayerTime,
         syncOffset,
         duration,
-        bufferedDuration,
       };
     };
 
