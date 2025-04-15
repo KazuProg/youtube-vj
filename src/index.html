@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="author" content="KazuProg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube-VJ Controller Window</title>
+    <link rel="icon" href="favicon.ico" />
+  </head>
+  <body>
+    <div id="terms">
+      <div class="terms-content">
+        <iframe src="./docs/terms.html"></iframe>
+        <button id="terms-agree-btn">同意する</button>
+      </div>
+    </div>
+    <div id="controller">
+      <div class="deck ch0" data-channel="0">
+        <fieldset>
+          <legend data-action="suspend-preview">Preview</legend>
+          <div class="preview">
+            <div class="yt-player" id="vj_player_ch0"></div>
+          </div>
+          <div class="seek-bar">
+            <div class="bar"></div>
+            <div class="indicator"></div>
+            <div class="time">
+              <span class="current"></span>
+              <span class="suspend hidden">Suspending Preview</span>
+              <span class="duration"></span>
+            </div>
+            <div class="hotcues"></div>
+          </div>
+        </fieldset>
+        <div class="controls">
+          <fieldset>
+            <legend>Adjust</legend>
+            <div class="adjust">
+              <button data-adjust="-5">&lt;</button>
+              <span>5s</span>
+              <button data-adjust="5">&gt;</button>
+              <button data-adjust="-1">&lt;</button>
+              <span>1s</span>
+              <button data-adjust="1">&gt;</button>
+              <button data-adjust="-0.1">&lt;</button>
+              <span>0.1s</span>
+              <button data-adjust="0.1">&gt;</button>
+            </div>
+          </fieldset>
+          <fieldset class="speed">
+            <legend data-action="reset-speed">Speed</legend>
+            <div class="fader-container vertical-fader reverse">
+              <input
+                type="range"
+                step="0.01"
+                value="1.0"
+                min="0.25"
+                max="2"
+                data-control="speed"
+              />
+            </div>
+            <input
+              type="number"
+              step="0.01"
+              value="1.00"
+              min="0.25"
+              max="2"
+              data-control="speed"
+            />
+          </fieldset>
+        </div>
+      </div>
+      <div id="mixer">
+        <div class="load">
+          <button data-action="load-to-ch0">Load</button>
+          <button class="youtube" data-action="open-youtube">Y</button>
+          <button data-action="load-to-ch1">Load</button>
+        </div>
+        <fieldset class="load-track">
+          <legend>Load Track</legend>
+          <data value="" id="videoId"></data>
+          <data value="" id="loadedVideoId"></data>
+          <img class="yt-thumbnail" />
+          <input
+            type="text"
+            id="input-videoId"
+            placeholder="Enter YouTube ID"
+            data-action="change-video"
+          />
+        </fieldset>
+        <fieldset class="opacity" style="padding: 0">
+          <legend>Opacity</legend>
+          <div class="vertical-fader-container">
+            <div class="fader-container vertical-fader">
+              <input
+                class="deck0"
+                type="range"
+                step="0.01"
+                value="1.0"
+                min="0"
+                max="1"
+                data-control="opacity"
+                data-channel="0"
+              />
+            </div>
+            <div class="fader-container vertical-fader">
+              <input
+                class="deck1"
+                type="range"
+                step="0.01"
+                value="1.0"
+                min="0"
+                max="1"
+                data-control="opacity"
+                data-channel="1"
+              />
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="crossfader" style="padding: 0">
+          <legend data-action="switch-video" data-context-action="set-switch-duration">
+            Crossfader
+          </legend>
+          <div class="fader-container" style="width: 100%">
+            <input
+              type="range"
+              id="cross-fader"
+              step="0.1"
+              value="-1"
+              min="-1"
+              max="1"
+              data-control="crossfader"
+            />
+          </div>
+        </fieldset>
+      </div>
+      <div class="deck ch1" data-channel="1">
+        <fieldset>
+          <legend data-action="suspend-preview">Preview</legend>
+          <div class="preview">
+            <div class="yt-player" id="vj_player_ch1"></div>
+          </div>
+          <div class="seek-bar">
+            <div class="bar"></div>
+            <div class="indicator"></div>
+            <div class="time">
+              <span class="current"></span>
+              <span class="suspend hidden">Suspending Preview</span>
+              <span class="duration"></span>
+            </div>
+            <div class="hotcues"></div>
+          </div>
+        </fieldset>
+        <div class="controls">
+          <fieldset>
+            <legend>Adjust</legend>
+            <div class="adjust">
+              <button data-adjust="-5">&lt;</button>
+              <span>5s</span>
+              <button data-adjust="5">&gt;</button>
+              <button data-adjust="-1">&lt;</button>
+              <span>1s</span>
+              <button data-adjust="1">&gt;</button>
+              <button data-adjust="-0.1">&lt;</button>
+              <span>0.1s</span>
+              <button data-adjust="0.1">&gt;</button>
+            </div>
+          </fieldset>
+          <fieldset class="speed">
+            <legend data-action="reset-speed">Speed</legend>
+            <div class="fader-container vertical-fader reverse">
+              <input
+                type="range"
+                step="0.01"
+                value="1.0"
+                min="0.25"
+                max="2"
+                data-control="speed"
+              />
+            </div>
+            <input
+              type="number"
+              step="0.01"
+              value="1.00"
+              min="0.25"
+              max="2"
+              data-control="speed"
+            />
+          </fieldset>
+        </div>
+      </div>
+    </div>
+    <div id="library" class="hidden">
+      <div class="playlist">
+        <button data-action="load-playlist">Load Playlist</button>
+        <ul></ul>
+      </div>
+      <div class="videolist focused">
+        <table>
+          <thead>
+            <tr>
+              <th>Art</th>
+              <th>Title</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="ytplayers" style="display: none"></div>
+      </div>
+      <div class="drag-overlay">+</div>
+    </div>
+    <div id="status">
+      <div id="show-config-editor" class="clickable">Config</div>
+      <div id="library-status" class="clickable">
+        <div class="indicator"></div>
+        Library
+      </div>
+      <div id="projection-status" class="clickable">
+        <div class="indicator"></div>
+        Projection
+      </div>
+      <div id="midi-device-status" class="clickable">
+        <div class="indicator"></div>
+        MIDI Control
+      </div>
+      <div id="extension-status" class="clickable">
+        <div class="indicator"></div>
+        Extension
+      </div>
+    </div>
+    <div id="config" class="hidden">
+      <div class="config-popup">
+        <h1>Config</h1>
+        <p>一部設定は変更すると即時反映されます</p>
+        <div class="config-list">
+          <div class="config-item">
+            <div class="config-title">終了確認ダイアログを表示</div>
+            <div class="config-content">
+              <input type="checkbox" id="config-exit-confirmation" checked />
+            </div>
+          </div>
+          <div class="config-item">
+            <div class="config-title">Projection Window自動起動</div>
+            <div class="config-content">
+              <input type="checkbox" id="config-auto-projection" checked />
+            </div>
+          </div>
+          <div class="config-item">
+            <div class="config-title">Projectionスケール調整</div>
+            <div class="config-content">
+              <input
+                type="range"
+                id="config-projection-scale"
+                min="0.5"
+                max="2"
+                step="0.01"
+                value="1"
+              />
+            </div>
+          </div>
+          <div class="config-item">
+            <div class="config-title">Seek Barクリック操作</div>
+            <div class="config-content">
+              <input type="checkbox" id="config-seek-click" checked />
+            </div>
+          </div>
+          <div class="config-item">
+            <div class="config-title">映像スイッチング速度</div>
+            <div class="config-content">
+              <input
+                type="number"
+                id="config-switching-duration"
+                value="0.3"
+                min="0"
+                max="5"
+                step="0.1"
+              />
+            </div>
+          </div>
+          <div class="config-item">
+            <div class="config-title">常にTopに表示</div>
+            <div class="config-content">
+              <input type="checkbox" id="config-always-on-top" checked />
+            </div>
+          </div>
+        </div>
+        <div class="button-row">
+          <button id="config-close">閉じる</button>
+        </div>
+      </div>
+    </div>
+    <script src="https://www.youtube.com/iframe_api"></script>
+  </body>
+</html> 

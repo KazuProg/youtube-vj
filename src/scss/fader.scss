@@ -1,0 +1,136 @@
+// フェーダー用のスタイル変数
+$fader-track-color: #333;
+$fader-thumb-color: #ddd;
+$fader-height: 10px;
+$fader-thumb-size: 20px;
+
+// 垂直フェーダーミックスイン
+@mixin vertical-fader {
+  -webkit-appearance: none;
+  width: $fader-height;
+  height: 100%;
+  background: $fader-track-color;
+  outline: none;
+  
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: $fader-thumb-size;
+    height: $fader-thumb-size;
+    background: $fader-thumb-color;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  
+  &::-moz-range-thumb {
+    width: $fader-thumb-size;
+    height: $fader-thumb-size;
+    background: $fader-thumb-color;
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+  }
+}
+
+// 水平フェーダーミックスイン
+@mixin horizontal-fader {
+  -webkit-appearance: none;
+  height: $fader-height;
+  width: 100%;
+  background: $fader-track-color;
+  outline: none;
+  
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: $fader-thumb-size;
+    height: $fader-thumb-size;
+    background: $fader-thumb-color;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  
+  &::-moz-range-thumb {
+    width: $fader-thumb-size;
+    height: $fader-thumb-size;
+    background: $fader-thumb-color;
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+  }
+}
+
+// フェーダーコンテナ
+.fader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &.vertical-fader {
+    height: 100%;
+    
+    input[type="range"] {
+      @include vertical-fader;
+      writing-mode: bt-lr; /* IE */
+      -webkit-appearance: slider-vertical; /* Blink and WebKit */
+      
+      &::-webkit-slider-runnable-track {
+        width: $fader-height;
+        cursor: pointer;
+        background: $fader-track-color;
+      }
+      
+      &::-moz-range-track {
+        width: $fader-height;
+        cursor: pointer;
+        background: $fader-track-color;
+      }
+    }
+    
+    &.reverse {
+      transform: rotate(180deg);
+      
+      input[type="range"] {
+        transform: rotate(180deg);
+      }
+    }
+  }
+}
+
+// 水平フェーダー
+input[type="range"]#cross-fader {
+  @include horizontal-fader;
+  
+  &::-webkit-slider-runnable-track {
+    height: $fader-height;
+    cursor: pointer;
+    background: $fader-track-color;
+  }
+  
+  &::-moz-range-track {
+    height: $fader-height;
+    cursor: pointer;
+    background: $fader-track-color;
+  }
+}
+
+// チャンネル固有の色
+.deck0 {
+  &::-webkit-slider-thumb {
+    background: #5599ff !important;
+  }
+  
+  &::-moz-range-thumb {
+    background: #5599ff !important;
+  }
+}
+
+.deck1 {
+  &::-webkit-slider-thumb {
+    background: #ff5599 !important;
+  }
+  
+  &::-moz-range-thumb {
+    background: #ff5599 !important;
+  }
+} 

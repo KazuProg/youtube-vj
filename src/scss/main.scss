@@ -1,0 +1,437 @@
+// 変数
+$primary-color: #333;
+$secondary-color: #555;
+$accent-color: #0078d7;
+$background-color: #222;
+$text-color: #eee;
+$border-color: #444;
+$highlight-color: #0078d7;
+$error-color: #ff5555;
+$success-color: #55ff55;
+
+// ミックスイン
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin button-style {
+  padding: 5px 10px;
+  background-color: $primary-color;
+  border: 1px solid $border-color;
+  color: $text-color;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: $secondary-color;
+  }
+}
+
+// リセットとベーススタイル
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background-color: $background-color;
+  color: $text-color;
+}
+
+button {
+  @include button-style;
+}
+
+input[type="text"],
+input[type="number"] {
+  background-color: $primary-color;
+  border: 1px solid $border-color;
+  color: $text-color;
+  padding: 5px;
+}
+
+fieldset {
+  border: 1px solid $border-color;
+  margin: 5px;
+  padding: 5px;
+}
+
+legend {
+  color: $text-color;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+// レイアウト
+#controller {
+  display: flex;
+  height: calc(100% - 30px);
+  width: 100%;
+}
+
+.deck {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  border: 1px solid transparent;
+  
+  &.selected {
+    border-color: $highlight-color;
+  }
+  
+  &.muted {
+    opacity: 0.7;
+  }
+}
+
+#mixer {
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+}
+
+.preview {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background-color: #000;
+  
+  .yt-player {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.seek-bar {
+  position: relative;
+  height: 20px;
+  background-color: $primary-color;
+  cursor: pointer;
+  
+  &.syncing {
+    background-color: lighten($primary-color, 10%);
+  }
+  
+  .bar {
+    position: absolute;
+    height: 100%;
+    background-color: $highlight-color;
+    width: 0%;
+  }
+  
+  .indicator {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background-color: $text-color;
+    left: 0;
+  }
+  
+  .time {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+    font-size: 0.8em;
+    
+    .suspend {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      
+      &.hidden {
+        display: none;
+      }
+    }
+  }
+  
+  .hotcues {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    
+    span {
+      position: absolute;
+      background-color: red;
+      width: 10px;
+      height: 10px;
+      top: 5px;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      font-size: 8px;
+      @include flex-center;
+      color: white;
+    }
+  }
+}
+
+.controls {
+  display: flex;
+  
+  fieldset {
+    flex: 1;
+  }
+}
+
+.adjust {
+  display: flex;
+  flex-wrap: wrap;
+  
+  button {
+    margin: 2px;
+    width: 30px;
+  }
+  
+  span {
+    @include flex-center;
+    margin: 0 5px;
+  }
+}
+
+// フェーダー
+.vertical-fader-container {
+  display: flex;
+  height: 150px;
+  justify-content: space-around;
+}
+
+// ライブラリ
+#library {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 30px);
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  
+  &.hidden {
+    display: none;
+  }
+  
+  .playlist {
+    width: 200px;
+    height: 100%;
+    border-right: 1px solid $border-color;
+    overflow-y: auto;
+    
+    ul {
+      list-style: none;
+      
+      li {
+        padding: 5px;
+        cursor: pointer;
+        
+        &:hover {
+          background-color: $secondary-color;
+        }
+        
+        &.selected {
+          background-color: $highlight-color;
+        }
+      }
+    }
+  }
+  
+  .videolist {
+    flex: 1;
+    height: 100%;
+    overflow-y: auto;
+    
+    &.focused {
+      border: 1px solid $highlight-color;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      
+      th, td {
+        padding: 5px;
+        text-align: left;
+        border-bottom: 1px solid $border-color;
+      }
+      
+      tr:hover {
+        background-color: $secondary-color;
+      }
+      
+      tr.selected {
+        background-color: $highlight-color;
+      }
+    }
+  }
+  
+  .drag-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    @include flex-center;
+    font-size: 5em;
+    color: $text-color;
+    display: none;
+  }
+}
+
+// ステータスバー
+#status {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background-color: $primary-color;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  
+  div {
+    margin-right: 15px;
+    font-size: 0.8em;
+    
+    &.clickable {
+      cursor: pointer;
+      
+      &:hover {
+        color: $highlight-color;
+      }
+    }
+    
+    .indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #555;
+      margin-right: 5px;
+      
+      &.active {
+        background-color: $success-color;
+      }
+    }
+  }
+}
+
+// 設定画面
+#config {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  @include flex-center;
+  
+  &.hidden {
+    display: none;
+  }
+  
+  .config-popup {
+    background-color: $background-color;
+    width: 500px;
+    padding: 20px;
+    border: 1px solid $border-color;
+    
+    h1 {
+      margin-bottom: 10px;
+    }
+    
+    .config-list {
+      margin: 20px 0;
+      
+      .config-item {
+        display: flex;
+        margin-bottom: 10px;
+        
+        .config-title {
+          flex: 1;
+        }
+        
+        .config-content {
+          width: 150px;
+          text-align: right;
+        }
+      }
+    }
+    
+    .button-row {
+      text-align: right;
+    }
+  }
+}
+
+// 同意画面
+#terms {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: $background-color;
+  @include flex-center;
+  z-index: 1000;
+  
+  .terms-content {
+    width: 80%;
+    max-width: 800px;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    
+    iframe {
+      flex: 1;
+      border: 1px solid $border-color;
+      margin-bottom: 20px;
+      background-color: white;
+    }
+    
+    button {
+      align-self: center;
+      padding: 10px 20px;
+    }
+  }
+}
+
+// レスポンシブデザイン
+@media (max-width: 800px) {
+  #controller {
+    flex-direction: column;
+  }
+  
+  #mixer {
+    width: 100%;
+    order: -1;
+  }
+}
+
+// クロスブラウザ対応
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: $primary-color;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $secondary-color;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: $highlight-color;
+} 
