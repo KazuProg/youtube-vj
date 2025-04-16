@@ -124,6 +124,21 @@ body > #status {
   position: absolute;
 }
 
+.deck .seek-bar .loop {
+  position: absolute;
+  top: 1em;
+  left: 0;
+  right: 0;
+  height: 0.7em;
+  font-size: 0.7em;
+  line-height: 0.7em;
+}
+
+.deck .seek-bar .loop span {
+  transform: translateX(-50%);
+  position: absolute;
+}
+
 .deck .seek-bar .time {
   position: absolute;
   bottom: 0;

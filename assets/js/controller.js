@@ -50,6 +50,29 @@ function init() {
           document.querySelector(`.opacity .deck${channel}`).value =
             val["opacity"];
           break;
+        case "loop":
+          const loopParent = document.querySelector(`.deck.ch${channel} .loop`);
+
+          loopParent.innerHTML = "";
+
+          if (loop.start != -1) {
+            const markerS = document.createElement("span");
+            markerS.className = `loop-start`;
+            markerS.innerText = "|";
+            markerS.style.left = `${
+              (loop.start / ch[channel].duration) * 100
+            }%`;
+            loopParent.appendChild(markerS);
+          }
+
+          if (loop.end != -1) {
+            const markerE = document.createElement("span");
+            markerE.className = `loop-end`;
+            markerE.innerText = "|";
+            markerE.style.left = `${(loop.end / ch[channel].duration) * 100}%`;
+            loopParent.appendChild(markerE);
+          }
+          break;
       }
       selectCh(channel);
     },
