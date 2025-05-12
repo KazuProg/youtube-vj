@@ -255,10 +255,6 @@ class VJController extends EventEmitter {
 
   #onYTPlayerStateChange(e) {
     switch (e.data) {
-      case YT.PlayerState.BUFFERING:
-        // 再生位置変更(単純なローディングはしらん)
-        //this.#setData("pause", false);
-        break;
       case YT.PlayerState.PLAYING:
         // 再生されたらプレビューの一時停止は解除
         if (this.#isSuspendPreview) {
