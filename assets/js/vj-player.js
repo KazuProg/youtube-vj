@@ -2,35 +2,20 @@
 
 class VJPlayer extends EventEmitter {
   #YTPlayer;
-  #localStorageKey;
   #options;
   #syncing = false;
-  #data = {};
+  #dataManager;
 
-  constructor(channel, options = {}) {
+  constructor(channel, dataManager, options = {}) {
     super();
     const playerId = `vj_player_ch${channel}`;
-    this.#localStorageKey = `ytvj_ch${channel}`;
+    this.#dataManager = dataManager;
     this.#options = {
       isProjection: false,
       ...options,
     };
-    this.#data = {
-      speed: 1,
-      filter: {},
-      pause: true,
-      timing: {
-        timestamp: 0,
-        playerTime: 0,
-      },
-      videoId: null,
-      loop: {
-        start: -1,
-        end: -1,
-      },
-    };
 
-    this.#YTPlayer = new YT.Player(playerId, {
+    this.#YTPlayer = new YT.Player(document.getElementById(playerId), {
       videoId: "BLeUas72Mzk", //【フリー動画素材】ローディング動画4秒【ダウンロード可能】
       events: {
         onReady: (event) => {
@@ -65,10 +50,6 @@ class VJPlayer extends EventEmitter {
     );
   }
 
-  get localStorageKey() {
-    return this.#localStorageKey;
-  }
-
   get videoTitle() {
     return this.#YTPlayer.videoTitle;
   }
@@ -78,25 +59,7 @@ class VJPlayer extends EventEmitter {
   }
 
   get currentTime() {
-    const TIMING = this.#data.timing;
-    const TIMESTAMP_NOW = new Date() / 1000;
-
-    if (TIMING.timestamp == 0) return 0;
-    if (this.#data.pause) return TIMING.playerTime;
-
-    let expectPlayerTime =
-      TIMING.playerTime + (TIMESTAMP_NOW - TIMING.timestamp) * this.#data.speed;
-
-    if (this.isLoop && this.#data.loop.end < expectPlayerTime) {
-      this.#data.timing.timestamp =
-        TIMESTAMP_NOW -
-        (expectPlayerTime - this.#data.loop.end) / this.#data.speed;
-      this.#data.timing.playerTime = this.#data.loop.start;
-      expectPlayerTime -= this.#data.loop.end - this.#data.loop.start;
-      this.syncTiming();
-    }
-
-    return expectPlayerTime;
+    return this.#dataManager.currentTime;
   }
 
   get isMuted() {
@@ -112,66 +75,35 @@ class VJPlayer extends EventEmitter {
   }
 
   get isLoop() {
-    return this.#data.loop.start < this.#data.loop.end;
+    return this.#dataManager.isLoop;
   }
 
   #onPlayerReady() {
     this.#YTPlayer.mute();
 
-    document.addEventListener("VJPlayerUpdated", (event) => {
-      if (event.detail.key === this.#localStorageKey) {
-        const data = JSON.parse(event.detail.value);
-        for (const key in data) {
-          this.#applyData(key, data[key]);
-        }
-      }
-    });
-
-    // 初回データ読み込み
-    document.dispatchEvent(
-      new CustomEvent("VJPlayerUpdated", {
-        detail: {
-          key: this.#localStorageKey,
-          value: localStorage.getItem(this.#localStorageKey),
-        },
-      })
+    this.#dataManager.addEventListener(
+      "changed",
+      this.#onDataChanged.bind(this)
     );
+
+    this.#dataManager.dispatchAll();
 
     setInterval(() => {
       this.syncTiming();
     }, 3000);
-
-    const onAnimationFrame = () => {
-      this.currentTime;
-      requestAnimationFrame(onAnimationFrame);
-    };
-    requestAnimationFrame(onAnimationFrame);
   }
 
-  #applyData(key, value) {
-    if (JSON.stringify(this.#data[key]) === JSON.stringify(value)) {
-      return;
-    }
-    if (key === "filter") {
-      this.#data[key] = {
-        ...this.#data[key],
-        ...value,
-      };
-      value = this.#data[key];
-    } else {
-      this.#data[key] = value;
-    }
-
+  #onDataChanged(key, value, data) {
     switch (key) {
       case "videoId":
         this.#YTPlayer.loadVideoById(value);
         break;
       case "pause":
         if (value === true) {
-          this.#data.timing.playerTime = this.currentTime;
+          this.#dataManager.timing.playerTime = this.currentTime;
           this.#YTPlayer.pauseVideo();
         } else {
-          this.#data.timing.timestamp = new Date() / 1000;
+          this.#dataManager.timing.timestamp = new Date() / 1000;
           this.#YTPlayer.playVideo();
         }
         break;
@@ -215,12 +147,12 @@ class VJPlayer extends EventEmitter {
       return;
     }
 
-    if (state === YT.PlayerState.PAUSED && this.#data.pause === false) {
+    if (state === YT.PlayerState.PAUSED && this.#dataManager.pause === false) {
       this.dispatchEvent("paused");
       return;
     }
 
-    if (state === YT.PlayerState.PLAYING && this.#data.pause === true) {
+    if (state === YT.PlayerState.PLAYING && this.#dataManager.pause === true) {
       this.dispatchEvent("resumed");
       return;
     }
@@ -233,7 +165,7 @@ class VJPlayer extends EventEmitter {
     if (state == YT.PlayerState.PLAYING) {
       // 新動画読み込み時は自動再生されるっぽい？
       // 一時停止中にPreviewリロードで再生される対策
-      if (this.#data.pause) {
+      if (this.#dataManager.pause) {
         this.#YTPlayer.pauseVideo();
         return;
       }
@@ -243,16 +175,12 @@ class VJPlayer extends EventEmitter {
     }
   }
 
-  getData(key = null) {
-    let result = this.#data;
-    if (key !== null) {
-      result = this.#data[key] || null;
-    }
-    return JSON.parse(JSON.stringify(result));
-  }
-
   syncTiming() {
-    if (this.#syncing || this.#data.timing.timestamp == 0 || this.#data.pause) {
+    if (
+      this.#syncing ||
+      this.#dataManager.timing.timestamp == 0 ||
+      this.#dataManager.pause
+    ) {
       return;
     }
 
@@ -319,7 +247,7 @@ class VJPlayer extends EventEmitter {
           } else {
             isChecking = false;
 
-            let speed = this.#data.speed;
+            let speed = this.#dataManager.speed;
             let offsetSpeed = 0;
 
             if (Math.abs(t.syncOffset) < 0.005) {

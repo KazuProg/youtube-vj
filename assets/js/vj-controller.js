@@ -10,11 +10,15 @@ class VJController extends EventEmitter {
   #hotcues = [];
   #volume = 100;
   #isMuted = false;
+  #dataManager;
 
   constructor(channel, options = {}) {
     super();
     this.#channel = channel;
-    this.#VJPlayer = new VJPlayer(channel);
+
+    this.#dataManager = new VJPlayerData();
+
+    this.#VJPlayer = new VJPlayer(channel, this.#dataManager);
     this.#VJPlayer.addEventListener(
       "YTPlayerStateChange",
       this.#onYTPlayerStateChange.bind(this)
@@ -33,7 +37,7 @@ class VJController extends EventEmitter {
     this.#VJPlayer.addEventListener("resumed", this.#onResumed.bind(this));
     this.#VJPlayer.addEventListener("ended", this.#onEnded.bind(this));
 
-    localStorage.removeItem(this.#VJPlayer.localStorageKey);
+    localStorage.removeItem(`ytvj_ch${this.#channel}`);
     if (options.autoplay) {
       this.#setData("pause", false);
     }
@@ -48,10 +52,10 @@ class VJController extends EventEmitter {
   }
 
   get currentTime() {
-    const paused = this.#VJPlayer.getData("pause");
+    const paused = this.#dataManager.pause;
     if (this.#isSuspendPreview && !paused) {
-      const timing = this.#VJPlayer.getData("timing");
-      const speed = this.#VJPlayer.getData("speed");
+      const timing = this.#dataManager.timing;
+      const speed = this.#dataManager.speed;
 
       if (timing.timestamp == 0) return 0;
 
@@ -113,7 +117,7 @@ class VJController extends EventEmitter {
 
   setSpeed(val, relative = false) {
     if (relative) {
-      val = this.#VJPlayer.getData("speed") + val;
+      val = this.#dataManager.speed + val;
     }
 
     if (val < 0.25) val = 0.25;
@@ -131,7 +135,7 @@ class VJController extends EventEmitter {
 
   setFilter(val) {
     const value = {
-      ...this.#VJPlayer.getData("filter"),
+      ...this.#dataManager.filter,
       ...val,
     };
     this.#setData("filter", value);
@@ -181,25 +185,25 @@ class VJController extends EventEmitter {
   }
 
   adjustTiming(sec) {
-    let timing = this.#VJPlayer.getData("timing");
+    let timing = this.#dataManager.timing;
     timing.playerTime += sec;
     this.#setData("timing", timing);
   }
 
   loopStart() {
-    const loop = this.#VJPlayer.getData("loop");
+    const loop = this.#dataManager.loop;
     loop.start = this.currentTime;
     this.#setData("loop", loop);
   }
 
   loopEnd() {
-    const loop = this.#VJPlayer.getData("loop");
+    const loop = this.#dataManager.loop;
     loop.end = this.currentTime;
     this.#setData("loop", loop);
   }
 
   loopClear() {
-    const loop = this.#VJPlayer.getData("loop");
+    const loop = this.#dataManager.loop;
     loop.start = -1;
     loop.end = -1;
     this.#setData("loop", loop);
@@ -269,7 +273,7 @@ class VJController extends EventEmitter {
         }
         if (this.#isChangeVideoId) {
           this.#isChangeVideoId = false;
-          const videoId = this.#VJPlayer.getData("videoId");
+          const videoId = this.#dataManager.videoId;
           if (videoId) {
             this.dispatchEvent("changeVideo", this.#channel, videoId);
           }
@@ -316,7 +320,7 @@ class VJController extends EventEmitter {
   }
 
   #setData(key, value) {
-    let data = this.#VJPlayer.getData();
+    let data = this.#dataManager.getAll();
 
     data[key] = value;
     if (key === "speed") {
@@ -324,17 +328,9 @@ class VJController extends EventEmitter {
       data["timing"] = this.#getTimingData();
     }
 
-    localStorage.setItem(this.#VJPlayer.localStorageKey, JSON.stringify(data));
+    localStorage.setItem(`ytvj_ch${this.#channel}`, JSON.stringify(data));
 
-    // カスタムイベントを作成して発火
-    document.dispatchEvent(
-      new CustomEvent("VJPlayerUpdated", {
-        detail: {
-          key: this.#VJPlayer.localStorageKey,
-          value: JSON.stringify(data),
-        },
-      })
-    );
+    this.#dataManager.applyData(data);
   }
 
   #getTimingData() {

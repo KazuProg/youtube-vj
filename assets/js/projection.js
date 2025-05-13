@@ -17,8 +17,13 @@ function init(fullscreen = false) {
   let ch1_opacity = 1;
   let crossfader = 0;
 
-  const ch0 = new VJPlayer(0, { isProjection: true });
-  const ch1 = new VJPlayer(1, { isProjection: true });
+  const ch0_dataManager = new VJPlayerData();
+  const ch1_dataManager = new VJPlayerData();
+  ch0_dataManager.applyData(JSON.parse(localStorage.getItem("ytvj_ch0")));
+  ch1_dataManager.applyData(JSON.parse(localStorage.getItem("ytvj_ch1")));
+
+  const ch0 = new VJPlayer(0, ch0_dataManager, { isProjection: true });
+  const ch1 = new VJPlayer(1, ch1_dataManager, { isProjection: true });
 
   ch0.addEventListener("dataApplied", (key, value) => {
     if (key === "filter" && "opacity" in value) {
@@ -40,14 +45,12 @@ function init(fullscreen = false) {
       systemHandler();
       return;
     }
-    document.dispatchEvent(
-      new CustomEvent("VJPlayerUpdated", {
-        detail: {
-          key: event.key,
-          value: event.newValue,
-        },
-      })
-    );
+    if (event.key === "ytvj_ch0") {
+      ch0_dataManager.applyData(JSON.parse(event.newValue));
+    }
+    if (event.key === "ytvj_ch1") {
+      ch1_dataManager.applyData(JSON.parse(event.newValue));
+    }
   });
 
   let _sysDat = {};
