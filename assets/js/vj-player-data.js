@@ -126,7 +126,6 @@ class VJPlayerData extends EventEmitter {
   }
 
   applyData(data) {
-    console.log(data);
     for (const key in data) {
       if (!(key in this)) {
         console.warn(`${key} is not a valid property`);
