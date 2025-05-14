@@ -50,28 +50,8 @@ class VJPlayer extends EventEmitter {
     );
   }
 
-  get duration() {
-    return this.#YTPlayer.getDuration();
-  }
-
-  get currentTime() {
-    return this.#dataManager.currentTime;
-  }
-
-  get isMuted() {
-    return this.#YTPlayer.isMuted();
-  }
-
-  get volume() {
-    return this.#YTPlayer.getVolume();
-  }
-
-  get YTPlayerState() {
-    return this.#YTPlayer.getPlayerState();
-  }
-
-  get isLoop() {
-    return this.#dataManager.isLoop;
+  get YTPlayer() {
+    return this.#YTPlayer;
   }
 
   #onPlayerReady() {
@@ -96,7 +76,7 @@ class VJPlayer extends EventEmitter {
         break;
       case "pause":
         if (value === true) {
-          this.#dataManager.timing.playerTime = this.currentTime;
+          this.#dataManager.timing.playerTime = this.#dataManager.currentTime;
           this.#YTPlayer.pauseVideo();
         } else {
           this.#dataManager.timing.timestamp = new Date() / 1000;
@@ -184,9 +164,9 @@ class VJPlayer extends EventEmitter {
     this.dispatchEvent("timeSyncStart");
 
     const getTimeInfo = () => {
-      const duration = this.#YTPlayer.getDuration();
+      const duration = this.YTPlayer.getDuration();
 
-      const expectPlayerTime = this.currentTime;
+      const expectPlayerTime = this.#dataManager.currentTime;
       const syncOffset = expectPlayerTime - this.#YTPlayer.getCurrentTime();
 
       return {
@@ -268,25 +248,5 @@ class VJPlayer extends EventEmitter {
   stopSync() {
     this.#syncing = false;
     this.dispatchEvent("timeSyncEnd");
-  }
-
-  play() {
-    this.#YTPlayer.playVideo();
-  }
-
-  pause() {
-    this.#YTPlayer.pauseVideo();
-  }
-
-  mute() {
-    this.#YTPlayer.mute();
-  }
-
-  unmute() {
-    this.#YTPlayer.unMute();
-  }
-
-  setVolume(volume) {
-    this.#YTPlayer.setVolume(volume);
   }
 }

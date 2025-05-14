@@ -44,7 +44,7 @@ class VJController extends EventEmitter {
   }
 
   get duration() {
-    return this.#VJPlayer.duration;
+    return this.#VJPlayer.YTPlayer.getDuration();
   }
 
   get currentTime() {
@@ -64,7 +64,7 @@ class VJController extends EventEmitter {
 
       return current;
     } else {
-      return this.#VJPlayer.currentTime;
+      return this.#dataManager.currentTime;
     }
   }
 
@@ -78,9 +78,9 @@ class VJController extends EventEmitter {
 
   set isMuted(val) {
     if (val) {
-      this.#VJPlayer.mute();
+      this.#VJPlayer.YTPlayer.mute();
     } else {
-      this.#VJPlayer.unmute();
+      this.#VJPlayer.YTPlayer.unMute();
       this.setVolume(this.#volume);
     }
     if (val === this.#isMuted) return;
@@ -94,7 +94,7 @@ class VJController extends EventEmitter {
 
   set volume(val) {
     this.#volume = val;
-    this.#VJPlayer.setVolume(val);
+    this.#VJPlayer.YTPlayer.setVolume(val);
   }
 
   setVideo(id) {
@@ -171,12 +171,12 @@ class VJController extends EventEmitter {
       this.#isSuspendPreview = true;
     }
     this.#VJPlayer.stopSync();
-    this.#VJPlayer.pause();
+    this.#VJPlayer.YTPlayer.pauseVideo();
   }
 
   resumePreview() {
     if (this.#isSuspendPreview) {
-      this.#VJPlayer.play();
+      this.#VJPlayer.YTPlayer.playVideo();
     }
   }
 
@@ -206,15 +206,15 @@ class VJController extends EventEmitter {
   }
 
   play() {
-    this.#VJPlayer.play();
+    this.#VJPlayer.YTPlayer.playVideo();
   }
 
   pause() {
-    this.#VJPlayer.pause();
+    this.#VJPlayer.YTPlayer.pauseVideo();
   }
 
   togglePlayPause() {
-    if (this.#VJPlayer.YTPlayerState === YT.PlayerState.PLAYING) {
+    if (this.#VJPlayer.YTPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
       this.pause();
     } else {
       this.play();
@@ -245,9 +245,11 @@ class VJController extends EventEmitter {
         return;
       }
 
-      this.#VJPlayer.setVolume(this.#VJPlayer.volume - 1);
+      this.#VJPlayer.YTPlayer.setVolume(
+        this.#VJPlayer.YTPlayer.getVolume() - 1
+      );
 
-      if (this.#VJPlayer.volume <= 0) {
+      if (this.#VJPlayer.YTPlayer.getVolume() <= 0) {
         clearInterval(fadeout);
       }
     }, 20);
@@ -332,7 +334,7 @@ class VJController extends EventEmitter {
   #getTimingData() {
     return {
       timestamp: +new Date() / 1000,
-      playerTime: this.#VJPlayer.currentTime,
+      playerTime: this.currentTime,
     };
   }
 }
