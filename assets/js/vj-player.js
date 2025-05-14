@@ -50,10 +50,6 @@ class VJPlayer extends EventEmitter {
     );
   }
 
-  get videoTitle() {
-    return this.#YTPlayer.videoTitle;
-  }
-
   get duration() {
     return this.#YTPlayer.getDuration();
   }

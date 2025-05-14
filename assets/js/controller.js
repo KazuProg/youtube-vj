@@ -18,7 +18,7 @@ function init() {
       for (const c of ch) {
         c.channelNumber === channel ? c.unmute() : c.mute();
       }
-      Library.addHistory(videoId, ch[channel].videoTitle);
+      Library.addHistory(videoId);
       selectCh(channel);
     },
     onSuspendPreview: (channel) => {
