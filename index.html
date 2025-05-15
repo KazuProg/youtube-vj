@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>サイト移行のお知らせ</title>
+    <style>
+      :root {
+        --bg-color: #333;
+        --text-color: #ddd;
+        --accent-color: #4ea1d3;
+        --button-bg: #555;
+        --button-hover: #666;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Helvetica Neue", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+        padding: 1.5rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+      }
+
+      a.button {
+        display: inline-block;
+        background-color: var(--button-bg);
+        color: var(--text-color);
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.3s;
+      }
+
+      a.button:hover {
+        background-color: var(--button-hover);
+      }
+
+      footer {
+        margin-top: 3rem;
+        font-size: 0.9rem;
+        color: #888;
+      }
+    </style>
+    <script>
+      setTimeout(() => {
+        window.location.href = "https://youtube-vj.kazuprog.work";
+      }, 10000);
+    </script>
+  </head>
+  <body>
+    <h1>サイトは移転しました</h1>
+    <p>
+      <strong>YouTube-VJ</strong>
+      は別ドメインに移行しました。<br />
+      今後のアップデートやコンテンツは新しいサイトでご確認ください。
+    </p>
+    <a class="button" href="https://youtube-vj.kazuprog.work">
+      新しいサイトへ移動
+    </a>
+    <footer>※ 10秒後に自動的にリダイレクトされます。</footer>
+  </body>
+</html>
