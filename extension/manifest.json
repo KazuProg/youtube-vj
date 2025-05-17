@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube-VJ Plus",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "YouTube-VJ の使い勝手を向上させる便利機能を提供します。URLのコピペ簡略化など、作業をスムーズにする機能を揃えています。",
   "icons": {
     "16": "icons/16.png",
@@ -20,7 +20,7 @@
       "js": ["js/script.js"],
       "matches": [
         "https://www.youtube.com/*",
-        "https://kazuprog.github.io/youtube-vj/"
+        "https://youtube-vj.kazuprog.work/"
       ]
     }
   ]
