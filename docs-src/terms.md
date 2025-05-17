@@ -1,6 +1,5 @@
 ---
-layout: minimum
-title: 利用規約
+permalink: "terms.html"
 ---
 
 # 利用規約

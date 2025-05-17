@@ -1,3 +1,7 @@
+---
+permalink: "chrome-extension.html"
+---
+
 # Chrome 拡張機能の紹介と導入手順
 
 ## 拡張機能でできること

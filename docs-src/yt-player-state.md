@@ -1,3 +1,7 @@
+---
+permalink: "yt-plater-state.html"
+---
+
 # YT.PlayerState に関するメモ
 
 | Key       | Value |

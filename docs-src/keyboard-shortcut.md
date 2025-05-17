@@ -1,3 +1,7 @@
+---
+permalink: "keyboard-shortcut.html"
+---
+
 # キーボードショートカット一覧
 
 `YouTube-VJ Controller Window`で使用できるキーボードショートカット一覧です。
