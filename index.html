@@ -225,6 +225,7 @@
           </thead>
           <tbody></tbody>
         </table>
+        <input type="text" id="search-keyword" placeholder="Search" />
         <div id="ytplayers" style="display: none"></div>
       </div>
       <div class="drag-overlay">+</div>
@@ -255,6 +256,16 @@
           <label for="conf-fadeout">
             <input id="conf-fadeout" type="checkbox" checked />
             Fadeout volume when unfocus
+          </label>
+          <br />
+          <label for="conf-ytapikey">
+            YouTube Data API Key
+            <input id="conf-ytapikey" type="text" />
+          </label>
+          <br />
+          <label for="conf-ytapireq">
+            YouTube Search Count
+            <input id="conf-ytapireq" type="number" min="1" max="50" />
           </label>
         </div>
         <div class="buttons">

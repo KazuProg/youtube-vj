@@ -4,6 +4,8 @@ class _ConfigManager {
   #configObj = {
     fadeoutVolume: true,
     openLibrary: false,
+    youtubeAPIKey: "",
+    youtubeAPIRequests: 10,
   };
   #key;
 
@@ -27,6 +29,14 @@ class _ConfigManager {
     return this.#configObj.openLibrary;
   }
 
+  get youtubeAPIKey() {
+    return this.#configObj.youtubeAPIKey;
+  }
+
+  get youtubeAPIRequests() {
+    return this.#configObj.youtubeAPIRequests;
+  }
+
   set fadeoutVolume(value) {
     this.#configObj.fadeoutVolume = value;
     this.#save();
@@ -34,6 +44,16 @@ class _ConfigManager {
 
   set openLibrary(value) {
     this.#configObj.openLibrary = value;
+    this.#save();
+  }
+
+  set youtubeAPIKey(value) {
+    this.#configObj.youtubeAPIKey = value;
+    this.#save();
+  }
+
+  set youtubeAPIRequests(value) {
+    this.#configObj.youtubeAPIRequests = value;
     this.#save();
   }
 

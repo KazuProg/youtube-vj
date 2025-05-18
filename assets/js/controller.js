@@ -394,9 +394,18 @@ function init() {
   });
 
   document.querySelector("#conf-fadeout").checked = Config.fadeoutVolume;
-
   document.querySelector("#conf-fadeout").addEventListener("input", (e) => {
     Config.fadeoutVolume = e.target.checked;
+  });
+
+  document.querySelector("#conf-ytapikey").value = Config.youtubeAPIKey;
+  document.querySelector("#conf-ytapikey").addEventListener("input", (e) => {
+    Config.youtubeAPIKey = e.target.value;
+  });
+
+  document.querySelector("#conf-ytapireq").value = Config.youtubeAPIRequests;
+  document.querySelector("#conf-ytapireq").addEventListener("input", (e) => {
+    Config.youtubeAPIRequests = e.target.value;
   });
 
   changeVideo(relayElement.value);

@@ -17,6 +17,10 @@ class _YouTubeTitleFetcher {
     return this.#fetchFromList(id);
   }
 
+  addManually(id, title) {
+    this.#list[id] = title;
+  }
+
   #fetchingCount() {
     let fetchingCount = 0;
     for (const key in this.#list) {

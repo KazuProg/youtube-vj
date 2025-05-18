@@ -23,6 +23,7 @@ class _Library {
       library: root,
       playlist: root.querySelector(".playlist"),
       videolist: root.querySelector(".videolist"),
+      searchInput: root.querySelector("#search-keyword"),
       videoFocused: null,
       focusedListParent: null,
     };
@@ -38,6 +39,64 @@ class _Library {
       this.#onVideoSelected.bind(this),
       this.#onVideoListChanged.bind(this)
     );
+
+    if (Config.youtubeAPIKey) {
+      this.#playlist.insert("Search", []);
+
+      let searchInputTimeout = null;
+      this.#UIElements.searchInput.addEventListener("keydown", (e) => {
+        if (searchInputTimeout) {
+          clearTimeout(searchInputTimeout);
+        }
+
+        const keyword = this.#UIElements.searchInput.value;
+        if (keyword.length === "") return;
+
+        if (e.key === "Enter") {
+          this.#searchYouTubeVideos(keyword);
+          search(keyword);
+        } else {
+          searchInputTimeout = setTimeout(() => {
+            this.#searchYouTubeVideos(keyword);
+          }, 500);
+        }
+      });
+    }
+  }
+
+  #searchYouTubeVideos(keyword) {
+    const apiKey = Config.youtubeAPIKey;
+    const apiRequests = Config.youtubeAPIRequests;
+    if (!apiKey) {
+      console.error("YouTube API key is not set.");
+      return;
+    }
+
+    const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
+      keyword
+    )}&key=${apiKey}&maxResults=${apiRequests}`;
+
+    fetch(apiUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        videos = data.items;
+        const videoIds = videos.map((video) => video.id.videoId);
+        videos.forEach((video) => {
+          YouTubeTitleFetcher.addManually(
+            video.id.videoId,
+            video.snippet.title
+          );
+        });
+        this.#playlist.insert("Search", videoIds);
+      })
+      .catch((error) => {
+        console.error("Error fetching YouTube videos:", error);
+      });
   }
 
   #onFileDrop(files) {
@@ -97,8 +156,13 @@ class _Library {
     }
   }
 
-  #onPlaylistChanged(list) {
+  #onPlaylistChanged(name, list) {
     this.#videolist.update(list);
+    if (name === "Search") {
+      this.#UIElements.searchInput.classList.remove("hidden");
+    } else {
+      this.#UIElements.searchInput.classList.add("hidden");
+    }
   }
 
   #onVideoSelected(videoId) {
@@ -213,7 +277,10 @@ class _Library_Playlist {
     });
     this.#currentName = element.getAttribute("list-name");
 
-    this.#onChangedCallback(JSON.parse(element.getAttribute("list")));
+    this.#onChangedCallback(
+      this.#currentName,
+      JSON.parse(element.getAttribute("list"))
+    );
   }
 
   insert(name, list) {
