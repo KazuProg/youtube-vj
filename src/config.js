@@ -1,5 +1,3 @@
-"use strict";
-
 class _ConfigManager {
   #configObj = {
     fadeoutVolume: true,
@@ -62,3 +60,5 @@ class _ConfigManager {
   }
 }
 const Config = new _ConfigManager("ytvj_config");
+
+export default Config;

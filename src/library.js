@@ -1,4 +1,7 @@
-"use strict";
+import YouTubeTitleFetcher from "./youtube-title-fetcher.js";
+import Config from "./config.js";
+import History from "./history.js";
+import { changeVideo, parseYouTubeURL } from "./controller.js";
 
 class _Library {
   actions;
@@ -434,3 +437,6 @@ class _Library_Videolist {
 }
 
 const Library = new _Library();
+
+window.Library = Library;
+export default Library;

@@ -1,5 +1,3 @@
-"use strict";
-
 class VJPlayerData extends EventEmitter {
   #speed = 1;
   #filter = {};
@@ -136,3 +134,5 @@ class VJPlayerData extends EventEmitter {
     }
   }
 }
+
+export default VJPlayerData;

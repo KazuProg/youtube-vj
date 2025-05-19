@@ -6,7 +6,8 @@
     "url": "https://github.com/KazuProg/YouTube-VJ/issues"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^3.1.0"
+    "@11ty/eleventy": "^3.1.0",
+    "rollup": "^4.41.0"
   },
   "homepage": "https://github.com/KazuProg/YouTube-VJ#readme",
   "repository": {
@@ -14,6 +15,10 @@
     "url": "git+https://github.com/KazuProg/YouTube-VJ.git"
   },
   "scripts": {
-    "build-docs": "eleventy"
-  }
+    "build": "npm run build-script && npm run build-docs",
+    "build-docs": "eleventy --config=.eleventy.cjs",
+    "build-script": "rollup -c",
+    "dev": "rollup -c rollup.config.js -w"
+  },
+  "type": "module"
 }

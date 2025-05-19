@@ -1,8 +1,15 @@
-"use strict";
+import Config from "./config.js";
+import Library from "./library.js";
+import VJController from "./vj-controller.js";
+import YouTubeTitleFetcher from "./youtube-title-fetcher.js";
+import templates from "./script-template.js";
 
 const ch = [];
 let selCh = null;
 let midi = null;
+
+window.ch = ch;
+window.selCh = selCh;
 
 window.addEventListener("load", () => {
   document.querySelector("#terms-agree-btn").addEventListener("click", () => {
@@ -474,7 +481,6 @@ function requestMidiAccess(startup = false) {
     });
 }
 
-var prepareVideoId;
 function changeVideo(text) {
   text = text.trim();
   let id;
@@ -501,9 +507,10 @@ function changeVideo(text) {
     const url = `https://img.youtube.com/vi/${id}/default.jpg`;
     document.querySelector(".yt-thumbnail").src = url;
     document.querySelector("#input-videoId").value = idPos;
-    prepareVideoId = idPos;
+    window.prepareVideoId = idPos;
   }
 }
+window.changeVideo = changeVideo;
 function extractURLs(text) {
   const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/g;
   return text.match(urlPattern) || [];
@@ -569,6 +576,7 @@ function setCrossfader(val) {
   updateSystemData({ crossfader: val });
   document.querySelector("#cross-fader").value = val;
 }
+window.setCrossfader = setCrossfader;
 
 function loadSystemData() {
   return JSON.parse(localStorage.getItem("ytvj_sys"));
@@ -601,6 +609,7 @@ function selectCh(channel = null) {
   }
   document.querySelector("#input-videoId").blur();
 }
+window.selectCh = selectCh;
 
 function openProjectionWindow(preview = false) {
   const wnd = window.open(
@@ -623,9 +632,13 @@ function openProjectionWindow(preview = false) {
   }
 }
 
+window.openProjectionWindow = openProjectionWindow;
+
 function openYouTubeWindow() {
   window.open("https://www.youtube.com/", "YouTube", "width=640,height=960");
 }
+
+window.openYouTubeWindow = openYouTubeWindow;
 
 function saveConfig() {
   localStorage.setItem("ytvj_config", JSON.stringify(config));
@@ -639,3 +652,17 @@ function formatTime(sec) {
 
   return `${minutes}:${formattedSeconds}`;
 }
+
+export {
+  ch,
+  selCh,
+  setCrossfader,
+  changeVideo,
+  extractURLs,
+  isURL,
+  parseYouTubeURL,
+  setSwitchingDuration,
+  openProjectionWindow,
+  openYouTubeWindow,
+  saveConfig,
+};

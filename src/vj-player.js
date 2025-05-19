@@ -1,5 +1,3 @@
-"use strict";
-
 class VJPlayer extends EventEmitter {
   #YTPlayer;
   #options;
@@ -250,3 +248,5 @@ class VJPlayer extends EventEmitter {
     this.dispatchEvent("timeSyncEnd");
   }
 }
+
+export default VJPlayer;
