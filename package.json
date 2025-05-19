@@ -16,7 +16,7 @@
   },
   "scripts": {
     "build": "npm run build-script && npm run build-docs",
-    "build-docs": "eleventy -c /eleventy.cjs",
+    "build-docs": "eleventy -c .eleventy.cjs",
     "build-script": "rollup -c",
     "dev": "rollup -c rollup.config.js -w"
   },
