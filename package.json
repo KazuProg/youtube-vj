@@ -15,9 +15,10 @@
     "url": "git+https://github.com/KazuProg/YouTube-VJ.git"
   },
   "scripts": {
-    "build-script": "rollup -c",
-    "build-docs": "eleventy",
     "build": "npm run build-script && npm run build-docs",
+    "build-docs": "eleventy",
+    "build-script": "rollup -c",
     "dev": "rollup -c rollup.config.js -w"
-  }
+  },
+  "type": "module"
 }
