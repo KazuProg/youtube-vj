@@ -54,7 +54,6 @@ class _Library {
 
         if (e.key === "Enter") {
           this.#searchYouTubeVideos(keyword);
-          search(keyword);
         } else {
           searchInputTimeout = setTimeout(() => {
             this.#searchYouTubeVideos(keyword);
@@ -84,7 +83,7 @@ class _Library {
         return response.json();
       })
       .then((data) => {
-        videos = data.items;
+        const videos = data.items;
         const videoIds = videos.map((video) => video.id.videoId);
         videos.forEach((video) => {
           YouTubeTitleFetcher.addManually(
