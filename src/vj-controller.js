@@ -1,4 +1,5 @@
-"use strict";
+import VJPlayer from "./vj-player.js";
+import VJPlayerData from "./vj-player-data.js";
 
 class VJController extends EventEmitter {
   #channel;
@@ -338,3 +339,5 @@ class VJController extends EventEmitter {
     };
   }
 }
+
+export default VJController;

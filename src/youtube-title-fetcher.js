@@ -1,5 +1,3 @@
-"use strict";
-
 class _YouTubeTitleFetcher {
   #playersContainer;
   #list = {}; // 取得予定はnull、取得中は""、取得済みはタイトル文字列
@@ -105,3 +103,5 @@ class _YouTubeTitleFetcher {
 }
 
 const YouTubeTitleFetcher = new _YouTubeTitleFetcher();
+
+export default YouTubeTitleFetcher;

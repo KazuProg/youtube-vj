@@ -1,4 +1,5 @@
-"use strict";
+import VJPlayer from "./vj-player.js";
+import VJPlayerData from "./vj-player-data.js";
 
 function init(fullscreen = false) {
   if (fullscreen) {
@@ -90,3 +91,5 @@ function init(fullscreen = false) {
       (ch1_isFront ? 1 - ch0_weight / 2 : 1) * ch1_weight;
   }
 }
+
+window.init = init;

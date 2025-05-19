@@ -1,5 +1,3 @@
-"use strict";
-
 class _HistoryManager {
   #MAX_COUNT = 100;
   #key;
@@ -38,3 +36,5 @@ class _HistoryManager {
   }
 }
 const History = new _HistoryManager("ytvj_history");
+
+export default History;

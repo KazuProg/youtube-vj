@@ -220,3 +220,5 @@ let templates = [
     code: "if (value === 0x7f) {\n  Library.actions.up();\n} else {\n  Library.actions.down();\n}",
   },
 ];
+
+export default templates;
