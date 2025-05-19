@@ -220,13 +220,15 @@ class _Library {
     const history = History.getAll();
     this.#playlist.insert("History", history);
 
-    // リスト更新時に先頭の動画が選択されてしまう対策
-    // 履歴の最後(=選択中だった動画)を選択させる
-    this.#onVideoSelected(history.at(-1));
+    if (history.length !== 0) {
+      // リスト更新時に先頭の動画が選択されてしまう対策
+      // 履歴の最後(=選択中だった動画)を選択させる
+      this.#onVideoSelected(history.at(-1));
 
-    // もともと選択されていた動画を選択
-    if (idx !== -1) {
-      this.#videolist.selectByIndex(idx, false);
+      // もともと選択されていた動画を選択
+      if (idx !== -1) {
+        this.#videolist.selectByIndex(idx, false);
+      }
     }
   }
 }
