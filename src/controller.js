@@ -534,6 +534,9 @@ function parseYouTubeURL(text) {
   if (url.pathname === "/watch") {
     id = params.get("v");
   }
+  if (url.pathname.startsWith("/shorts")) {
+    id = url.pathname.substr(8, 11);
+  }
   start = params.get("t");
 
   return {
