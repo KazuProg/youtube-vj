@@ -66,7 +66,7 @@ class VJPlayer extends EventEmitter {
 
     setInterval(() => {
       this.syncTiming();
-    }, APP_CONSTANTS.SYNC_INTERVAL);
+    }, AppConstants.SYNC_INTERVAL);
   }
 
   #onDataChanged(key, value, data) {
