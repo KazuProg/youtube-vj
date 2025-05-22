@@ -1,66 +1,103 @@
 import { AppConstants } from "./utils/constants";
 
-class _ConfigManager {
-  #configObj = {
+class Config {
+  static #defaultConfig = {
     fadeoutVolume: true,
     openLibrary: false,
     youtubeAPIKey: "",
     youtubeAPIRequests: 10,
   };
-  #key;
 
-  constructor(localStorageKey) {
-    this.#key = localStorageKey;
+  static #config = {};
+  static #localStorageKey = AppConstants.LOCAL_STORAGE_KEYS.APP_SETTINGS;
 
-    const savedConfig = localStorage.getItem(this.#key);
+  static {
+    Object.assign(Config.#config, Config.#defaultConfig);
+
+    const savedConfig = localStorage.getItem(Config.#localStorageKey);
     if (savedConfig) {
-      const parsed = JSON.parse(savedConfig);
-      for (const key in parsed) {
-        this.#configObj[key] = parsed[key];
+      try {
+        const parsed = JSON.parse(savedConfig);
+        for (const key in parsed) {
+          if (Object.prototype.hasOwnProperty.call(Config.#config, key)) {
+            Config.#config[key] = parsed[key];
+          }
+        }
+      } catch (e) {
+        console.error("Failed to parse saved config from localStorage:", e);
       }
     }
   }
 
-  get fadeoutVolume() {
-    return this.#configObj.fadeoutVolume;
+  static get fadeoutVolume() {
+    return Config.#config.fadeoutVolume;
   }
 
-  get openLibrary() {
-    return this.#configObj.openLibrary;
+  static get openLibrary() {
+    return Config.#config.openLibrary;
   }
 
-  get youtubeAPIKey() {
-    return this.#configObj.youtubeAPIKey;
+  static get youtubeAPIKey() {
+    return Config.#config.youtubeAPIKey;
   }
 
-  get youtubeAPIRequests() {
-    return this.#configObj.youtubeAPIRequests;
+  static get youtubeAPIRequests() {
+    return Config.#config.youtubeAPIRequests;
   }
 
-  set fadeoutVolume(value) {
-    this.#configObj.fadeoutVolume = value;
-    this.#save();
+  static set fadeoutVolume(value) {
+    if (typeof value === "boolean") {
+      Config.#config.fadeoutVolume = value;
+      Config.#save();
+    } else {
+      console.warn("Invalid value for fadeoutVolume: must be a boolean.");
+    }
   }
 
-  set openLibrary(value) {
-    this.#configObj.openLibrary = value;
-    this.#save();
+  static set openLibrary(value) {
+    if (typeof value === "boolean") {
+      Config.#config.openLibrary = value;
+      Config.#save();
+    } else {
+      console.warn("Invalid value for openLibrary: must be a boolean.");
+    }
   }
 
-  set youtubeAPIKey(value) {
-    this.#configObj.youtubeAPIKey = value;
-    this.#save();
+  static set youtubeAPIKey(value) {
+    if (typeof value === "string") {
+      Config.#config.youtubeAPIKey = value;
+      Config.#save();
+    } else {
+      console.warn("Invalid value for youtubeAPIKey: must be a string.");
+    }
   }
 
-  set youtubeAPIRequests(value) {
-    this.#configObj.youtubeAPIRequests = value;
-    this.#save();
+  static set youtubeAPIRequests(value) {
+    if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
+      Config.#config.youtubeAPIRequests = value;
+      Config.#save();
+    } else {
+      console.warn(
+        "Invalid value for youtubeAPIRequests: must be a non-negative integer."
+      );
+    }
   }
 
-  #save() {
-    localStorage.setItem(this.#key, JSON.stringify(this.#configObj));
+  static #save() {
+    localStorage.setItem(
+      Config.#localStorageKey,
+      JSON.stringify(Config.#config)
+    );
+  }
+
+  static getAllConfig() {
+    return { ...Config.#config };
+  }
+
+  static resetConfig() {
+    Object.assign(Config.#config, Config.#defaultConfig);
+    Config.#save();
   }
 }
-const Config = new _ConfigManager(AppConstants.LOCAL_STORAGE_KEYS.APP_SETTINGS);
 
 export default Config;
