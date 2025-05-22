@@ -3,6 +3,7 @@ import Library from "./library.js";
 import VJController from "./vj-controller.js";
 import YouTubeTitleFetcher from "./youtube-title-fetcher.js";
 import templates from "./script-template.js";
+import { AppConstants } from "./utils/constants.js";
 
 const ch = [];
 let selCh = null;
@@ -109,8 +110,13 @@ function init() {
     },
   };
 
-  ch[0] = new VJController(0, { autoplay: true });
-  ch[1] = new VJController(1);
+  ch[0] = new VJController(0, {
+    localStorageKey: AppConstants.LOCAL_STORAGE_KEYS.CTRL_CH_0,
+    autoplay: true,
+  });
+  ch[1] = new VJController(1, {
+    localStorageKey: AppConstants.LOCAL_STORAGE_KEYS.CTRL_CH_1,
+  });
 
   // for custom script
   window.ch1 = ch[0];
@@ -143,7 +149,7 @@ function init() {
   changeVideo(relayElement.value);
 
   window.addEventListener("storage", (e) => {
-    if (e.key !== "ytvj_sys") return;
+    if (e.key !== AppConstants.LOCAL_STORAGE_KEYS.CTRL_MASTER) return;
     const oldVal = JSON.parse(e.oldValue);
     const newVal = JSON.parse(e.newValue);
 
@@ -582,12 +588,14 @@ function setCrossfader(val) {
 window.setCrossfader = setCrossfader;
 
 function loadSystemData() {
-  return JSON.parse(localStorage.getItem("ytvj_sys"));
+  return JSON.parse(
+    localStorage.getItem(AppConstants.LOCAL_STORAGE_KEYS.CTRL_MASTER)
+  );
 }
 
 function updateSystemData(obj) {
   localStorage.setItem(
-    "ytvj_sys",
+    AppConstants.LOCAL_STORAGE_KEYS.CTRL_MASTER,
     JSON.stringify({
       ...loadSystemData(),
       ...obj,
@@ -644,7 +652,10 @@ function openYouTubeWindow() {
 window.openYouTubeWindow = openYouTubeWindow;
 
 function saveConfig() {
-  localStorage.setItem("ytvj_config", JSON.stringify(config));
+  localStorage.setItem(
+    AppConstants.LOCAL_STORAGE_KEYS.APP_SETTINGS,
+    JSON.stringify(config)
+  );
 }
 
 function formatTime(sec) {

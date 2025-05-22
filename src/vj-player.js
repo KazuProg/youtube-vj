@@ -1,3 +1,5 @@
+import { AppConstants } from "./utils/constants";
+
 class VJPlayer extends EventEmitter {
   #YTPlayer;
   #options;
@@ -64,7 +66,7 @@ class VJPlayer extends EventEmitter {
 
     setInterval(() => {
       this.syncTiming();
-    }, 3000);
+    }, APP_CONSTANTS.SYNC_INTERVAL);
   }
 
   #onDataChanged(key, value, data) {

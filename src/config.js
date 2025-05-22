@@ -1,3 +1,5 @@
+import { AppConstants } from "./utils/constants";
+
 class _ConfigManager {
   #configObj = {
     fadeoutVolume: true,
@@ -59,6 +61,6 @@ class _ConfigManager {
     localStorage.setItem(this.#key, JSON.stringify(this.#configObj));
   }
 }
-const Config = new _ConfigManager("ytvj_config");
+const Config = new _ConfigManager(AppConstants.LOCAL_STORAGE_KEYS.APP_SETTINGS);
 
 export default Config;

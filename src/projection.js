@@ -1,5 +1,6 @@
 import VJPlayer from "./vj-player.js";
 import VJPlayerData from "./vj-player-data.js";
+import { AppConstants } from "./utils/constants.js";
 
 function init(fullscreen = false) {
   if (fullscreen) {
@@ -20,8 +21,12 @@ function init(fullscreen = false) {
 
   const ch0_dataManager = new VJPlayerData();
   const ch1_dataManager = new VJPlayerData();
-  ch0_dataManager.applyData(JSON.parse(localStorage.getItem("ytvj_ch0")));
-  ch1_dataManager.applyData(JSON.parse(localStorage.getItem("ytvj_ch1")));
+  ch0_dataManager.applyData(
+    JSON.parse(localStorage.getItem(AppConstants.LOCAL_STORAGE_KEYS.CTRL_CH_0))
+  );
+  ch1_dataManager.applyData(
+    JSON.parse(localStorage.getItem(AppConstants.LOCAL_STORAGE_KEYS.CTRL_CH_1))
+  );
 
   const ch0 = new VJPlayer(0, ch0_dataManager, { isProjection: true });
   const ch1 = new VJPlayer(1, ch1_dataManager, { isProjection: true });
@@ -42,21 +47,23 @@ function init(fullscreen = false) {
   });
 
   window.addEventListener("storage", (event) => {
-    if (event.key === "ytvj_sys") {
+    if (event.key === AppConstants.LOCAL_STORAGE_KEYS.CTRL_MASTER) {
       systemHandler();
       return;
     }
-    if (event.key === "ytvj_ch0") {
+    if (event.key === AppConstants.LOCAL_STORAGE_KEYS.CTRL_CH_0) {
       ch0_dataManager.applyData(JSON.parse(event.newValue));
     }
-    if (event.key === "ytvj_ch1") {
+    if (event.key === AppConstants.LOCAL_STORAGE_KEYS.CTRL_CH_1) {
       ch1_dataManager.applyData(JSON.parse(event.newValue));
     }
   });
 
   let _sysDat = {};
   function systemHandler() {
-    const data = JSON.parse(localStorage.getItem("ytvj_sys"));
+    const data = JSON.parse(
+      localStorage.getItem(AppConstants.LOCAL_STORAGE_KEYS.CTRL_MASTER)
+    );
 
     for (const key in data) {
       if (JSON.stringify(_sysDat[key]) === JSON.stringify(data[key])) {

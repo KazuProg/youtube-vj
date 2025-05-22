@@ -12,10 +12,12 @@ class VJController extends EventEmitter {
   #volume = 100;
   #isMuted = false;
   #dataManager;
+  #localStorageKey = null;
 
   constructor(channel, options = {}) {
     super();
     this.#channel = channel;
+    this.#localStorageKey = options.localStorageKey;
 
     this.#dataManager = new VJPlayerData();
 
@@ -38,7 +40,7 @@ class VJController extends EventEmitter {
     this.#VJPlayer.addEventListener("resumed", this.#onResumed.bind(this));
     this.#VJPlayer.addEventListener("ended", this.#onEnded.bind(this));
 
-    localStorage.removeItem(`ytvj_ch${this.#channel}`);
+    localStorage.removeItem(this.#localStorageKey);
     if (options.autoplay) {
       this.#setData("pause", false);
     }
@@ -327,7 +329,7 @@ class VJController extends EventEmitter {
       data["timing"] = this.#getTimingData();
     }
 
-    localStorage.setItem(`ytvj_ch${this.#channel}`, JSON.stringify(data));
+    localStorage.setItem(this.#localStorageKey, JSON.stringify(data));
 
     this.#dataManager.applyData(data);
   }

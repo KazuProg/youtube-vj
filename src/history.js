@@ -1,5 +1,6 @@
+import { AppConstants } from "./utils/constants";
+
 class _HistoryManager {
-  #MAX_COUNT = 100;
   #key;
 
   constructor(localStorageKey) {
@@ -19,7 +20,7 @@ class _HistoryManager {
 
     history.push(videoId);
 
-    if (this.#MAX_COUNT < history.length) {
+    if (AppConstants.HISTORY_MAX < history.length) {
       history.shift();
     }
 
@@ -35,6 +36,8 @@ class _HistoryManager {
     localStorage.removeItem(this.#key);
   }
 }
-const History = new _HistoryManager("ytvj_history");
+const History = new _HistoryManager(
+  AppConstants.LOCAL_STORAGE_KEYS.PLAY_HISTORY
+);
 
 export default History;
