@@ -166,7 +166,7 @@ class VJPlayer extends EventEmitter {
     const getTimeInfo = () => {
       const duration = this.YTPlayer.getDuration();
 
-      const expectPlayerTime = this.#dataManager.currentTime;
+      const expectPlayerTime = this.#dataManager.currentTime % duration;
       const syncOffset = expectPlayerTime - this.#YTPlayer.getCurrentTime();
 
       return {

@@ -67,7 +67,7 @@ class VJController extends EventEmitter {
 
       return current;
     } else {
-      return this.#dataManager.currentTime;
+      return this.#dataManager.currentTime % this.duration;
     }
   }
 
