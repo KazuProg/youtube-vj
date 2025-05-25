@@ -12,16 +12,6 @@ class VJPlayerData extends EventEmitter {
     end: -1,
   };
 
-  constructor() {
-    super();
-    const loop = () => {
-      // ループ処理を呼び出すため
-      this.currentTime;
-      requestAnimationFrame(loop);
-    };
-    requestAnimationFrame(loop);
-  }
-
   getAll() {
     return {
       speed: this.speed,
@@ -92,31 +82,6 @@ class VJPlayerData extends EventEmitter {
   set loop(value) {
     this.#loop = value;
     this.dispatchEvent("changed", "loop", value, this.getAll());
-  }
-
-  get currentTime() {
-    const TIMING = this.#timing;
-    const TIMESTAMP_NOW = new Date() / 1000;
-
-    if (TIMING.timestamp == 0) return 0;
-    if (this.#pause) return TIMING.playerTime;
-
-    let expectPlayerTime =
-      TIMING.playerTime + (TIMESTAMP_NOW - TIMING.timestamp) * this.#speed;
-
-    if (this.isLoop && this.#loop.end < expectPlayerTime) {
-      this.timing = {
-        timestamp:
-          TIMESTAMP_NOW - (expectPlayerTime - this.#loop.end) / this.#speed,
-        playerTime: this.#loop.start,
-      };
-      expectPlayerTime -= this.#loop.end - this.#loop.start;
-
-      // ループの変更を通知
-      this.dispatchEvent("changed", "timing", this.timing, this.getAll());
-    }
-
-    return expectPlayerTime;
   }
 
   get isLoop() {

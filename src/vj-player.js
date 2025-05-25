@@ -54,6 +54,35 @@ class VJPlayer extends EventEmitter {
     return this.#YTPlayer;
   }
 
+  get currentTime() {
+    const TIMING = this.#dataManager.timing;
+    const TIMESTAMP_NOW = new Date() / 1000;
+
+    if (TIMING.timestamp == 0) return 0;
+    if (this.#dataManager.pause) return TIMING.playerTime;
+
+    let expectPlayerTime =
+      TIMING.playerTime +
+      (TIMESTAMP_NOW - TIMING.timestamp) * this.#dataManager.speed;
+
+    if (
+      this.#dataManager.isLoop &&
+      this.#dataManager.loop.end < expectPlayerTime
+    ) {
+      this.#dataManager.timing = {
+        timestamp:
+          TIMESTAMP_NOW -
+          (expectPlayerTime - this.#dataManager.loop.end) /
+            this.#dataManager.speed,
+        playerTime: this.#dataManager.loop.start,
+      };
+      expectPlayerTime -=
+        this.#dataManager.loop.end - this.#dataManager.loop.start;
+    }
+
+    return expectPlayerTime;
+  }
+
   #onPlayerReady() {
     this.#YTPlayer.mute();
 
@@ -67,6 +96,13 @@ class VJPlayer extends EventEmitter {
     setInterval(() => {
       this.syncTiming();
     }, AppConstants.SYNC_INTERVAL);
+
+    const loop = () => {
+      // ループ処理を呼び出すため
+      this.currentTime;
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
   }
 
   #onDataChanged(key, value, data) {
@@ -76,7 +112,7 @@ class VJPlayer extends EventEmitter {
         break;
       case "pause":
         if (value === true) {
-          this.#dataManager.timing.playerTime = this.#dataManager.currentTime;
+          this.#dataManager.timing.playerTime = this.currentTime;
           this.#YTPlayer.pauseVideo();
         } else {
           this.#dataManager.timing.timestamp = new Date() / 1000;
@@ -166,7 +202,7 @@ class VJPlayer extends EventEmitter {
     const getTimeInfo = () => {
       const duration = this.YTPlayer.getDuration();
 
-      const expectPlayerTime = this.#dataManager.currentTime % duration;
+      const expectPlayerTime = this.currentTime % duration;
       const syncOffset = expectPlayerTime - this.#YTPlayer.getCurrentTime();
 
       return {
