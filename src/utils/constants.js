@@ -12,4 +12,3 @@ export const AppConstants = {
   SYNC_INTERVAL: 3000,
   HISTORY_MAX: 100,
 };
-console.log("AppConstants loaded");
