@@ -121,8 +121,12 @@ class VJPlayer extends EventEmitter {
         break;
       case "timing":
       case "speed":
-        this.#YTPlayer.playVideo();
-        this.syncTiming();
+        if (this.#dataManager.pause) {
+          this.#YTPlayer.seekTo(this.currentTime);
+          return;
+        } else {
+          this.syncTiming();
+        }
         break;
       case "filter":
         if (this.#options.isProjection) {
