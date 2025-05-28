@@ -10,7 +10,7 @@ import {
 } from "../core/library/index.js";
 import Config from "./config.js";
 import History from "./history.js";
-import YouTubeTitleFetcher from "../youtube-title-fetcher.js";
+import YouTubeTitleFetcher from "./youtube-title-fetcher.js";
 import { changeVideo, parseYouTubeURL } from "../controller.js";
 
 /**
