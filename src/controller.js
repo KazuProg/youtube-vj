@@ -2,7 +2,7 @@ import Config from "./app/config.js";
 import Library from "./app/library.js";
 import VJController from "./vj-controller.js";
 import YouTubeTitleFetcher from "./youtube-title-fetcher.js";
-import templates from "./script-template.js";
+import templates from "./app/midi-templates.js";
 import { AppConstants } from "./app/constants.js";
 
 const ch = [];
