@@ -1,6 +1,6 @@
 import VJPlayer from "./vj-player.js";
 import VJPlayerData from "./vj-player-data.js";
-import { AppConstants } from "./utils/constants.js";
+import { AppConstants } from "./app/constants.js";
 
 function init(fullscreen = false) {
   if (fullscreen) {

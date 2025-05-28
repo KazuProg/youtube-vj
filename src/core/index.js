@@ -4,11 +4,7 @@
  */
 
 // Constants
-export {
-  AppConstants,
-  StorageConstants,
-  LegacyAppConstants,
-} from "./constants/index.js";
+export { AppConstants, StorageConstants } from "./constants/index.js";
 
 // Storage
 export { IStorageProvider } from "./storage/IStorageProvider.js";
@@ -19,10 +15,8 @@ export { JsonStorageService } from "./storage/JsonStorageService.js";
 export { IConfigValidator } from "./config/IConfigValidator.js";
 export { ConfigValidator } from "./config/ConfigValidator.js";
 export { ConfigManager } from "./config/ConfigManager.js";
-export { default as Config } from "./config/Config.js";
 
 // History
 export { IHistoryRepository } from "./history/IHistoryRepository.js";
 export { HistoryRepository } from "./history/HistoryRepository.js";
 export { HistoryManager } from "./history/HistoryManager.js";
-export { default as History } from "./history/History.js";

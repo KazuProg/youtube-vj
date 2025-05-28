@@ -1,11 +1,11 @@
-import { ConfigManager } from "./ConfigManager.js";
-import { ConfigValidator } from "./ConfigValidator.js";
-import { JsonStorageService } from "../storage/JsonStorageService.js";
-import { LocalStorageProvider } from "../storage/LocalStorageProvider.js";
+import { ConfigManager } from "../core/config/ConfigManager.js";
+import { ConfigValidator } from "../core/config/ConfigValidator.js";
+import { JsonStorageService } from "../core/storage/JsonStorageService.js";
+import { LocalStorageProvider } from "../core/storage/LocalStorageProvider.js";
 
 /**
- * 後方互換性を保つためのConfigクラス
- * Facade Pattern: 複雑なサブシステムへの簡単なインターフェースを提供
+ * アプリケーション設定を管理するクラス
+ * 新しいSOLID原則に基づく実装を使用
  */
 class Config {
   static #configManager;

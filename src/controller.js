@@ -1,9 +1,9 @@
-import Config from "./config.js";
+import Config from "./app/config.js";
 import Library from "./library.js";
 import VJController from "./vj-controller.js";
 import YouTubeTitleFetcher from "./youtube-title-fetcher.js";
 import templates from "./script-template.js";
-import { AppConstants } from "./utils/constants.js";
+import { AppConstants } from "./app/constants.js";
 
 const ch = [];
 let selCh = null;

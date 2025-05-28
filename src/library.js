@@ -1,6 +1,6 @@
 import YouTubeTitleFetcher from "./youtube-title-fetcher.js";
-import Config from "./config.js";
-import History from "./history.js";
+import Config from "./app/config.js";
+import History from "./app/history.js";
 import { changeVideo, parseYouTubeURL } from "./controller.js";
 
 class _Library {

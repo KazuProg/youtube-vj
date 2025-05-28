@@ -1,4 +1,4 @@
-import { AppConstants } from "./utils/constants";
+import { AppConstants } from "./app/constants.js";
 
 class VJPlayer extends EventEmitter {
   #YTPlayer;

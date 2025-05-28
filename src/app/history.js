@@ -1,11 +1,11 @@
-import { HistoryManager } from "./HistoryManager.js";
-import { HistoryRepository } from "./HistoryRepository.js";
-import { JsonStorageService } from "../storage/JsonStorageService.js";
-import { LocalStorageProvider } from "../storage/LocalStorageProvider.js";
+import { HistoryManager } from "../core/history/HistoryManager.js";
+import { HistoryRepository } from "../core/history/HistoryRepository.js";
+import { JsonStorageService } from "../core/storage/JsonStorageService.js";
+import { LocalStorageProvider } from "../core/storage/LocalStorageProvider.js";
 
 /**
- * 後方互換性を保つためのHistoryクラス
- * Facade Pattern: 複雑なサブシステムへの簡単なインターフェースを提供
+ * YouTube再生履歴を管理するクラス
+ * 新しいSOLID原則に基づく実装を使用
  */
 class _HistoryManager {
   #historyManager;
@@ -33,6 +33,15 @@ class _HistoryManager {
 
   clear() {
     this.#historyManager.clear();
+  }
+
+  // 新しいメソッドも公開
+  getSize() {
+    return this.#historyManager.getSize();
+  }
+
+  getLatest() {
+    return this.#historyManager.getLatest();
   }
 }
 
