@@ -1,4 +1,4 @@
-import VJPlayer from "./vj-player.js";
+import VJPlayer from "./app/vj-player.js";
 import VJPlayerData from "./vj-player-data.js";
 
 class VJController extends EventEmitter {
@@ -127,7 +127,7 @@ class VJController extends EventEmitter {
 
   setTime(sec) {
     this.#setData("timing", {
-      timestamp: +new Date() / 1000,
+      timestamp: new Date() / 1000,
       playerTime: sec,
     });
   }
