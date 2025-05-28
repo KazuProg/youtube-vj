@@ -1,14 +1,5 @@
 /**
- * アプリケーション全体で利用する定数を定義します。
+ * 後方互換性のための定数エクスポート
+ * 新しいコア構造への移行期間中の互換性を保持
  */
-export const AppConstants = {
-  LOCAL_STORAGE_KEYS: {
-    APP_SETTINGS: "ytvj_config",
-    PLAY_HISTORY: "ytvj_history",
-    CTRL_CH_0: "ytvj_ch0",
-    CTRL_CH_1: "ytvj_ch1",
-    CTRL_MASTER: "ytvj_sys",
-  },
-  SYNC_INTERVAL: 3000,
-  HISTORY_MAX: 100,
-};
+export { LegacyAppConstants as AppConstants } from "../core/constants/index.js";
