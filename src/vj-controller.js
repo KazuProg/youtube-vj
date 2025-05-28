@@ -1,5 +1,5 @@
 import VJPlayer from "./app/vj-player.js";
-import VJPlayerData from "./vj-player-data.js";
+import VJPlayerData from "./app/vj-player-data.js";
 
 class VJController extends EventEmitter {
   #channel;
