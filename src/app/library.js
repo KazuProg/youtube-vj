@@ -11,7 +11,7 @@ import {
 import Config from "./config.js";
 import History from "./history.js";
 import YouTubeTitleFetcher from "./youtube-title-fetcher.js";
-import { changeVideo, parseYouTubeURL } from "../controller.js";
+import { VideoUtils } from "./utils/VideoUtils.js";
 
 /**
  * ライブラリファサードクラス
@@ -62,10 +62,16 @@ class LibraryFacade {
       Config,
       YouTubeTitleFetcher
     );
-    const fileProcessor = new FileProcessor(parseYouTubeURL);
+    const fileProcessor = new FileProcessor(VideoUtils.parseYouTubeURL);
 
     // ビデオコントローラーオブジェクト
-    const videoController = { changeVideo };
+    const videoController = {
+      changeVideo: (text) => {
+        if (window.appManager) {
+          window.appManager.changeVideo(text);
+        }
+      },
+    };
 
     // メインライブラリマネージャーの作成
     this.#libraryManager = new LibraryManager(

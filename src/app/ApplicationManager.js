@@ -65,7 +65,8 @@ export class ApplicationManager {
     });
 
     // グローバル変数として公開（既存コードとの互換性のため）
-    window.ch = this.channels;
+    window.ch.length = 0; // 既存の配列をクリア
+    window.ch.push(...this.channels); // 新しいチャンネルを追加
     window.ch1 = this.channels[0];
     window.ch2 = this.channels[1];
   }
