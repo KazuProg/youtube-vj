@@ -1,29 +1,18 @@
 import { IConfigValidator } from "./IConfigValidator.js";
+import { getValidationRules } from "./ConfigSchema.js";
 
 /**
  * アプリケーション設定の検証を行うクラス
  * Single Responsibility Principle: 設定値の検証のみを責務とする
  */
 export class ConfigValidator extends IConfigValidator {
-  #validationRules = {
-    fadeoutVolume: {
-      type: "boolean",
-      message: "fadeoutVolume must be a boolean value",
-    },
-    openLibrary: {
-      type: "boolean",
-      message: "openLibrary must be a boolean value",
-    },
-    youtubeAPIKey: {
-      type: "string",
-      message: "youtubeAPIKey must be a string",
-    },
-    youtubeAPIRequests: {
-      type: "number",
-      validator: (value) => Number.isInteger(value) && value >= 0,
-      message: "youtubeAPIRequests must be a non-negative integer",
-    },
-  };
+  #validationRules;
+
+  constructor() {
+    super();
+    // スキーマから検証ルールを取得
+    this.#validationRules = getValidationRules();
+  }
 
   /**
    * 設定値を検証します

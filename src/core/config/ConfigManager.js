@@ -1,4 +1,5 @@
 import { StorageConstants } from "../constants/index.js";
+import { getDefaultConfig } from "./ConfigSchema.js";
 
 /**
  * アプリケーション設定を管理するクラス
@@ -6,13 +7,6 @@ import { StorageConstants } from "../constants/index.js";
  * Dependency Inversion Principle: 抽象（インターフェース）に依存
  */
 export class ConfigManager {
-  #defaultConfig = {
-    fadeoutVolume: true,
-    openLibrary: false,
-    youtubeAPIKey: "",
-    youtubeAPIRequests: 10,
-  };
-
   #config = {};
   #storageService;
   #validator;
@@ -34,8 +28,8 @@ export class ConfigManager {
    * 設定を初期化します
    */
   #initializeConfig() {
-    // デフォルト設定をコピー
-    Object.assign(this.#config, this.#defaultConfig);
+    // スキーマからデフォルト設定を取得
+    Object.assign(this.#config, getDefaultConfig());
 
     // 保存された設定を読み込み
     const savedConfig = this.#storageService.getJson(this.#storageKey, {});
@@ -91,7 +85,7 @@ export class ConfigManager {
    * 設定をリセットします
    */
   resetConfig() {
-    Object.assign(this.#config, this.#defaultConfig);
+    Object.assign(this.#config, getDefaultConfig());
     this.#save();
   }
 
