@@ -600,5 +600,5 @@ window.switchVideo = () => {
   }
 };
 
-// 後方互換性のためのエクスポート
-export { VideoUtils };
+// VideoUtilsをグローバルに公開（UIから使用するため）
+window.VideoUtils = VideoUtils;
