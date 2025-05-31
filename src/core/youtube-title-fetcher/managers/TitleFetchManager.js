@@ -34,7 +34,7 @@ export class TitleFetchManager {
   async fetch(id) {
     // キャッシュにない場合は取得予定として登録
     if (!this.#cache.has(id)) {
-      this.#cache.set(id, null);
+      this.#cache.setPending(id);
       this.#processQueue();
     }
 
@@ -71,14 +71,14 @@ export class TitleFetchManager {
    */
   async #startFetch(id) {
     try {
-      this.#cache.set(id, ""); // 取得中状態に設定
+      this.#cache.setFetching(id); // 取得中状態に設定
       this.#concurrencyManager.startTask(id);
 
       const title = await this.#playerService.fetchTitle(id);
       this.#cache.set(id, title);
     } catch (error) {
       // エラーの場合は取得予定状態に戻す
-      this.#cache.set(id, null);
+      this.#cache.setPending(id);
       console.error(`Failed to fetch title for ${id}:`, error);
     } finally {
       this.#concurrencyManager.endTask(id);
@@ -95,9 +95,8 @@ export class TitleFetchManager {
   #waitForResult(id) {
     return new Promise((resolve) => {
       const checkResult = () => {
-        const title = this.#cache.get(id);
-        if (title !== null && title !== "") {
-          resolve(title);
+        if (this.#cache.isFetched(id)) {
+          resolve(this.#cache.getTitle(id));
         } else {
           setTimeout(checkResult, 10);
         }
