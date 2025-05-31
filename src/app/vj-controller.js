@@ -281,6 +281,111 @@ class VJControllerFacade extends EventEmitter {
   fadeoutVolume() {
     this.#controllerManager.audioManager.fadeoutVolume();
   }
+
+  /**
+   * 動画をロード
+   * @param {string} videoId - 動画ID（省略時は準備済み動画をロード）
+   */
+  load(videoId = null) {
+    // 引数が指定されている場合はそれを使用
+    if (videoId) {
+      this.setVideo(videoId);
+      return;
+    }
+
+    // 引数が省略された場合は準備済み動画を取得
+    const inputElement = document.querySelector("#input-videoId");
+    if (!inputElement || !inputElement.value.trim()) {
+      return;
+    }
+    
+    const parsed = this.parseVideoInput(inputElement.value);
+    if (parsed) {
+      const displayId = this.formatVideoIdForDisplay(parsed.id, parsed.start);
+      this.setVideo(displayId);
+    }
+  }
+
+  /**
+   * テキストから動画IDと開始時間を抽出（VideoUtilsから複製）
+   */
+  parseVideoInput(text) {
+    if (!text) return null;
+
+    text = text.trim();
+    let id;
+    let start = null;
+
+    // @記号で開始時間が指定されている場合
+    if (text.indexOf("@") !== -1) {
+      const parts = text.split("@");
+      start = parts[1];
+      text = parts[0];
+    }
+
+    // 11文字の場合は直接動画IDとして扱う
+    if (text.length === 11) {
+      id = text;
+    } else {
+      // URLとして解析を試行
+      const parsed = this.parseYouTubeURL(text);
+      if (parsed) {
+        id = parsed.id;
+        start = parsed.start || start;
+      }
+    }
+
+    return id ? { id, start } : null;
+  }
+
+  /**
+   * YouTube URLを解析（VideoUtilsから複製）
+   */
+  parseYouTubeURL(text) {
+    const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/g;
+    const urls = text.match(urlPattern) || [];
+    if (urls.length === 0) {
+      return null;
+    }
+
+    try {
+      const url = new URL(urls[0]);
+      let id, start;
+      const params = new URLSearchParams(url.search);
+
+      // youtu.be形式
+      if (url.hostname === "youtu.be") {
+        id = url.pathname.substr(1, 11);
+      }
+      // youtube.com/watch形式
+      else if (url.pathname === "/watch") {
+        id = params.get("v");
+      }
+      // youtube.com/shorts形式
+      else if (url.pathname.startsWith("/shorts")) {
+        id = url.pathname.substr(8, 11);
+      }
+
+      start = params.get("t");
+
+      return { id, start };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * 動画IDから表示用の文字列を生成（VideoUtilsから複製）
+   */
+  formatVideoIdForDisplay(id, start) {
+    if (!id) return "";
+
+    let result = id;
+    if (start !== null && start !== undefined) {
+      result = `${id}@${start}`;
+    }
+    return result;
+  }
 }
 
 export default VJControllerFacade;

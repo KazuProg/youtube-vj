@@ -140,7 +140,22 @@ export class VideoUtils {
       inputElement.value = displayId;
     }
 
-    // グローバル変数更新（既存コードとの互換性のため）
+    // グローバル変数更新（既存MIDIスクリプトとの互換性のため）
     window.prepareVideoId = displayId;
+  }
+
+  /**
+   * 現在準備されている動画IDを取得
+   * UIの状態から動的に取得するため、変数として保持する必要がない
+   * @returns {string} 準備されている動画ID
+   */
+  static getPreparedVideoId() {
+    const inputElement = document.querySelector("#input-videoId");
+    if (!inputElement || !inputElement.value.trim()) {
+      return "";
+    }
+    
+    const parsed = this.parseVideoInput(inputElement.value);
+    return parsed ? this.formatVideoIdForDisplay(parsed.id, parsed.start) : "";
   }
 }
