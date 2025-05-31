@@ -594,5 +594,11 @@ window.openYouTubeWindow = () => {
   window.open("https://www.youtube.com/", "YouTube", "width=640,height=960");
 };
 
+window.switchVideo = () => {
+  if (window.appManager) {
+    window.appManager.switchVideo();
+  }
+};
+
 // 後方互換性のためのエクスポート
 export { VideoUtils };
