@@ -54,27 +54,11 @@ function setSwitchingDuration() {
   }
 }
 
-/**
- * 時間フォーマット
- * @param {number} sec - 秒数
- * @returns {string} フォーマットされた時間
- */
-function formatTime(sec) {
-  if (!sec || isNaN(sec)) return "0:00";
-
-  const minutes = Math.floor(sec / 60);
-  const seconds = Math.floor(sec % 60);
-  const formattedSeconds = String(seconds).padStart(2, "0");
-
-  return `${minutes}:${formattedSeconds}`;
-}
-
 // グローバル関数として公開（既存コードとの互換性のため）
 window.setSwitchingDuration = setSwitchingDuration;
-window.formatTime = formatTime;
 
 // 後方互換性のためのエクスポート
-export { ch, selCh, setSwitchingDuration, formatTime };
+export { ch, selCh, setSwitchingDuration };
 
 // 既存のエクスポートされた関数は ApplicationManager 経由でアクセス
 // これらは window オブジェクトに既に設定されているため、ここでは省略
