@@ -55,14 +55,6 @@ function setSwitchingDuration() {
 }
 
 /**
- * 設定保存
- */
-function saveConfig() {
-  // この関数は既存のHTMLから参照されている可能性があるため残す
-  console.log("Config is automatically saved");
-}
-
-/**
  * 時間フォーマット
  * @param {number} sec - 秒数
  * @returns {string} フォーマットされた時間
@@ -79,11 +71,10 @@ function formatTime(sec) {
 
 // グローバル関数として公開（既存コードとの互換性のため）
 window.setSwitchingDuration = setSwitchingDuration;
-window.saveConfig = saveConfig;
 window.formatTime = formatTime;
 
 // 後方互換性のためのエクスポート
-export { ch, selCh, setSwitchingDuration, saveConfig, formatTime };
+export { ch, selCh, setSwitchingDuration, formatTime };
 
 // 既存のエクスポートされた関数は ApplicationManager 経由でアクセス
 // これらは window オブジェクトに既に設定されているため、ここでは省略
