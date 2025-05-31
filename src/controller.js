@@ -6,7 +6,6 @@ let selCh = null;
 let midi = null;
 
 window.ch = ch;
-window.selCh = selCh;
 
 // アプリケーション管理インスタンス
 let appManager = null;
