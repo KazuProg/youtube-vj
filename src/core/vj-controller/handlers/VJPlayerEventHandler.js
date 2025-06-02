@@ -124,9 +124,8 @@ export class VJPlayerEventHandler {
    * 終了イベント
    */
   onEnded() {
-    this.#dataSyncService.setData("pause", true);
     this.#dataSyncService.setData("timing", {
-      timestamp: 0,
+      timestamp: new Date() / 1000,
       playerTime: 0,
     });
   }

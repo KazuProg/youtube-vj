@@ -231,6 +231,7 @@ export class VJPlayerManager extends EventEmitter {
     }
 
     if (state === YT.PlayerState.ENDED) {
+      // event.target.playVideo()
       this.dispatchEvent("ended");
       return;
     }
