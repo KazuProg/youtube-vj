@@ -10,6 +10,7 @@ export class VJPlayerManager extends EventEmitter {
   #dataManager;
   #options;
   #syncInterval;
+  #isInitialized = false;
 
   /**
    * @param {IYouTubePlayerWrapper} playerWrapper - プレイヤーラッパー
@@ -142,6 +143,7 @@ export class VJPlayerManager extends EventEmitter {
     requestAnimationFrame(loop);
 
     this.dispatchEvent("YTPlayerReady", event);
+    this.#isInitialized = true;
   }
 
   /**
@@ -167,11 +169,9 @@ export class VJPlayerManager extends EventEmitter {
       case "timing":
       case "speed":
         if (this.#dataManager.pause) {
-          if (this.#dataManager.timing.timestamp === 0) {
-            // 再生位置情報が初期化されていない場合は、シークしない
-            console.warn(
-              "YTVJ:P Player is not ready yet, skipping timing sync."
-            );
+          if (this.#isInitialized === false) {
+            // プレイヤーが準備できていない場合は、シークしない
+            console.warn("YTVJ:P Player is not ready yet, cannot seek.");
             return;
           }
           this.#playerWrapper.seekTo(this.currentTime);
@@ -203,7 +203,9 @@ export class VJPlayerManager extends EventEmitter {
         return;
     }
 
-    this.dispatchEvent("dataApplied", key, value);
+    if (this.#isInitialized) {
+      this.dispatchEvent("dataApplied", key, value);
+    }
   }
 
   /**
