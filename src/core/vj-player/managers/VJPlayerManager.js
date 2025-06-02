@@ -167,6 +167,13 @@ export class VJPlayerManager extends EventEmitter {
       case "timing":
       case "speed":
         if (this.#dataManager.pause) {
+          if (this.#dataManager.timing.timestamp === 0) {
+            // 再生位置情報が初期化されていない場合は、シークしない
+            console.warn(
+              "YTVJ:P Player is not ready yet, skipping timing sync."
+            );
+            return;
+          }
           this.#playerWrapper.seekTo(this.currentTime);
           return;
         } else {
