@@ -132,7 +132,9 @@ export class VJPlayerManager extends EventEmitter {
     this.#dataManager.dispatchAll();
 
     setInterval(() => {
-      this.syncTiming();
+      if (this.#playerWrapper.getPlayerState() === YT.PlayerState.PLAYING) {
+        this.syncTiming();
+      }
     }, this.#syncInterval);
 
     const loop = () => {
