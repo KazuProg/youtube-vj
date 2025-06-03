@@ -160,11 +160,9 @@ export class VJControllerManager extends EventEmitter {
       const elapsed = +new Date() / 1000 - timing.timestamp;
       const current = timing.playerTime + elapsed * speed;
 
-      if (this.duration < current) {
-        return this.duration;
-      }
+      const duration = current % this.duration;
 
-      return current;
+      return duration;
     } else {
       return this.#vjPlayer.currentTime % this.duration;
     }
