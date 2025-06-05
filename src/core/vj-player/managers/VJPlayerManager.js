@@ -224,6 +224,9 @@ export class VJPlayerManager extends EventEmitter {
 
     if (state === YT.PlayerState.PAUSED && this.#dataManager.pause === false) {
       this.dispatchEvent("paused");
+      if (this.#dataManager.pause === false) {
+        event.target.playVideo();
+      }
       return;
     }
 
