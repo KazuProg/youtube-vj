@@ -1,4 +1,6 @@
 ---
+layout: base.liquid
+title: キーボードショートカット一覧
 permalink: "keyboard-shortcut.html"
 ---
 
