@@ -62,7 +62,7 @@ class LibraryFacade {
       Config,
       YouTubeTitleFetcher
     );
-    const fileProcessor = new FileProcessor(VideoUtils.parseYouTubeURL);
+    const fileProcessor = new FileProcessor(VideoUtils.parseYouTubeURL.bind(VideoUtils));
 
     // ビデオコントローラーオブジェクト
     const videoController = {
