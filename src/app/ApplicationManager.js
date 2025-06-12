@@ -396,7 +396,14 @@ export class ApplicationManager {
   selectChannel(channel = null) {
     const e = new Error("selectChannel method is deprecated. Use keyboardManager.selectChannel instead.");
     console.warn(e.stack)
-    console.log(`=== selectChannel(${channel}) - current: ${this.selectedChannel?.channelNumber} ===`);
+    console.log(`=== selectChannel(${channel}) - current: ${this.selectedChannel} ===`);
+    
+    if (channel === this.selectedChannel) {
+      console.log(`Channel ${channel} is already selected`);
+      return;
+    }
+    
+    console.log(`Switching from channel ${this.selectedChannel} to ${channel}`);
     
     // 無限ループを防ぐための一時的な保護
     if (this._selectingChannel) {
@@ -698,27 +705,31 @@ export class ApplicationManager {
       console.log("DEBUG: handleDataApplied - suppressed by _suppressEvents flag");
       return;
     }
-    const { channel } = event.detail;
+    const { channel, key } = event.detail;
     console.log("DEBUG: handleDataApplied called", { 
       channel, 
+      key,
       currentSelected: this.selectedChannel?.channelNumber,
       suppressEvents: this._suppressEvents,
       selectingChannel: this._selectingChannel
     });
-    console.log("DEBUG: handleDataApplied call stack:", new Error().stack);
     
-    // 現在選択されているチャンネル以外からのdataAppliedイベントは無視
-    if (this.selectedChannel && this.selectedChannel.channelNumber !== channel) {
-      console.log("DEBUG: handleDataApplied - ignoring event from non-selected channel");
+    // videoIdの変更時は動画ロードによる自動フォーカス（非選択チャンネルからも処理）
+    if (key === 'videoId') {
+      console.log("DEBUG: handleDataApplied - videoId changed, auto-focusing channel", channel);
+      if (this.selectedChannel?.channelNumber !== channel) {
+        console.log("DEBUG: handleDataApplied - calling selectChannel for auto-focus");
+        this.selectChannel(channel);
+      } else {
+        console.log("DEBUG: handleDataApplied - skipping selectChannel (same channel)");
+      }
       return;
     }
     
-    // 既に同じチャンネルが選択されている場合はスキップ
-    if (this.selectedChannel?.channelNumber !== channel) {
-      console.log("DEBUG: handleDataApplied - calling selectChannel");
-      this.selectChannel(channel);
-    } else {
-      console.log("DEBUG: handleDataApplied - skipping selectChannel (same channel)");
+    // その他のデータ変更は現在選択されているチャンネルのみ処理
+    if (this.selectedChannel && this.selectedChannel.channelNumber !== channel) {
+      console.log("DEBUG: handleDataApplied - ignoring non-videoId event from non-selected channel");
+      return;
     }
   }
 
