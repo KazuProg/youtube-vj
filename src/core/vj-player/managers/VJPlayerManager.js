@@ -103,7 +103,6 @@ export class VJPlayerManager extends EventEmitter {
    */
   syncTiming() {
     if (this.#isSuspended) {
-      console.log(`VJPlayerManager: Skipping syncTiming during suspend`);
       return;
     }
     this.#timingSynchronizer.startSync(
@@ -127,7 +126,6 @@ export class VJPlayerManager extends EventEmitter {
    * @param {boolean} suspended - suspend状態
    */
   setSuspended(suspended) {
-    console.log(`VJPlayerManager setSuspended: ${suspended}`);
     this.#isSuspended = suspended;
   }
 
@@ -183,7 +181,6 @@ export class VJPlayerManager extends EventEmitter {
   #onDataChanged(key, value, data) {
     // suspend中は特定の処理をスキップ（videoIdは除く）
     if (this.#isSuspended && (key === "pause" || key === "timing" || key === "speed")) {
-      console.log(`VJPlayerManager: Skipping ${key} change during suspend`);
       return;
     }
     

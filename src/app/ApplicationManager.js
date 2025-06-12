@@ -394,32 +394,18 @@ export class ApplicationManager {
    * @param {number|null} channel - チャンネル番号
    */
   selectChannel(channel = null) {
-    const e = new Error("selectChannel method is deprecated. Use keyboardManager.selectChannel instead.");
-    console.warn(e.stack)
-    console.log(`=== selectChannel(${channel}) - current: ${this.selectedChannel} ===`);
-    
-    if (channel === this.selectedChannel) {
-      console.log(`Channel ${channel} is already selected`);
-      return;
-    }
-    
-    console.log(`Switching from channel ${this.selectedChannel} to ${channel}`);
-    
-    // 無限ループを防ぐための一時的な保護
     if (this._selectingChannel) {
-      console.warn("selectChannel already in progress, skipping to prevent infinite loop");
       return;
     }
-    this._selectingChannel = true;
+
+    const selectedChannel = channel ?? this.selectedChannel?.channelNumber ?? 0;
+    
+    if (selectedChannel === this.selectedChannel) {
+      return;
+    }
     
     try {
-      this.selectedChannel = this.channels[channel] || null;
-      window.selCh = this.selectedChannel;
-
-      // キーボード管理に選択チャンネルを通知
-      this.keyboardManager.setSelectedChannel(this.selectedChannel);
-
-      // イベント発火を一時的に無効化
+      this._selectingChannel = true;
       this._suppressEvents = true;
 
       // UIEventHandlersのdispatchCustomEventを一時的に無効化
@@ -428,65 +414,48 @@ export class ApplicationManager {
         // selectChannelを引き起こすイベントのみ抑制
         const suppressedEvents = ['previewResumed', 'channelUnmuted', 'dataApplied', 'videoChanged'];
         if (suppressedEvents.includes(eventName)) {
-          console.log(`dispatchCustomEvent suppressed: ${eventName}`);
           return;
         }
         // その他のイベント（suspendPreviewなど）は正常に発火
         originalDispatchCustomEvent.call(this.uiEventHandlers, eventName, detail);
       };
 
-      for (const c of this.channels) {
-        const cNum = c.channelNumber;
-        const deck = document.querySelector(`.deck.ch${cNum}`);
-        if (cNum === channel) {
-          console.log(`Activating channel ${cNum}`);
-          deck?.classList.add("selected");
-          c.unmute();
-          // 正常なresumePreviewを呼ぶ（UIイベントは発火するが、カスタムイベントは抑制される）
-          c.resumePreview();
-        } else {
-          console.log(`Deactivating channel ${cNum}`);
+      // 選択チャンネルを更新
+      this.selectedChannel = selectedChannel;
+
+      // 全チャンネルを非アクティブ化
+      for (let cNum = 0; cNum < this.channels.length; cNum++) {
+        const c = this.channels[cNum];
+        const deck = document.querySelector(`#deck${cNum}`);
+        
+        if (cNum !== selectedChannel) {
           deck?.classList.remove("selected");
           c.mute();
           if (this.channels[cNum]?.isSuspended) {
-            // 既にサスペンド状態なら何もしない
-            console.log(`Channel ${cNum} is already suspended`);
             continue;
           }
 
           if (c) {
-            console.log(`Calling suspendPreview on channel ${cNum}`);
             c.suspendPreview();
-            
-            // デバッグ：実際にsuspendPreviewが効いているかチェック
-            const ytPlayer = c.YTPlayer;
-            if (ytPlayer) {
-              console.log(`Channel ${cNum} player state after suspendPreview:`, ytPlayer.getPlayerState());
-              console.log("YT.PlayerState constants:", {
-                UNSTARTED: YT.PlayerState.UNSTARTED,
-                ENDED: YT.PlayerState.ENDED,
-                PLAYING: YT.PlayerState.PLAYING,
-                PAUSED: YT.PlayerState.PAUSED,
-                BUFFERING: YT.PlayerState.BUFFERING,
-                CUED: YT.PlayerState.CUED
-              });
-            } else {
-              console.log(`Channel ${cNum} YTPlayer not found`);
-            }
           }
         }
       }
 
+      // 選択チャンネルをアクティブ化
+      const selectedController = this.channels[selectedChannel];
+      const selectedDeck = document.querySelector(`#deck${selectedChannel}`);
+      
+      selectedDeck?.classList.add("selected");
+      selectedController.unmute();
+      selectedController.resumePreview();
+
       // UIEventHandlersのdispatchCustomEventを復元
       this.uiEventHandlers.dispatchCustomEvent = originalDispatchCustomEvent;
       document.querySelector("#input-videoId")?.blur();
-      console.log(`=== selectChannel(${channel}) completed ===`);
     } finally {
-      // 少し遅延してからイベント抑制を解除（非同期イベントをブロック）
       setTimeout(() => {
         this._suppressEvents = false;
         this._selectingChannel = false;
-        console.log("Event suppression released");
       }, 100);
     }
   }
@@ -627,116 +596,58 @@ export class ApplicationManager {
   // イベントハンドラー
   handleVideoChanged(event) {
     if (this._suppressEvents) {
-      console.log("DEBUG: handleVideoChanged - suppressed by _suppressEvents flag");
       return;
     }
     const { channel, videoId } = event.detail;
-    console.log("DEBUG: handleVideoChanged called", { channel, videoId, currentSelected: this.selectedChannel?.channelNumber });
     Library.addHistory(videoId);
     
-    // 現在選択されているチャンネル以外からのvideoChangedイベントは無視
     if (this.selectedChannel && this.selectedChannel.channelNumber !== channel) {
-      console.log("DEBUG: handleVideoChanged - ignoring event from non-selected channel");
-      return;
-    }
-    
-    // 既に同じチャンネルが選択されている場合はスキップ
-    if (this.selectedChannel?.channelNumber !== channel) {
-      console.log("DEBUG: handleVideoChanged - calling selectChannel");
       this.selectChannel(channel);
-    } else {
-      console.log("DEBUG: handleVideoChanged - skipping selectChannel (same channel)");
     }
   }
 
   handlePreviewResumed(event) {
     if (this._suppressEvents) {
-      console.log("DEBUG: handlePreviewResumed - suppressed by _suppressEvents flag");
       return;
     }
     const { channel } = event.detail;
-    console.log("DEBUG: handlePreviewResumed called", { 
-      channel, 
-      currentSelected: this.selectedChannel?.channelNumber,
-      selectedChannelExists: !!this.selectedChannel,
-      comparison: this.selectedChannel?.channelNumber !== channel
-    });
     
-    // 現在選択されているチャンネル以外からのpreviewResumedイベントは無視
     if (this.selectedChannel && this.selectedChannel.channelNumber !== channel) {
-      console.log("DEBUG: handlePreviewResumed - ignoring event from non-selected channel");
-      return;
-    }
-    
-    // 既に同じチャンネルが選択されている場合はスキップ
-    if (this.selectedChannel?.channelNumber !== channel) {
-      console.log("DEBUG: handlePreviewResumed - calling selectChannel");
       this.selectChannel(channel);
-    } else {
-      console.log("DEBUG: handlePreviewResumed - skipping selectChannel (same channel)");
     }
   }
 
   handleChannelUnmuted(event) {
     if (this._suppressEvents) {
-      console.log("DEBUG: handleChannelUnmuted - suppressed by _suppressEvents flag");
       return;
     }
     const { channel } = event.detail;
-    console.log("DEBUG: handleChannelUnmuted called", { channel, currentSelected: this.selectedChannel?.channelNumber });
     
-    // 現在選択されているチャンネル以外からのchannelUnmutedイベントは無視
     if (this.selectedChannel && this.selectedChannel.channelNumber !== channel) {
-      console.log("DEBUG: handleChannelUnmuted - ignoring event from non-selected channel");
-      return;
-    }
-    
-    // 既に同じチャンネルが選択されている場合はスキップ
-    if (this.selectedChannel?.channelNumber !== channel) {
-      console.log("DEBUG: handleChannelUnmuted - calling selectChannel");
       this.selectChannel(channel);
-    } else {
-      console.log("DEBUG: handleChannelUnmuted - skipping selectChannel (same channel)");
     }
   }
 
   handleDataApplied(event) {
     if (this._suppressEvents) {
-      console.log("DEBUG: handleDataApplied - suppressed by _suppressEvents flag");
       return;
     }
     const { channel, key } = event.detail;
-    console.log("DEBUG: handleDataApplied called", { 
-      channel, 
-      key,
-      currentSelected: this.selectedChannel?.channelNumber,
-      suppressEvents: this._suppressEvents,
-      selectingChannel: this._selectingChannel
-    });
     
-    // videoIdの変更時は動画ロードによる自動フォーカス（非選択チャンネルからも処理）
     if (key === 'videoId') {
-      console.log("DEBUG: handleDataApplied - videoId changed, auto-focusing channel", channel);
       if (this.selectedChannel?.channelNumber !== channel) {
-        console.log("DEBUG: handleDataApplied - calling selectChannel for auto-focus");
         this.selectChannel(channel);
-      } else {
-        console.log("DEBUG: handleDataApplied - skipping selectChannel (same channel)");
       }
       return;
     }
     
-    // その他のデータ変更は現在選択されているチャンネルのみ処理
     if (this.selectedChannel && this.selectedChannel.channelNumber !== channel) {
-      console.log("DEBUG: handleDataApplied - ignoring non-videoId event from non-selected channel");
       return;
     }
   }
 
   handleKeyboardSelectChannel(event) {
-    // キーボードからの選択は常に実行（ユーザーの明示的な操作のため）
     const { channel } = event.detail;
-    console.log("DEBUG: handleKeyboardSelectChannel called", { channel, currentSelected: this.selectedChannel?.channelNumber });
     this.selectChannel(channel);
   }
 
@@ -789,8 +700,6 @@ window.setCrossfader = (val) => {
 };
 
 window.selectCh = (channel) => {
-  console.log("DEBUG: window.selectCh called", { channel });
-  console.log("DEBUG: window.selectCh call stack:", new Error().stack);
   if (window.appManager) {
     window.appManager.selectChannel(channel);
   }
