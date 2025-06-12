@@ -73,6 +73,14 @@ class VJPlayerFacade extends EventEmitter {
   stopSync() {
     this.#manager.stopSync();
   }
+
+  /**
+   * suspend状態を設定
+   * @param {boolean} suspended - suspend状態
+   */
+  setSuspended(suspended) {
+    this.#manager.setSuspended(suspended);
+  }
 }
 
 export default VJPlayerFacade;
