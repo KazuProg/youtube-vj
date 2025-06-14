@@ -271,12 +271,78 @@ export class VJControllerManager extends EventEmitter {
 
   /**
    * タイミングを調整
-   * @param {number} sec - 調整秒数
+   * @param {number} seconds - 調整秒数
    */
-  adjustTiming(sec) {
-    let timing = this.#dataManager.timing;
-    timing.playerTime += sec;
-    this.#dataSyncService.setData("timing", timing);
+  adjustTiming(seconds) {
+    console.log(`[VJControllerManager] ============= Adjusting timing by ${seconds} seconds =============`);
+    
+    const timing = this.#dataManager.timing;
+    console.log("[VJControllerManager] Current timing:", {
+      timestamp: timing.timestamp,
+      playerTime: timing.playerTime,
+      formatted: new Date(timing.timestamp * 1000).toISOString()
+    });
+    
+    // プレビュー画面の現在の再生位置を記録
+    const previewPlayer = this.#vjPlayer.YTPlayer;
+    const previewCurrentTime = previewPlayer ? previewPlayer.getCurrentTime() : null;
+    console.log("[VJControllerManager] Preview player current time BEFORE adjustment:", previewCurrentTime);
+    
+    // 現在の計算上の時間を取得
+    const currentCalculatedTime = this.#calculateCurrentTime();
+    console.log("[VJControllerManager] Current calculated time:", currentCalculatedTime);
+    
+    // 新しい時間を計算（調整値を加算）
+    const newPlayerTime = currentCalculatedTime + seconds;
+    console.log("[VJControllerManager] New player time after adjustment:", newPlayerTime);
+    
+    // 新しいタイムスタンプを生成して、時間の整合性を保つ
+    const newTimestamp = new Date() / 1000;
+    const newTiming = {
+      timestamp: newTimestamp,
+      playerTime: newPlayerTime
+    };
+    
+    console.log("[VJControllerManager] New timing to set:", {
+      timestamp: newTiming.timestamp,
+      playerTime: newTiming.playerTime,
+      formatted: new Date(newTiming.timestamp * 1000).toISOString(),
+      note: "New timestamp generated for accurate timing"
+    });
+    
+    // timingを更新
+    this.#dataSyncService.setData("timing", newTiming);
+    
+    // データが実際に更新されたか確認
+    setTimeout(() => {
+      const updatedTiming = this.#dataManager.timing;
+      console.log("[VJControllerManager] Updated timing in dataManager:", {
+        timestamp: updatedTiming.timestamp,
+        playerTime: updatedTiming.playerTime,
+        formatted: new Date(updatedTiming.timestamp * 1000).toISOString()
+      });
+      
+      // プレビュー画面のプレイヤーにも新しい位置を反映
+      if (previewPlayer && previewPlayer.seekTo) {
+        console.log("[VJControllerManager] Seeking preview player to", newPlayerTime);
+        previewPlayer.seekTo(newPlayerTime, true);
+        
+        // シーク後の実際の位置を確認
+        setTimeout(() => {
+          const actualTime = previewPlayer.getCurrentTime();
+          console.log("[VJControllerManager] After seek - Preview player actual time:", actualTime);
+          console.log("[VJControllerManager] Seek difference:", Math.abs(actualTime - newPlayerTime));
+        }, 100);
+      } else {
+        console.log("[VJControllerManager] Preview player not available");
+      }
+      
+      // LocalStorage の内容も確認
+      const localStorageData = JSON.parse(localStorage.getItem(this.#localStorageKey) || '{}');
+      console.log("[VJControllerManager] Timing in localStorage:", localStorageData.timing);
+      
+      console.log("[VJControllerManager] ============= Timing adjustment completed =============");
+    }, 50);
   }
 
   /**

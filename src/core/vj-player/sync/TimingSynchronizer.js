@@ -10,6 +10,8 @@ export class TimingSynchronizer extends ITimingSynchronizer {
   #timeCalculator;
   #onSyncStart;
   #onSyncEnd;
+  #syncAttempts = 0; // 同期試行回数を追跡
+  #maxSyncAttempts = 10; // 最大同期試行回数
 
   /**
    * 同期を開始
@@ -25,12 +27,23 @@ export class TimingSynchronizer extends ITimingSynchronizer {
       return;
     }
 
+    // プレイヤーの状態をチェック
+    try {
+      const playerState = player.getPlayerState();
+      if (playerState === YT.PlayerState.BUFFERING || playerState === YT.PlayerState.UNSTARTED) {
+        return;
+      }
+    } catch (error) {
+      return;
+    }
+
     // 既に同期中の場合は、既存の同期を停止してから新しい同期を開始
     if (this.#syncing) {
       this.stopSync();
     }
 
     this.#syncing = true;
+    this.#syncAttempts = 0; // 同期試行回数をリセット
     this.#player = player;
     this.#dataManager = dataManager;
     this.#timeCalculator = timeCalculator;
@@ -48,13 +61,7 @@ export class TimingSynchronizer extends ITimingSynchronizer {
    */
   stopSync() {
     this.#syncing = false;
-
-    // 同期終了時に再生速度を元に戻す
-    if (this.#player && this.#dataManager) {
-      const originalSpeed = this.#dataManager.speed;
-      this.#player.setPlaybackRate(originalSpeed);
-    }
-
+    this.#syncAttempts = 0; // 同期試行回数をリセット
     if (this.#onSyncEnd) {
       this.#onSyncEnd();
     }
@@ -74,21 +81,35 @@ export class TimingSynchronizer extends ITimingSynchronizer {
    */
   #getTimeInfo() {
     const duration = this.#player.getDuration();
-    const expectPlayerTime =
-      this.#timeCalculator.calculateCurrentTime(this.#dataManager) % duration;
-    const syncOffset = expectPlayerTime - this.#player.getCurrentTime();
+    const currentPlayerTime = this.#player.getCurrentTime();
+    const calculatedCurrentTime = this.#timeCalculator.calculateCurrentTime(this.#dataManager);
+    const expectPlayerTime = calculatedCurrentTime % duration;
+    const syncOffset = expectPlayerTime - currentPlayerTime;
 
-    return {
+    const timeInfo = {
       expectPlayerTime,
       syncOffset,
       duration,
+      currentTime: calculatedCurrentTime,
+      currentPlayerTime
     };
+    
+
+
+    return timeInfo;
   }
 
   /**
    * ジャンプして同期
    */
   #jumpToSync() {
+    // 同期試行回数をチェック
+    this.#syncAttempts++;
+    if (this.#syncAttempts > this.#maxSyncAttempts) {
+      this.stopSync();
+      return;
+    }
+    
     const t = this.#getTimeInfo();
     
     // currentTimeが未定義の場合は同期をスキップ
@@ -98,6 +119,12 @@ export class TimingSynchronizer extends ITimingSynchronizer {
 
     // 期待値がNaNの場合は同期をスキップ
     if (isNaN(t.expectPlayerTime)) {
+      return;
+    }
+
+    // 同期オフセットが非常に大きい場合（10秒以上）は同期を停止
+    if (Math.abs(t.syncOffset) > 10) {
+      this.stopSync();
       return;
     }
 
@@ -143,7 +170,12 @@ export class TimingSynchronizer extends ITimingSynchronizer {
           checkCount++;
           if (checkCount === 10) {
             const originalSpeed = this.#dataManager.speed;
-            this.#player.setPlaybackRate(originalSpeed);
+            try {
+              this.#player.setPlaybackRate(originalSpeed);
+            } catch (error) {
+              // YouTube Playerが初期化されていない場合のエラーハンドリング
+            }
+            this.#syncAttempts = 0; // 同期完了時に試行回数をリセット
             this.stopSync();
             return;
           }
@@ -160,7 +192,11 @@ export class TimingSynchronizer extends ITimingSynchronizer {
             offsetSpeed = 0.05 * Math.max(1, parseInt(t.syncOffset * 20));
           }
           const playerSpeed = Math.floor((speed + offsetSpeed) / 0.05) * 0.05;
-          this.#player.setPlaybackRate(playerSpeed);
+          try {
+            this.#player.setPlaybackRate(playerSpeed);
+          } catch (error) {
+            // YouTube Playerが初期化されていない場合のエラーハンドリング
+          }
         }
       }
       requestAnimationFrame(refineLoop);
