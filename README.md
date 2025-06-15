@@ -1,54 +1,136 @@
-# React + TypeScript + Vite
+# YouTube VJ Web App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+YouTube iframe API を活用した VJ (Video Jockey) Web アプリケーションです。
 
-Currently, two official plugins are available:
+## 🎯 特徴
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **YouTube 動画制御**: 再生、一時停止、速度変更、音量調整
+- **外部制御**: `forwardRef`を使用した親子コンポーネント間の通信
+- **型安全**: TypeScript による型チェック
+- **高品質コード**: Biome によるリント・フォーマット
 
-## Expanding the ESLint configuration
+## 🛠️ 技術スタック
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **React 19** + **TypeScript**
+- **Vite** - 高速ビルドツール
+- **Biome** - 高速リンター・フォーマッター
+- **Husky** + **lint-staged** - Git hooks による品質管理
+- **react-youtube** - YouTube iframe API
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 🚀 開発環境セットアップ
+
+```bash
+# 依存関係インストール
+npm install
+
+# 開発サーバー起動
+npm run dev
+
+# ビルド
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📋 利用可能なコマンド
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 開発・ビルド
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+npm run dev      # 開発サーバー起動
+npm run build    # プロダクションビルド
+npm run preview  # ビルド結果のプレビュー
+```
+
+### コード品質
+
+```bash
+npm run check        # Biome: リント + フォーマット チェック
+npm run check:fix    # Biome: 自動修正
+npm run lint         # リントのみ
+npm run format       # フォーマットのみ
+npm run type-check   # TypeScript型チェック
+```
+
+## 🔧 Git Hooks による品質管理
+
+### Pre-commit Hook
+
+コミット前に自動実行される品質チェック：
+
+- **Biome**: リント・フォーマット自動修正
+- **TypeScript**: 型チェック
+
+### Commit-msg Hook
+
+**[Conventional Commits](https://www.conventionalcommits.org/)** 準拠のコミットメッセージ形式チェック：
+
+```
+<type>(<scope>): <description>
+
+例:
+feat: add user authentication
+feat(auth): implement login functionality
+fix: resolve memory leak in video player
+docs: update API documentation
+style: fix indentation in components
+```
+
+#### 標準タイプ（Conventional Commits 準拠）
+
+- `feat` - 新機能の追加
+- `fix` - バグ修正
+- `docs` - ドキュメントのみの変更
+- `style` - コードの意味に影響しない変更（フォーマット等）
+- `refactor` - バグ修正でも機能追加でもないコード変更
+- `perf` - パフォーマンスを向上させるコード変更
+- `test` - テストの追加や既存テストの修正
+- `chore` - ビルドプロセスや補助ツール・ライブラリの変更
+- `ci` - CI 設定ファイルとスクリプトの変更
+- `build` - ビルドシステムや外部依存関係に影響する変更
+
+## 🎮 YouTube Player API
+
+### 基本制御
+
+- `play()` - 再生
+- `pause()` - 一時停止
+- `mute()` / `unmute()` - ミュート制御
+- `setSpeed(rate)` - 再生速度変更 (0.25x, 0.5x, 1x, 2x)
+- `setVolume(volume)` - 音量調整 (0-100)
+
+### 使用例
+
+```tsx
+const playerRef = useRef<YouTubePlayerRef>(null);
+
+// 再生
+playerRef.current?.play();
+
+// 2倍速に変更
+playerRef.current?.setSpeed(2);
+```
+
+## 🧪 開発のヒント
+
+1. **品質チェック**: `npm run check` でコミット前に品質確認
+2. **型安全**: TypeScript の型エラーは必ず修正
+3. **コミット形式**: [Conventional Commits](https://www.conventionalcommits.org/) 準拠
+4. **自動修正**: Biome が自動でフォーマット・リント修正
+
+### 🔄 旧ルールから新ルールへの移行ガイド
+
+| 旧ルール        | 新ルール（Conventional Commits）                              | 例                                                           |
+| --------------- | ------------------------------------------------------------- | ------------------------------------------------------------ |
+| `upd: 機能改良` | `feat: 新機能追加` または `fix: バグ修正`                     | `upd: improve button` → `feat: enhance button functionality` |
+| `rm: 削除`      | `refactor: リファクタリング` または `chore: 不要ファイル削除` | `rm: old components` → `refactor: remove unused components`  |
+| `add: 追加`     | `feat: 新機能追加`                                            | `add: new utils` → `feat: add utility functions`             |
+
+## 📁 プロジェクト構造
+
+```
+src/
+├── components/
+│   ├── YouTubePlayer.tsx      # YouTube プレイヤーコンポーネント
+│   └── YouTubeController.tsx  # 制御パネルコンポーネント
+├── App.tsx                    # アプリケーションルート
+└── main.tsx                   # エントリーポイント
 ```

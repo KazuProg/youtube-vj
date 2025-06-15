@@ -1,0 +1,19 @@
+#!/bin/bash
+
+echo "🚀 Push前の最終チェック中..."
+
+# ビルドテスト
+echo "📦 プロダクションビルドテスト..."
+if ! npm run build; then
+  echo "❌ ビルドに失敗しました！"
+  exit 1
+fi
+
+# 型チェック
+echo "🔍 全体の型チェック..."
+if ! npm run type-check; then
+  echo "❌ 型エラーが検出されました！"
+  exit 1
+fi
+
+echo "✅ 全てのチェックが完了しました！"
