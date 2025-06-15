@@ -7,12 +7,17 @@
     "dev": "vite --host",
     "build": "tsc -b && vite build",
     "lint": "biome lint src/",
-    "lint:fix": "biome lint --apply src/",
+    "lint:fix": "biome lint --write src/",
     "format": "biome format src/",
     "format:write": "biome format --write src/",
     "check": "biome check src/",
     "check:fix": "biome check --apply src/",
-    "preview": "vite preview"
+    "type-check": "tsc --noEmit --skipLibCheck",
+    "type-check:watch": "tsc --noEmit --watch --skipLibCheck",
+    "preview": "vite preview",
+    "prepare": "husky",
+    "qa": "npm run type-check && npm run lint && npm run build",
+    "qa:fix": "npm run format:write && npm run lint:fix && npm run type-check"
   },
   "dependencies": {
     "react": "^19.1.0",

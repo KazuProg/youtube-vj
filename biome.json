@@ -48,7 +48,13 @@
         "noVar": "error",
         "useSingleVarDeclarator": "error",
         "useBlockStatements": "error",
-        "noNamespaceImport": "error"
+        "noNamespaceImport": "off",
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false
+          }
+        }
       },
       "suspicious": {
         "recommended": true,
