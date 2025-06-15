@@ -1,5 +1,5 @@
+import { forwardRef, useImperativeHandle, useRef } from "react";
 import YouTube from "react-youtube";
-import { useRef, useImperativeHandle, forwardRef } from "react";
 
 interface YouTubePlayerInstance {
   mute: () => void;
@@ -20,7 +20,7 @@ export interface YouTubePlayerRef {
   setVolume: (volume: number) => void;
 }
 
-const YouTubePlayer = forwardRef<YouTubePlayerRef>((props, ref) => {
+const YouTubePlayer = forwardRef<YouTubePlayerRef>((_props, ref) => {
   const playerRef = useRef<YouTubePlayerInstance | null>(null);
 
   const opts = {

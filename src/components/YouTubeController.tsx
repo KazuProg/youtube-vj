@@ -50,6 +50,7 @@ const YouTubeController = () => {
           }}
         >
           <button
+            type="button"
             onClick={handleExternalPlay}
             style={{
               backgroundColor: "#4CAF50",
@@ -62,6 +63,7 @@ const YouTubeController = () => {
             外部Play
           </button>
           <button
+            type="button"
             onClick={handleExternalPause}
             style={{
               backgroundColor: "#f44336",
@@ -74,6 +76,7 @@ const YouTubeController = () => {
             外部Pause
           </button>
           <button
+            type="button"
             onClick={handleExternalMute}
             style={{
               backgroundColor: "#ff9800",
@@ -86,6 +89,7 @@ const YouTubeController = () => {
             外部Mute
           </button>
           <button
+            type="button"
             onClick={handleExternalUnmute}
             style={{
               backgroundColor: "#2196F3",
@@ -108,6 +112,7 @@ const YouTubeController = () => {
           }}
         >
           <button
+            type="button"
             onClick={() => handleExternalSpeedChange(0.25)}
             style={{
               backgroundColor: "#9C27B0",
@@ -120,6 +125,7 @@ const YouTubeController = () => {
             0.25x速度
           </button>
           <button
+            type="button"
             onClick={() => handleExternalSpeedChange(0.5)}
             style={{
               backgroundColor: "#9C27B0",
@@ -132,6 +138,7 @@ const YouTubeController = () => {
             0.5x速度
           </button>
           <button
+            type="button"
             onClick={() => handleExternalSpeedChange(1)}
             style={{
               backgroundColor: "#9C27B0",
@@ -144,6 +151,7 @@ const YouTubeController = () => {
             通常速度
           </button>
           <button
+            type="button"
             onClick={() => handleExternalSpeedChange(2)}
             style={{
               backgroundColor: "#9C27B0",
@@ -159,6 +167,7 @@ const YouTubeController = () => {
 
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <button
+            type="button"
             onClick={() => handleExternalVolumeChange(25)}
             style={{
               backgroundColor: "#607D8B",
@@ -171,6 +180,7 @@ const YouTubeController = () => {
             音量25%
           </button>
           <button
+            type="button"
             onClick={() => handleExternalVolumeChange(50)}
             style={{
               backgroundColor: "#607D8B",
@@ -183,6 +193,7 @@ const YouTubeController = () => {
             音量50%
           </button>
           <button
+            type="button"
             onClick={() => handleExternalVolumeChange(75)}
             style={{
               backgroundColor: "#607D8B",
@@ -195,6 +206,7 @@ const YouTubeController = () => {
             音量75%
           </button>
           <button
+            type="button"
             onClick={() => handleExternalVolumeChange(100)}
             style={{
               backgroundColor: "#607D8B",
