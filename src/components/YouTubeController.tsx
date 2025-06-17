@@ -1,8 +1,40 @@
-import { useRef } from "react";
-import YouTubePlayer, { type YouTubePlayerRef } from "./YouTubePlayer";
+import { useCallback, useRef, useState } from "react";
+import YouTubePlayer, { type YouTubePlayerRef, type PlayerStatus } from "./YouTubePlayer";
 
 const YouTubeController = () => {
   const playerRef = useRef<YouTubePlayerRef>(null);
+  const [playerStatus, setPlayerStatus] = useState<PlayerStatus>({
+    state: 0,
+    playbackRate: 1,
+    volume: 100,
+    isMuted: false,
+  });
+
+  // プレイヤーの状態変更時に呼ばれるコールバック（useCallbackでメモ化）
+  const handleStatusChange = useCallback((status: PlayerStatus) => {
+    console.log("Status updated:", status);
+    setPlayerStatus(status);
+  }, []);
+
+  // プレイヤーの状態を文字列に変換する関数
+  const getPlayerStateText = (state: number) => {
+    switch (state) {
+      case -1:
+        return "未開始";
+      case 0:
+        return "終了";
+      case 1:
+        return "再生中";
+      case 2:
+        return "一時停止";
+      case 3:
+        return "バッファリング";
+      case 5:
+        return "頭出し済み";
+      default:
+        return "不明";
+    }
+  };
 
   const handleExternalPlay = () => {
     playerRef.current?.play();
@@ -31,7 +63,7 @@ const YouTubeController = () => {
   return (
     <div>
       <h2>YouTube Controller</h2>
-      <YouTubePlayer ref={playerRef} />
+      <YouTubePlayer ref={playerRef} onStatusChange={handleStatusChange} />
       <div
         style={{
           marginTop: "20px",
@@ -40,6 +72,78 @@ const YouTubeController = () => {
           borderRadius: "8px",
         }}
       >
+        <h3>プレイヤーステータスパネル（リアルタイム）</h3>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "10px",
+            marginBottom: "20px",
+            padding: "10px",
+            backgroundColor: "#f5f5f5",
+            borderRadius: "4px",
+          }}
+        >
+          <div
+            style={{
+              padding: "10px",
+              backgroundColor: "white",
+              borderRadius: "4px",
+              border: "1px solid #ddd",
+            }}
+          >
+            <strong>再生状態:</strong>
+            <br />
+            <span style={{ fontSize: "18px", color: "#2196F3" }}>
+              {getPlayerStateText(playerStatus.state)}
+            </span>
+          </div>
+          <div
+            style={{
+              padding: "10px",
+              backgroundColor: "white",
+              borderRadius: "4px",
+              border: "1px solid #ddd",
+            }}
+          >
+            <strong>再生速度:</strong>
+            <br />
+            <span style={{ fontSize: "18px", color: "#4CAF50" }}>{playerStatus.playbackRate}x</span>
+          </div>
+          <div
+            style={{
+              padding: "10px",
+              backgroundColor: "white",
+              borderRadius: "4px",
+              border: "1px solid #ddd",
+            }}
+          >
+            <strong>音量:</strong>
+            <br />
+            <span style={{ fontSize: "18px", color: "#FF9800" }}>
+              {Math.round(playerStatus.volume)}%
+            </span>
+          </div>
+          <div
+            style={{
+              padding: "10px",
+              backgroundColor: "white",
+              borderRadius: "4px",
+              border: "1px solid #ddd",
+            }}
+          >
+            <strong>ミュート:</strong>
+            <br />
+            <span
+              style={{
+                fontSize: "18px",
+                color: playerStatus.isMuted ? "#f44336" : "#4CAF50",
+              }}
+            >
+              {playerStatus.isMuted ? "ON" : "OFF"}
+            </span>
+          </div>
+        </div>
         <h3>外部制御パネル</h3>
         <div
           style={{
@@ -75,34 +179,7 @@ const YouTubeController = () => {
           >
             外部Pause
           </button>
-          <button
-            type="button"
-            onClick={handleExternalMute}
-            style={{
-              backgroundColor: "#ff9800",
-              color: "white",
-              padding: "8px 16px",
-              border: "none",
-              borderRadius: "4px",
-            }}
-          >
-            外部Mute
-          </button>
-          <button
-            type="button"
-            onClick={handleExternalUnmute}
-            style={{
-              backgroundColor: "#2196F3",
-              color: "white",
-              padding: "8px 16px",
-              border: "none",
-              borderRadius: "4px",
-            }}
-          >
-            外部Unmute
-          </button>
         </div>
-
         <div
           style={{
             display: "flex",
@@ -164,59 +241,40 @@ const YouTubeController = () => {
             2x速度
           </button>
         </div>
-
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          Volume：
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={playerStatus.volume}
+            onChange={(e) => handleExternalVolumeChange(Number.parseInt(e.target.value))}
+          />
           <button
             type="button"
-            onClick={() => handleExternalVolumeChange(25)}
+            onClick={handleExternalMute}
             style={{
-              backgroundColor: "#607D8B",
+              backgroundColor: "#ff9800",
               color: "white",
               padding: "8px 16px",
               border: "none",
               borderRadius: "4px",
             }}
           >
-            音量25%
+            外部Mute
           </button>
           <button
             type="button"
-            onClick={() => handleExternalVolumeChange(50)}
+            onClick={handleExternalUnmute}
             style={{
-              backgroundColor: "#607D8B",
+              backgroundColor: "#2196F3",
               color: "white",
               padding: "8px 16px",
               border: "none",
               borderRadius: "4px",
             }}
           >
-            音量50%
-          </button>
-          <button
-            type="button"
-            onClick={() => handleExternalVolumeChange(75)}
-            style={{
-              backgroundColor: "#607D8B",
-              color: "white",
-              padding: "8px 16px",
-              border: "none",
-              borderRadius: "4px",
-            }}
-          >
-            音量75%
-          </button>
-          <button
-            type="button"
-            onClick={() => handleExternalVolumeChange(100)}
-            style={{
-              backgroundColor: "#607D8B",
-              color: "white",
-              padding: "8px 16px",
-              border: "none",
-              borderRadius: "4px",
-            }}
-          >
-            音量100%
+            外部Unmute
           </button>
         </div>
       </div>
