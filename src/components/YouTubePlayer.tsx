@@ -3,23 +3,27 @@ import YouTube from "react-youtube";
 import type { Options, YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
 
 export interface YouTubePlayerRef {
-  play: () => void;
-  pause: () => void;
+  playVideo: () => void;
+  pauseVideo: () => void;
   mute: () => void;
-  unmute: () => void;
-  setSpeed: (rate: number) => void;
+  unMute: () => void;
   setVolume: (volume: number) => void;
+  setPlaybackRate: (rate: number) => void;
+  isMuted: boolean;
+  playerState: number;
+  playbackRate: number;
+  volume: number;
+  currentTime: number;
+  duration: number;
+}
+
+export interface PlayerStatus {
   playerState: number;
   playbackRate: number;
   volume: number;
   isMuted: boolean;
-}
-
-export interface PlayerStatus {
-  state: number;
-  playbackRate: number;
-  volume: number;
-  isMuted: boolean;
+  currentTime: number;
+  duration: number;
 }
 
 interface YouTubePlayerProps {
@@ -29,111 +33,82 @@ interface YouTubePlayerProps {
 const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(
   ({ onStatusChange }, ref) => {
     const playerRef = useRef<YTPlayerTypes | null>(null);
-    const [playerState, setPlayerState] = useState<number>(0);
-    const [playbackRate, setPlaybackRate] = useState<number>(1);
-    const [volume, setVolume] = useState<number>(100);
-    const [isMuted, setIsMuted] = useState<boolean>(false);
+    const [playerState, setPlayerState] = useState(0);
+    const [playbackRate, setPlaybackRate] = useState(1);
+    const [volume, setVolume] = useState(100);
+    const [isMuted, setIsMuted] = useState(true);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
 
-    // playerState、playbackRate、volume、isMutedが変更されたときに親コンポーネントに通知
-    useEffect(() => {
-      if (onStatusChange) {
-        const status: PlayerStatus = {
-          state: playerState,
-          playbackRate: playbackRate,
-          volume: volume,
-          isMuted: isMuted,
-        };
-        onStatusChange(status);
-      }
-    }, [playerState, playbackRate, volume, isMuted, onStatusChange]);
-
-    const opts = {
-      width: "640",
-      height: "360",
-      playerVars: {
-        autoplay: 1,
-      },
-    };
-
-    const handleReady = async (event: { target: YTPlayerTypes }) => {
-      playerRef.current = event.target;
-      event.target.mute();
-      event.target.playVideo();
-
-      // 初期状態を設定
-      setPlayerState(1); // 再生中
-      setPlaybackRate(1); // 通常速度
-
-      // 初期のvolume/mute状態を取得
-      try {
-        const initialVolume = await event.target.getVolume();
-        const initialMuted = await event.target.isMuted();
-        setVolume(initialVolume);
-        setIsMuted(initialMuted);
-      } catch (error) {
-        console.error("Failed to get initial volume/mute state:", error);
-      }
-    };
-
+    // 状態変更時に親コンポーネントに通知 & プレイヤーに反映
     useEffect(() => {
       if (playerRef.current) {
+        // プレイヤーに状態を反映
         if (isMuted) {
           playerRef.current.mute();
         } else {
           playerRef.current.unMute();
           playerRef.current.setVolume(volume);
         }
+        playerRef.current.setPlaybackRate(playbackRate);
       }
-    }, [volume, isMuted]);
 
-    const handlePlay = () => {
-      if (playerRef.current) {
-        playerRef.current.playVideo();
-      }
+      // 親コンポーネントに通知
+      onStatusChange?.({
+        playerState,
+        playbackRate,
+        volume,
+        isMuted,
+        currentTime,
+        duration,
+      });
+    }, [playerState, playbackRate, volume, isMuted, currentTime, duration, onStatusChange]);
+
+    const handleReady = async (event: { target: YTPlayerTypes }) => {
+      playerRef.current = event.target;
+      event.target.mute();
+      setIsMuted(true);
+      event.target.playVideo();
+      setDuration(await event.target.getDuration());
+
+      // currentTimeの更新ループ
+      const updateCurrentTime = async () => {
+        if (playerRef.current) {
+          setCurrentTime(await playerRef.current.getCurrentTime());
+        }
+        requestAnimationFrame(updateCurrentTime);
+      };
+      updateCurrentTime();
     };
 
-    const handlePause = () => {
-      if (playerRef.current) {
-        playerRef.current.pauseVideo();
-      }
-    };
-
-    const handleStateChange = (event: { data: number }) => {
-      setPlayerState(event.data);
-    };
-
-    const handlePlaybackRateChange = (event: { data: number }) => {
-      setPlaybackRate(event.data);
-    };
-
-    const handleSpeedChange = (rate: number) => {
-      if (playerRef.current) {
-        playerRef.current.setPlaybackRate(rate);
-        setPlaybackRate(rate);
-      }
-    };
-
-    // 親コンポーネントから呼び出し可能なメソッドを公開
     useImperativeHandle(ref, () => ({
-      play: handlePlay,
-      pause: handlePause,
+      playVideo: () => playerRef.current?.playVideo(),
+      pauseVideo: () => playerRef.current?.pauseVideo(),
       mute: () => setIsMuted(true),
-      unmute: () => setIsMuted(false),
-      setSpeed: handleSpeedChange,
-      setVolume: (volume: number) => setVolume(volume),
-      isMuted: isMuted,
-      playerState: playerState,
-      playbackRate: playbackRate,
-      volume: volume,
+      unMute: () => setIsMuted(false),
+      setVolume,
+      setPlaybackRate,
+      isMuted,
+      playerState,
+      playbackRate,
+      volume,
+      currentTime,
+      duration,
     }));
 
     return (
       <YouTube
         videoId="42jhMWfKY9Y"
-        opts={opts as Options}
+        opts={
+          {
+            width: "640",
+            height: "360",
+            playerVars: { autoplay: 1 },
+          } as Options
+        }
         onReady={handleReady}
-        onStateChange={handleStateChange}
-        onPlaybackRateChange={handlePlaybackRateChange}
+        onStateChange={(e) => setPlayerState(e.data)}
+        onPlaybackRateChange={(e) => setPlaybackRate(e.data)}
       />
     );
   }
