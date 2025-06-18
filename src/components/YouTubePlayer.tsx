@@ -43,14 +43,18 @@ const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(
     // 状態変更時に親コンポーネントに通知 & プレイヤーに反映
     useEffect(() => {
       if (playerRef.current) {
-        // プレイヤーに状態を反映
-        if (isMuted) {
-          playerRef.current.mute();
-        } else {
-          playerRef.current.unMute();
-          playerRef.current.setVolume(volume);
+        try {
+          // プレイヤーに状態を反映
+          if (isMuted) {
+            playerRef.current.mute();
+          } else {
+            playerRef.current.unMute();
+            playerRef.current.setVolume(volume);
+          }
+          playerRef.current.setPlaybackRate(playbackRate);
+        } catch (error) {
+          console.warn("Player not ready yet:", error);
         }
-        playerRef.current.setPlaybackRate(playbackRate);
       }
 
       // 親コンポーネントに通知
@@ -65,20 +69,32 @@ const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(
     }, [playerState, playbackRate, volume, isMuted, currentTime, duration, onStatusChange]);
 
     const handleReady = async (event: { target: YTPlayerTypes }) => {
-      playerRef.current = event.target;
-      event.target.mute();
-      setIsMuted(true);
-      event.target.playVideo();
-      setDuration(await event.target.getDuration());
+      try {
+        playerRef.current = event.target;
 
-      // currentTimeの更新ループ
-      const updateCurrentTime = async () => {
-        if (playerRef.current) {
-          setCurrentTime(await playerRef.current.getCurrentTime());
-        }
-        requestAnimationFrame(updateCurrentTime);
-      };
-      updateCurrentTime();
+        event.target.mute();
+        setIsMuted(true);
+        event.target.playVideo();
+
+        const duration = await event.target.getDuration();
+        setDuration(duration);
+
+        // currentTimeの更新ループ
+        const updateCurrentTime = async () => {
+          if (playerRef.current) {
+            try {
+              const currentTime = await playerRef.current.getCurrentTime();
+              setCurrentTime(currentTime);
+            } catch {
+              // プレイヤーがまだ準備できていない場合はスキップ
+            }
+          }
+          requestAnimationFrame(updateCurrentTime);
+        };
+        updateCurrentTime();
+      } catch (error) {
+        console.error("Error initializing YouTube player:", error);
+      }
     };
 
     useImperativeHandle(ref, () => ({

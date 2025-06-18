@@ -43,28 +43,28 @@ const YouTubeController = () => {
         {/* プレイヤー制御 */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "20px" }}>
           <button
-            {...buttonStyle}
+            type="button"
             style={{ ...buttonStyle, backgroundColor: "#4CAF50" }}
             onClick={() => playerRef.current?.playVideo()}
           >
             Play
           </button>
           <button
-            {...buttonStyle}
+            type="button"
             style={{ ...buttonStyle, backgroundColor: "#f44336" }}
             onClick={() => playerRef.current?.pauseVideo()}
           >
             Pause
           </button>
           <button
-            {...buttonStyle}
+            type="button"
             style={{ ...buttonStyle, backgroundColor: "#ff9800" }}
             onClick={() => playerRef.current?.mute()}
           >
             Mute
           </button>
           <button
-            {...buttonStyle}
+            type="button"
             style={{ ...buttonStyle, backgroundColor: "#2196F3" }}
             onClick={() => playerRef.current?.unMute()}
           >
