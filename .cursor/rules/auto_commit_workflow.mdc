@@ -33,32 +33,22 @@ When users express commit intention using these phrases, the automated workflow 
 ## Automated Workflow Steps
 
 ### Step 1: Pre-Commit Validation
-1. **Verify working directory**
-   ```bash
-   cd /home/kazuki/dev/youtube-vj-react && pwd
-   ```
-
-2. **Check git repository status**
+1. **Check git repository status**
    ```bash
    git status
    ```
 
-3. **Verify staged changes exist**
+2. **Verify staged changes exist**
    - If no changes staged: Ask user to specify files to stage
    - If changes staged: Proceed to Step 2
 
 ### Step 2: Staging Management
-1. **Check for staged changes only**
-   ```bash
-   git status --porcelain
-   ```
-
-2. **NEVER auto-stage files (重要なルール)**
+1. **NEVER auto-stage files (重要なルール)**
    - ❌ `git add .` や `git add <file>` を自動実行してはならない
    - ✅ 既にステージングされたファイルのみ処理する
    - ✅ ステージングされたファイルがない場合は、ユーザーに手動でのステージングを促す
 
-3. **Handle unstaged changes**
+2. **Handle unstaged changes**
    - If no staged changes: Display message asking user to stage files first
    - Example message: "ステージングされたファイルがありません。以下のコマンドでファイルをステージングしてください: `git add <filename>`"
    - Only proceed if staged changes exist
@@ -66,15 +56,10 @@ When users express commit intention using these phrases, the automated workflow 
 ### Step 3: Diff Analysis
 1. **Retrieve complete diff**
    ```bash
-   git diff --cached
-   ```
-
-2. **Fallback for truncated output**
-   ```bash
    git diff --cached | cat
    ```
 
-3. **Handle new files**
+2. **Handle new files**
    - For new files: Read file content directly
    - Explain that file content equals diff for new files
 
@@ -97,7 +82,6 @@ When users express commit intention using these phrases, the automated workflow 
    - **Ensure English language ONLY** - Never use Japanese or other languages
    - Verify Conventional Commits compliance
    - Check description clarity
-   - Validate message length (no strict limit, but keep reasonable)
 
 ### Step 5: Commit Execution
 1. **Present commit message to user**
@@ -113,23 +97,11 @@ When users express commit intention using these phrases, the automated workflow 
    git commit -m "[generated message]"
    ```
 
-3. **Confirm commit success**
-   ```bash
-   git log --oneline -n 1
-   ```
-
 ## Error Handling
 
-### Terminal Command Failures
-If commands fail, use reliable patterns:
-```bash
-cd /home/kazuki/dev/youtube-vj-react && [command]
-```
-
 ### Diff Retrieval Issues
-1. **Truncated output**: Try with `| cat`
-2. **Complete failure**: Request manual diff input
-3. **New files**: Read file content directly with explanation
+1. **Complete failure**: Request manual diff input
+2. **New files**: Read file content directly with explanation
 
 ### Commit Failures
 1. **Pre-commit hook failures**: Show lint errors and stop
@@ -144,11 +116,6 @@ cd /home/kazuki/dev/youtube-vj-react && [command]
 - ステージングされていない場合は適切なメッセージでユーザーに促す
 - ユーザーの意図しないファイルをコミットしないよう安全を確保
 
-### Pre-Commit Checks
-- Ensure Husky hooks are functional
-- Verify lint-staged will run
-- Check for syntax errors
-
 ### User Confirmation
 - Always show generated commit message before execution
 - Provide 5-second countdown for abort opportunity
@@ -156,7 +123,6 @@ cd /home/kazuki/dev/youtube-vj-react && [command]
 
 ### Rollback Capability
 - Provide instructions for `git reset --soft HEAD^` if needed
-- Maintain git reflog for recovery
 
 ## Commit Message Standards
 
@@ -193,23 +159,6 @@ If user requests custom message:
 - Ask for user's preferred message
 - Use user's message instead
 
-### Selective Staging
-If user specifies files:
-- Stage only specified files
-- Generate message based on selected changes
-
-## Integration with Existing Rules
-
-### Code Quality
-- All existing TypeScript and React rules apply
-- Biome formatting must pass
-- No syntax errors allowed
-
-### VJ Application Specific
-- MIDI integration security maintained
-- YouTube player state consistency verified
-- Zustand store integrity checked
-
 ## Example Workflows
 
 ### Successful Workflow
@@ -220,15 +169,6 @@ User: "コミットして"
 → Analyze diff
 → Generate: "feat: add new YouTube player controls"
 → Execute commit
-→ Confirm success
-```
-
-### Error Workflow
-```
-User: "コミット"
-→ Check git status
-→ No changes found
-→ Response: "No changes to commit. Please make changes first."
 ```
 
 ### No Staging Available Workflow
@@ -243,46 +183,9 @@ User: "コミットして"
 ### Lint Error Workflow
 ```
 User: "コミットしたい"
-→ Stage changes
 → Pre-commit hook fails
 → Show lint errors
 → Response: "Please fix lint errors before committing"
 ```
-
-## Performance Considerations
-
-### Parallel Operations
-- Run git status and git diff in parallel when possible
-- Use efficient git commands
-- Minimize terminal round-trips
-
-### Caching
-- Cache git status between operations
-- Reuse diff analysis if files unchanged
-- Optimize for common workflow patterns
-
-## Monitoring and Feedback
-
-### Success Metrics
-- Commit success rate
-- Message quality scores
-- User satisfaction feedback
-
-### Error Tracking
-- Terminal command failure rates
-- Common error patterns
-- User intervention requirements
-
-## Continuous Improvement
-
-### Message Quality
-- Learn from user modifications
-- Improve pattern recognition
-- Enhance scope detection
-
-### Workflow Optimization
-- Reduce confirmation steps for trusted users
-- Streamline common patterns
-- Add shortcuts for frequent operations
 
 This automated workflow ensures consistent, high-quality commits while reducing manual overhead for the user.
