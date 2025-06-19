@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # Automated Commit Workflow Rules for YouTube VJ React Project
@@ -48,20 +48,20 @@ When users express commit intention using these phrases, the automated workflow 
    - If changes staged: Proceed to Step 2
 
 ### Step 2: Staging Management
-1. **Check for unstaged changes**
-   ```bash
-   git diff --name-only
-   ```
-
-2. **Auto-stage if user indicates intent**
-   ```bash
-   git add .
-   ```
-
-3. **Confirm staging status**
+1. **Check for staged changes only**
    ```bash
    git status --porcelain
    ```
+
+2. **NEVER auto-stage files (重要なルール)**
+   - ❌ `git add .` や `git add <file>` を自動実行してはならない
+   - ✅ 既にステージングされたファイルのみ処理する
+   - ✅ ステージングされたファイルがない場合は、ユーザーに手動でのステージングを促す
+
+3. **Handle unstaged changes**
+   - If no staged changes: Display message asking user to stage files first
+   - Example message: "ステージングされたファイルがありません。以下のコマンドでファイルをステージングしてください: `git add <filename>`"
+   - Only proceed if staged changes exist
 
 ### Step 3: Diff Analysis
 1. **Retrieve complete diff**
@@ -94,9 +94,10 @@ When users express commit intention using these phrases, the automated workflow 
    ```
 
 3. **Validate message format**
-   - Ensure English language
+   - **Ensure English language ONLY** - Never use Japanese or other languages
    - Verify Conventional Commits compliance
    - Check description clarity
+   - Validate message length (no strict limit, but keep reasonable)
 
 ### Step 5: Commit Execution
 1. **Present commit message to user**
@@ -137,6 +138,12 @@ cd /home/kazuki/dev/youtube-vj-react && [command]
 
 ## Safety Measures
 
+### Staging Policy (最重要ルール)
+- **絶対に `git add` を自動実行しない**
+- ユーザーが明示的にステージングしたファイルのみ処理
+- ステージングされていない場合は適切なメッセージでユーザーに促す
+- ユーザーの意図しないファイルをコミットしないよう安全を確保
+
 ### Pre-Commit Checks
 - Ensure Husky hooks are functional
 - Verify lint-staged will run
@@ -164,7 +171,11 @@ cd /home/kazuki/dev/youtube-vj-react && [command]
 - **chore**: Build/tool changes
 
 ### Format Requirements
-- English language only
+- **English language only (英語のみ)** - CRITICAL REQUIREMENT
+  - All commit messages MUST be written in English
+  - This ensures consistency and international compatibility
+  - Even when user communicates in Japanese, commit messages are always English
+  - Examples: "feat: add new feature" ✅, "feat: 新機能を追加" ❌
 - Clear, concise descriptions
 - Proper conventional commits structure
 - Informative body for complex changes
@@ -205,7 +216,7 @@ If user specifies files:
 ```
 User: "コミットして"
 → Check git status
-→ Stage changes (git add .)
+→ Verify staged changes exist
 → Analyze diff
 → Generate: "feat: add new YouTube player controls"
 → Execute commit
@@ -218,6 +229,15 @@ User: "コミット"
 → Check git status
 → No changes found
 → Response: "No changes to commit. Please make changes first."
+```
+
+### No Staging Available Workflow
+```
+User: "コミットして"
+→ Check git status
+→ No staged changes found
+→ Response: "ステージングされたファイルがありません。以下のコマンドでファイルをステージングしてください: `git add <filename>`"
+→ Do NOT execute git add automatically
 ```
 
 ### Lint Error Workflow
