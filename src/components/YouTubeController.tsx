@@ -51,31 +51,29 @@ const YouTubeController = () => {
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "20px" }}>
           <button
             type="button"
-            style={{ ...buttonStyle, backgroundColor: "#4CAF50" }}
-            onClick={() => playerRef.current?.playVideo()}
+            style={{
+              ...buttonStyle,
+              backgroundColor: playerStatus.playerState === 1 ? "#f44336" : "#4CAF50",
+            }}
+            onClick={() =>
+              playerStatus.playerState === 1
+                ? playerRef.current?.pauseVideo()
+                : playerRef.current?.playVideo()
+            }
           >
-            Play
+            {playerStatus.playerState === 1 ? "Pause" : "Play"}
           </button>
           <button
             type="button"
-            style={{ ...buttonStyle, backgroundColor: "#f44336" }}
-            onClick={() => playerRef.current?.pauseVideo()}
+            style={{
+              ...buttonStyle,
+              backgroundColor: playerStatus.isMuted ? "#2196F3" : "#ff9800",
+            }}
+            onClick={() =>
+              playerStatus.isMuted ? playerRef.current?.unMute() : playerRef.current?.mute()
+            }
           >
-            Pause
-          </button>
-          <button
-            type="button"
-            style={{ ...buttonStyle, backgroundColor: "#ff9800" }}
-            onClick={() => playerRef.current?.mute()}
-          >
-            Mute
-          </button>
-          <button
-            type="button"
-            style={{ ...buttonStyle, backgroundColor: "#2196F3" }}
-            onClick={() => playerRef.current?.unMute()}
-          >
-            Unmute
+            {playerStatus.isMuted ? "Unmute" : "Mute"}
           </button>
         </div>
 
