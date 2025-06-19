@@ -1,0 +1,158 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Cursor Auto-Run 安全なコマンド実行ルール
+
+## 概要
+
+Cursor の Auto-run 機能が有効になっている環境では、提案されたコマンドが自動的に実行されるため、破壊的な操作や予期しない動作を避けるための安全対策が必要です。
+
+## 基本原則
+
+### 1. 破壊的コマンドの禁止
+以下のコマンドは **絶対に使用しない**:
+
+#### ファイル・ディレクトリ削除
+- `rm` (特に `rm -rf`, `rm -f`)
+- `rmdir`
+- `unlink`
+- `shred`
+
+#### システム変更
+- `sudo` を伴うコマンド
+- `chmod` でのパーミッション変更（読み取り専用化以外）
+- `chown` でのオーナー変更
+- `mv` での重要ファイルの移動
+
+#### ネットワーク・プロセス操作
+- `kill` / `killall` （プロセス終了）
+- `pkill` / `pgrep`
+- `wget` / `curl` での外部ファイルダウンロード（信頼できないソースから）
+
+### 2. 安全な代替手段
+
+#### ファイル削除の代わりに
+```bash
+# ❌ 危険
+rm file.txt
+
+# ✅ 安全な代替案
+# 1. ファイルの中身を空にする
+> file.txt
+
+# 2. 一時的な名前変更
+mv file.txt file.txt.backup
+
+# 3. 専用のトラッシュディレクトリに移動
+mkdir -p .trash && mv file.txt .trash/
+```
+
+#### システム変更の代わりに
+```bash
+# ❌ 危険
+sudo apt install package
+
+# ✅ 安全な代替案
+# 1. 確認のみ
+apt list --upgradable
+
+# 2. パッケージ情報の確認
+apt show package
+
+# 3. ドライラン
+apt install --dry-run package
+```
+
+### 3. 推奨する安全なコマンド
+
+#### 情報取得・確認
+- `ls`, `ls -la`, `pwd`
+- `cat`, `head`, `tail`, `less`, `more`
+- `grep`, `find` (読み取り専用)
+- `git status`, `git log`, `git diff`
+- `ps aux`, `top`, `htop` (プロセス確認)
+
+#### 開発関連
+- `npm install`, `npm run`, `npm test`
+- `yarn install`, `yarn build`
+- `git add`, `git commit`, `git push`
+- `docker ps`, `docker logs` (確認系)
+
+#### ファイル作成・編集
+- `touch` (新規ファイル作成)
+- `echo "content" > file.txt` (ファイル作成・上書き)
+- `echo "content" >> file.txt` (追記)
+- `cp` (バックアップ作成時)
+
+### 4. 実行前確認が必要なコマンド
+
+以下のコマンドは実行前に必ず影響範囲を確認する:
+
+- `git reset` (特に `--hard`)
+- `git rebase`
+- `git merge`
+- `docker-compose down`
+- `npm uninstall`
+- `pip uninstall`
+
+### 5. Auto-Run 環境での追加対策
+
+#### コマンド実行時の注意点
+1. **段階的実行**: 複雑な操作は小さなステップに分割
+2. **確認コマンド**: 実行前に状態確認コマンドを提案
+3. **バックアップ提案**: 重要な変更前にバックアップ作成を提案
+4. **ドライラン**: 可能な場合は `--dry-run` オプションを使用
+
+#### 推奨ワークフロー
+```bash
+# 1. 現在の状態確認
+git status
+ls -la
+
+# 2. 変更の実行
+git add .
+git commit -m "message"
+
+# 3. 結果の確認
+git log --oneline -n 5
+```
+
+### 6. 緊急時の対応
+
+万が一破壊的な操作が実行されてしまった場合:
+
+1. **即座に停止**: Ctrl+C でコマンドを中断
+2. **状態確認**: `git status`, `ls -la` で現在の状態を確認
+3. **復旧手順**: 
+   - Git リポジトリの場合: `git reflog` で履歴確認
+   - ファイルの場合: `.trash/` ディレクトリや `.backup` ファイルの確認
+   - システムの場合: バックアップからの復旧
+
+### 7. 開発者向けガイドライン
+
+#### コマンド提案時のチェックリスト
+- [ ] コマンドは読み取り専用か？
+- [ ] ファイルやディレクトリを削除していないか？
+- [ ] システム設定を変更していないか？
+- [ ] 外部リソースにアクセスしていないか？
+- [ ] 実行結果が予測可能か？
+
+#### 安全性の段階
+1. **完全に安全**: 情報取得のみ (`ls`, `cat`, `git status`)
+2. **比較的安全**: 新規作成・追加 (`touch`, `echo >>`, `git add`)
+3. **注意が必要**: 変更・上書き (`echo >`, `git commit`)
+4. **危険**: 削除・システム変更 (使用禁止)
+
+### 8. プロジェクト固有の安全対策
+
+#### YouTube VJ React プロジェクト
+- `node_modules/` の削除は `npm install` で復旧可能だが避ける
+- `dist/` や `build/` ディレクトリは `npm run build` で再生成可能
+- `.env` ファイルの削除は設定の完全な消失につながるため特に注意
+- Docker 関連の操作は慎重に行う
+
+## まとめ
+
+Auto-run 環境では、**「疑わしきは実行せず」** の原則に従い、安全性を最優先に考えてコマンドを提案・実行してください。破壊的な操作が必要な場合は、明示的にユーザーの確認を求めるか、より安全な代替手段を提案してください。
