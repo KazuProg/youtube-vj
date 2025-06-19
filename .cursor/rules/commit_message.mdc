@@ -17,7 +17,7 @@ alwaysApply: true
 ## Commit Message Rules
 
 ### 1. Use Conventional Commits Format
-All commit messages must follow the [Conventional Commits](https://www.conventionalcommits.org) specification:
+All commit messages must follow the [Conventional Commits](mdc:https:/www.conventionalcommits.org) specification:
 
 ```
 <type>[optional scope]: <description>
@@ -122,6 +122,52 @@ When terminal commands fail (`Exit code: 1` with no output), follow these steps:
    - Always verify successful command execution before proceeding
    - When in doubt, use the `cd && command` pattern for reliability
    - Don't assume terminal state persists between operations
+
+#### **CRITICAL: Error Handling for Commit Message Generation**
+When terminal commands fail and diff cannot be retrieved:
+
+1. **DO NOT** guess or interpret changes based on conversation context
+2. **DO NOT** generate commit messages without actual diff information
+3. **IMMEDIATELY** report the error and stop commit message generation
+
+**Required Error Response Format:**
+
+**Case 1: Terminal commands completely failed**
+```
+❌ Cannot generate commit message: Terminal command failed
+
+Error: git diff/git status commands failed to execute
+Reason: [specific error details if available]
+
+Action Required: Please manually check git status and resolve terminal issues before requesting commit message generation.
+```
+
+**Case 2: Incomplete diff information**
+```
+❌ Cannot generate commit message: Insufficient diff information
+
+Error: git status information provided, but git diff output is missing
+Reason: Terminal commands failed to execute, and complete diff information is not available
+
+Action Required: Please provide the output of the following command to generate an accurate commit message:
+git diff --cached  (for staged changes)
+git diff HEAD      (for all changes since last commit)
+```
+
+**What NOT to do:**
+- ❌ "Based on conversation context, the changes seem to be..."
+- ❌ "I'll generate a commit message based on what we discussed..."
+- ❌ Generate commit messages with only git status information (file names only)
+- ❌ Any form of guessing or assumption without actual diff data
+
+**What TO do:**
+- ✅ Report the error clearly and immediately
+- ✅ Request user to manually provide both git status AND git diff output
+- ✅ Wait for complete diff information before proceeding
+- ✅ Only generate commit messages when BOTH file list AND actual changes are known
+- ✅ Always require diff data to understand what was actually changed
+
+This prevents incorrect or incomplete commit messages and ensures data integrity.
 
 ### 6. Examples
 
