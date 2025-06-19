@@ -167,7 +167,40 @@ git diff HEAD      (for all changes since last commit)
 - ✅ Only generate commit messages when BOTH file list AND actual changes are known
 - ✅ Always require diff data to understand what was actually changed
 
-This prevents incorrect or incomplete commit messages and ensures data integrity.
+**Case 3: Diff output truncated or incomplete**
+```
+⚠️ Cannot generate commit message: Git diff output incomplete
+
+Error: git diff --cached output was truncated, and retry with | cat also failed
+Reason: [specific error details]
+
+Action Taken: [describe the actual solution used]
+```
+
+**Special Case: New file (untracked → staged)**
+When dealing with new files that were previously untracked:
+
+1. **Acknowledge the special case clearly:**
+   - State that this is a new file (untracked → staged)
+   - Explain that for new files, the entire file content equals the diff
+
+2. **Required explanation format:**
+   ```
+   ⚠️ New file diff verification required
+
+   git diff --cached output is incomplete for new file [filename].
+   For new files, the entire file content represents the diff content.
+   
+   [After file content verification]
+   ✅ Verification complete: New file addition diff has been analyzed.
+   ```
+
+3. **NEVER bypass the explanation:**
+   - Even for new files, always explain why direct file reading was necessary
+   - Always acknowledge that diff information was incomplete
+   - Always explain the relationship between file content and diff for new files
+
+This prevents incorrect or incomplete commit messages and ensures data integrity and transparency.
 
 ### 6. Examples
 
