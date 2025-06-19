@@ -1,0 +1,176 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Documentation Synchronization Rules for YouTube VJ React Project
+
+## Overview
+
+This rule ensures that documentation remains up-to-date when source code functionality changes. When significant code changes are made, the system should proactively suggest updating related documentation.
+
+## Trigger Conditions
+
+### Code Changes That Require Documentation Updates
+
+**High Priority (Must Update):**
+- New features added (`feat:` commits)
+- API changes or breaking changes
+- New components, hooks, or utilities
+- Configuration changes
+- Dependency updates with behavioral changes
+
+**Medium Priority (Should Update):**
+- Bug fixes that affect user behavior (`fix:` commits)
+- Performance improvements (`perf:` commits)
+- Refactoring that changes architecture (`refactor:` commits)
+- New testing patterns (`test:` commits)
+
+**Low Priority (Consider Update):**
+- Style changes that affect UI (`style:` commits)
+- Build process changes (`build:` commits)
+- Developer workflow changes (`chore:` commits)
+
+## Documentation Targets
+
+### Primary Documentation Files
+- `README.md` - Main project documentation
+- `docs/` directory - Detailed documentation
+- `CHANGELOG.md` - Version history (if exists)
+- Component documentation comments (JSDoc)
+
+### Secondary Documentation
+- `package.json` - Scripts and dependencies description
+- Code comments in complex functions
+- Configuration file comments
+- Docker/deployment documentation
+
+## Automated Suggestions
+
+### When Code Changes Are Detected
+1. **Analyze the change scope:**
+   - Identify affected components/features
+   - Determine user-facing impact
+   - Assess API or interface changes
+
+2. **Suggest documentation updates:**
+   - Provide specific sections to update
+   - Suggest new documentation sections if needed
+   - Recommend updating examples or usage instructions
+
+3. **Generate documentation templates:**
+   - Create skeleton documentation for new features
+   - Suggest README section updates
+   - Provide JSDoc comment templates
+
+## Implementation Guidelines
+
+### For New Features
+```markdown
+When adding new features:
+1. Update README.md with:
+   - Feature description in main overview
+   - Usage examples
+   - Configuration options
+   - Integration instructions
+
+2. Add/update JSDoc comments:
+   - Component props documentation
+   - Function parameter descriptions
+   - Return value documentation
+   - Usage examples in comments
+
+3. Consider adding:
+   - Screenshots or GIFs for UI changes
+   - Code examples for new APIs
+   - Migration guides for breaking changes
+```
+
+### For Bug Fixes
+```markdown
+When fixing significant bugs:
+1. Update README.md if behavior changes
+2. Add clarifying comments in complex fix areas
+3. Update examples if they were incorrect
+4. Consider adding to troubleshooting section
+```
+
+### For Architecture Changes
+```markdown
+When refactoring architecture:
+1. Update project structure documentation
+2. Revise component relationship diagrams
+3. Update technical design decisions
+4. Refresh getting started guides
+```
+
+## Project-Specific Documentation Rules
+
+### YouTube VJ React App Specific
+- **MIDI Integration Changes:** Update MIDI controller documentation
+- **YouTube Player Changes:** Refresh player control documentation
+- **VJ Features:** Update VJ workflow and usage guides
+- **Security Changes:** Document new security measures for custom scripts
+- **Performance Optimizations:** Update performance considerations section
+
+### File-Specific Rules
+- **`src/components/`** changes → Update component documentation
+- **`src/hooks/`** changes → Update custom hooks documentation
+- **`src/stores/`** changes → Update state management documentation
+- **Configuration files** → Update setup and configuration guides
+
+## Automation Workflow
+
+1. **Detect Code Changes:**
+   - Monitor commits for functional changes
+   - Analyze diff for new/modified exports
+   - Check for breaking changes in APIs
+
+2. **Generate Documentation Suggestions:**
+   - Create specific update recommendations
+   - Provide templates for new documentation
+   - Suggest relevant examples
+
+3. **Validation:**
+   - Check if documentation files exist
+   - Verify documentation completeness
+   - Ensure examples are up-to-date
+
+## Best Practices
+
+### Writing Guidelines
+- Use clear, concise language
+- Include practical examples
+- Keep documentation close to code when possible
+- Use consistent formatting and structure
+
+### Maintenance
+- Regular documentation reviews
+- Update screenshots and examples
+- Remove outdated information
+- Keep dependencies and setup instructions current
+
+### User Experience
+- Focus on what users need to know
+- Provide quick start guides
+- Include troubleshooting sections
+- Maintain backwards compatibility information
+
+## Integration with Development Workflow
+
+### Pre-Commit Checks
+- Remind developers to update documentation
+- Suggest specific documentation updates
+- Flag commits that likely need documentation updates
+
+### Code Review Process
+- Include documentation updates in PR reviews
+- Check for consistency between code and docs
+- Ensure examples work as documented
+
+### Continuous Integration
+- Automated checks for documentation completeness
+- Link validation for documentation
+- Example code testing
+
+This rule ensures that the YouTube VJ React project maintains high-quality, up-to-date documentation that helps users understand and contribute to the project effectively.
