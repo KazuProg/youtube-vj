@@ -89,6 +89,7 @@ const YouTubeController = () => {
               max={playerStatus.duration}
               value={playerStatus.currentTime}
               readOnly
+              onChange={(e) => playerRef.current?.seekTo(Number(e.target.value), true)}
             />
           </label>
           <label>

@@ -5,6 +5,7 @@ import type { Options, YouTubePlayer as YTPlayerTypes } from "youtube-player/dis
 export interface YouTubePlayerRef {
   playVideo: () => void;
   pauseVideo: () => void;
+  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
   mute: () => void;
   unMute: () => void;
   setVolume: (volume: number) => void;
@@ -100,6 +101,8 @@ const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(
     useImperativeHandle(ref, () => ({
       playVideo: () => playerRef.current?.playVideo(),
       pauseVideo: () => playerRef.current?.pauseVideo(),
+      seekTo: (seconds: number, allowSeekAhead: boolean) =>
+        playerRef.current?.seekTo(seconds, allowSeekAhead),
       mute: () => setIsMuted(true),
       unMute: () => setIsMuted(false),
       setVolume,
