@@ -3,6 +3,11 @@ description:
 globs: 
 alwaysApply: true
 ---
+---
+description: Automated git commit workflow with conventional commits
+globs: 
+alwaysApply: true
+---
 # Automated Commit Workflow Rules for YouTube VJ React Project
 
 ## Overview
@@ -89,7 +94,7 @@ When users express commit intention using these phrases, the automated workflow 
    Generated commit message:
    [commit message]
    
-   Execute commit? (Auto-executing in 5 seconds...)
+   Execute commit? (Auto-executing...)
    ```
 
 2. **Execute commit**
@@ -118,7 +123,7 @@ When users express commit intention using these phrases, the automated workflow 
 
 ### User Confirmation
 - Always show generated commit message before execution
-- Provide 5-second countdown for abort opportunity
+- Present commit message for user review before execution
 - Allow manual message editing if requested
 
 ### Rollback Capability
@@ -135,6 +140,8 @@ When users express commit intention using these phrases, the automated workflow 
 - **perf**: Performance improvements
 - **test**: Testing additions/fixes
 - **chore**: Build/tool changes
+- **ci**: CI configuration and scripts
+- **build**: Build system and external dependencies
 
 ### Format Requirements
 - **English language only (英語のみ)** - CRITICAL REQUIREMENT
@@ -150,7 +157,7 @@ When users express commit intention using these phrases, the automated workflow 
 
 ### Skip Confirmation Mode
 If user adds "すぐに" or "immediately":
-- Skip 5-second countdown
+- Skip confirmation prompt
 - Execute commit immediately after message generation
 
 ### Manual Message Mode
