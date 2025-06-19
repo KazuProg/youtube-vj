@@ -1,317 +1,268 @@
 ---
-description: 
-globs: 
-alwaysApply: true
+description:
+globs:
+alwaysApply: false
 ---
-# Cursor Rules for YouTube VJ React Project
+# Automated Commit Workflow Rules for YouTube VJ React Project
 
-## Automatic Code Change Response
+## Overview
 
-### 0. Automatic Commit Message Generation
-- **ALWAYS generate commit messages after code changes are completed**
-- **Generate commit messages for EVERY set of changes made during development**
-- Do not wait for user request - proactively provide commit messages
-- This ensures proper documentation of all development progress
-- Commit message generation is MANDATORY for all code modifications
+This rule set defines an automated commit workflow that triggers when users indicate their intention to commit. The workflow includes staging verification, diff analysis, commit message generation, and commit execution.
 
-## Commit Message Rules
+## Workflow Triggers
 
-### 1. Use Conventional Commits Format
-All commit messages must follow the [Conventional Commits](mdc:https:/www.conventionalcommits.org) specification:
+### User Intent Keywords
+When users express commit intention using these phrases, the automated workflow should activate:
 
-```
-<type>[optional scope]: <description>
+**Japanese Triggers:**
+- "コミット"
+- "コミットして"
+- "コミットしたい"
+- "コミットお願いします"
+- "変更をコミット"
+- "これをコミット"
 
-[optional body]
+**English Triggers:**
+- "commit"
+- "commit this"
+- "commit changes"
+- "make a commit"
+- "please commit"
+- "commit these changes"
 
-[optional footer(s)]
-```
+## Automated Workflow Steps
 
-### 2. Commit Messages Must Be in English
-- All commit messages, including type, description, body, and footer must be written in English
-- Use clear, concise, and descriptive language
-
-### 3. Commit Types
-Use the following commit types:
-
-- **feat**: A new feature
-- **fix**: A bug fix
-- **docs**: Documentation only changes
-- **style**: Changes that do not affect the meaning of the code (formatting, etc.)
-- **refactor**: A code change that neither fixes a bug nor adds a feature
-- **perf**: A code change that improves performance
-- **test**: Adding missing tests or correcting existing tests
-- **chore**: Changes to the build process or auxiliary tools
-
-### 4. Breaking Changes
-- Use `!` after the type/scope for breaking changes: `feat!:` or `feat(api)!:`
-- Include `BREAKING CHANGE:` in the footer for detailed explanation
-
-### 5. Commit Message Generation Process
-When code changes are made, follow this process:
-
-#### MANDATORY: Check Diff Before Commit Message Generation
-1. **Always run `git status` and `git diff` (or `git diff --cached` for staged changes)**
-2. **Analyze the COMPLETE diff from the last commit, not just current conversation changes**
-3. **Generate commit message based on the actual file changes, not conversation context**
-4. **Commit message generation must be the FINAL step after all code changes are complete**
-
-#### Important Notes:
-- ❌ **DO NOT** base commit messages on single conversation changes
-- ✅ **DO** base commit messages on the cumulative diff from the last commit
-- ❌ **DO NOT** generate commit messages in the middle of development
-- ✅ **DO** generate commit messages only when ready to commit
-- ✅ **DO** generate commit messages automatically after each set of changes
-- ✅ **DO** provide commit messages proactively without waiting for user request
-- The commit message must reflect ALL changes since the last commit, even if they span multiple conversations
-
-#### **COMMIT MESSAGE OUTPUT FORMAT**
-- **ONLY output the commit message text itself**
-- **DO NOT include git commands (git add, git commit, etc.)**
-- **DO NOT include command examples unless specifically requested**
-- **Present the message in a clean, copy-paste ready format**
-
-#### Workflow:
-```bash
-# 1. Check current status
-git status
-
-# 2. Review all changes from last commit
-git diff HEAD
-
-# 3. Stage changes if needed
-git add .
-
-# 4. Review staged changes
-git diff --cached
-
-# 5. Generate commit message based on COMPLETE diff
-# 6. OUTPUT ONLY THE COMMIT MESSAGE TEXT
-```
-
-#### Terminal Command Troubleshooting
-When terminal commands fail (`Exit code: 1` with no output), follow these steps:
-
-1. **Immediate Retry Strategy:**
+### Step 1: Pre-Commit Validation
+1. **Verify working directory**
    ```bash
-   # If simple commands fail, try with explicit directory change
-   cd /home/kazuki/dev/youtube-vj-react && git status
-   cd /home/kazuki/dev/youtube-vj-react && git diff HEAD
+   cd /home/kazuki/dev/youtube-vj-react && pwd
    ```
 
-2. **Session Recovery:**
-   - If sequential commands fail, start a new terminal session
-   - Always include `cd` to ensure proper working directory
-   - Use `&&` to chain directory change with the intended command
-
-3. **Reliable Command Patterns:**
+2. **Check git repository status**
    ```bash
-   # Preferred pattern for critical commands
-   cd /home/kazuki/dev/youtube-vj-react && git diff HEAD
-   cd /home/kazuki/dev/youtube-vj-react && git status
-   cd /home/kazuki/dev/youtube-vj-react && git add .
+   git status
    ```
 
-4. **Troubleshooting Order:**
-   1. Try the command as-is first
-   2. If it fails, try with `cd && command` pattern
-   3. If still failing, check directory permissions and git repository status
-   4. Use `pwd` and `ls -la` to verify environment
+3. **Verify staged changes exist**
+   - If no changes staged: Ask user to specify files to stage
+   - If changes staged: Proceed to Step 2
 
-5. **Best Practices:**
-   - Always verify successful command execution before proceeding
-   - When in doubt, use the `cd && command` pattern for reliability
-   - Don't assume terminal state persists between operations
-
-#### **CRITICAL: Error Handling for Commit Message Generation**
-When terminal commands fail and diff cannot be retrieved:
-
-1. **DO NOT** guess or interpret changes based on conversation context
-2. **DO NOT** generate commit messages without actual diff information
-3. **IMMEDIATELY** report the error and stop commit message generation
-
-**Required Error Response Format:**
-
-**Case 1: Terminal commands completely failed**
-```
-❌ Cannot generate commit message: Terminal command failed
-
-Error: git diff/git status commands failed to execute
-Reason: [specific error details if available]
-
-Action Required: Please manually check git status and resolve terminal issues before requesting commit message generation.
-```
-
-**Case 2: Incomplete diff information**
-```
-❌ Cannot generate commit message: Insufficient diff information
-
-Error: git status information provided, but git diff output is missing
-Reason: Terminal commands failed to execute, and complete diff information is not available
-
-Action Required: Please provide the output of the following command to generate an accurate commit message:
-git diff --cached  (for staged changes)
-git diff HEAD      (for all changes since last commit)
-```
-
-**What NOT to do:**
-- ❌ "Based on conversation context, the changes seem to be..."
-- ❌ "I'll generate a commit message based on what we discussed..."
-- ❌ Generate commit messages with only git status information (file names only)
-- ❌ Any form of guessing or assumption without actual diff data
-
-**What TO do:**
-- ✅ Report the error clearly and immediately
-- ✅ Request user to manually provide both git status AND git diff output
-- ✅ Wait for complete diff information before proceeding
-- ✅ Only generate commit messages when BOTH file list AND actual changes are known
-- ✅ Always require diff data to understand what was actually changed
-
-**Case 3: Diff output truncated or incomplete**
-```
-⚠️ Cannot generate commit message: Git diff output incomplete
-
-Error: git diff --cached output was truncated, and retry with | cat also failed
-Reason: [specific error details]
-
-Action Taken: [describe the actual solution used]
-```
-
-**Special Case: New file (untracked → staged)**
-When dealing with new files that were previously untracked:
-
-1. **Acknowledge the special case clearly:**
-   - State that this is a new file (untracked → staged)
-   - Explain that for new files, the entire file content equals the diff
-
-2. **Required explanation format:**
+### Step 2: Staging Management
+1. **Check for unstaged changes**
+   ```bash
+   git diff --name-only
    ```
-   ⚠️ New file diff verification required
 
-   git diff --cached output is incomplete for new file [filename].
-   For new files, the entire file content represents the diff content.
+2. **Auto-stage if user indicates intent**
+   ```bash
+   git add .
+   ```
+
+3. **Confirm staging status**
+   ```bash
+   git status --porcelain
+   ```
+
+### Step 3: Diff Analysis
+1. **Retrieve complete diff**
+   ```bash
+   git diff --cached
+   ```
+
+2. **Fallback for truncated output**
+   ```bash
+   git diff --cached | cat
+   ```
+
+3. **Handle new files**
+   - For new files: Read file content directly
+   - Explain that file content equals diff for new files
+
+### Step 4: Commit Message Generation
+1. **Analyze diff content**
+   - Identify change types (feat, fix, docs, style, refactor, etc.)
+   - Determine scope if applicable
+   - Extract key changes for description
+
+2. **Generate Conventional Commit message**
+   ```
+   <type>[optional scope]: <description>
    
-   [After file content verification]
-   ✅ Verification complete: New file addition diff has been analyzed.
+   [optional body]
+   
+   [optional footer(s)]
    ```
 
-3. **NEVER bypass the explanation:**
-   - Even for new files, always explain why direct file reading was necessary
-   - Always acknowledge that diff information was incomplete
-   - Always explain the relationship between file content and diff for new files
+3. **Validate message format**
+   - Ensure English language
+   - Verify Conventional Commits compliance
+   - Check description clarity
 
-This prevents incorrect or incomplete commit messages and ensures data integrity and transparency.
+### Step 5: Commit Execution
+1. **Present commit message to user**
+   ```
+   Generated commit message:
+   [commit message]
+   
+   Execute commit? (Auto-executing in 5 seconds...)
+   ```
 
-### 6. Examples
+2. **Execute commit**
+   ```bash
+   git commit -m "[generated message]"
+   ```
 
-#### Good Examples:
-```
-feat: add real-time YouTube player status display
+3. **Confirm commit success**
+   ```bash
+   git log --oneline -n 1
+   ```
 
-- implement useState-based state management
-- add volume and playback rate sliders
-- display current time and duration
+## Error Handling
 
-feat!: update YouTubePlayer interface
-
-BREAKING CHANGE: PlayerStatus.state renamed to playerState
-
-refactor: consolidate useEffect hooks for better performance
-
-fix: resolve infinite loop in status updates
-
-docs: update README with installation instructions
-
-chore: update dependencies to latest versions
-```
-
-#### Bad Examples:
-```
-❌ update player        (not descriptive, no type)
-❌ 機能追加             (not in English)
-❌ feat player update   (missing colon after type)
-❌ FIX: broken stuff    (type should be lowercase)
-❌ fix: handle onChange event (based on single conversation, ignoring other changes)
+### Terminal Command Failures
+If commands fail, use reliable patterns:
+```bash
+cd /home/kazuki/dev/youtube-vj-react && [command]
 ```
 
-## Code Quality Rules
+### Diff Retrieval Issues
+1. **Truncated output**: Try with `| cat`
+2. **Complete failure**: Request manual diff input
+3. **New files**: Read file content directly with explanation
 
-### 1. TypeScript
-- Use TypeScript for all components and utilities
-- Define proper interfaces for props and state
-- Avoid `any` type unless absolutely necessary
+### Commit Failures
+1. **Pre-commit hook failures**: Show lint errors and stop
+2. **Merge conflicts**: Instruct user to resolve conflicts
+3. **No changes**: Inform user and abort
 
-### 2. React Best Practices
-- Use functional components with hooks
-- Prefer `useCallback` and `useMemo` for performance optimization
-- Keep components small and focused on single responsibility
+## Safety Measures
 
-### 3. Code Style
-- Use meaningful variable and function names
-- Write concise but readable code
-- Remove unused imports and variables
-- Use consistent formatting (handled by Biome)
+### Pre-Commit Checks
+- Ensure Husky hooks are functional
+- Verify lint-staged will run
+- Check for syntax errors
 
-### 4. Performance
-- Minimize re-renders by optimizing dependencies
-- Use `useCallback` for event handlers passed as props
-- Consolidate related state updates when possible
+### User Confirmation
+- Always show generated commit message before execution
+- Provide 5-second countdown for abort opportunity
+- Allow manual message editing if requested
 
-## VJ Application Specific Rules
+### Rollback Capability
+- Provide instructions for `git reset --soft HEAD^` if needed
+- Maintain git reflog for recovery
 
-### 1. MIDI Integration
-- All MIDI-related functionality should be secure and sandboxed
-- Use iframe with sandbox attributes for user script execution
-- Validate MIDI input before processing
+## Commit Message Standards
 
-### 2. YouTube Player
-- Maintain real-time state synchronization between player and UI
-- Handle YouTube API events properly
-- Ensure smooth playback control without interruptions
+### Types
+- **feat**: New feature
+- **fix**: Bug fix
+- **docs**: Documentation changes
+- **style**: Code formatting
+- **refactor**: Code restructuring
+- **perf**: Performance improvements
+- **test**: Testing additions/fixes
+- **chore**: Build/tool changes
 
-### 3. State Management
-- Use Zustand for global state management
-- Keep component-level state minimal and focused
-- Persist important settings to localStorage
+### Format Requirements
+- English language only
+- Clear, concise descriptions
+- Proper conventional commits structure
+- Informative body for complex changes
 
-## File Organization
+## Workflow Customization
 
+### Skip Confirmation Mode
+If user adds "すぐに" or "immediately":
+- Skip 5-second countdown
+- Execute commit immediately after message generation
+
+### Manual Message Mode
+If user requests custom message:
+- Generate suggested message
+- Ask for user's preferred message
+- Use user's message instead
+
+### Selective Staging
+If user specifies files:
+- Stage only specified files
+- Generate message based on selected changes
+
+## Integration with Existing Rules
+
+### Code Quality
+- All existing TypeScript and React rules apply
+- Biome formatting must pass
+- No syntax errors allowed
+
+### VJ Application Specific
+- MIDI integration security maintained
+- YouTube player state consistency verified
+- Zustand store integrity checked
+
+## Example Workflows
+
+### Successful Workflow
 ```
-src/
-├── components/          # Reusable UI components
-├── features/           # Feature-specific components
-├── hooks/              # Custom React hooks
-├── stores/             # Zustand stores
-├── types/              # TypeScript type definitions
-└── utils/              # Utility functions
+User: "コミットして"
+→ Check git status
+→ Stage changes (git add .)
+→ Analyze diff
+→ Generate: "feat: add new YouTube player controls"
+→ Execute commit
+→ Confirm success
 ```
 
-## Before Committing
+### Error Workflow
+```
+User: "コミット"
+→ Check git status
+→ No changes found
+→ Response: "No changes to commit. Please make changes first."
+```
 
-1. ✅ Ensure all TypeScript errors are resolved
-2. ✅ Run linter and fix any issues
-3. ✅ Test the functionality manually
-4. ✅ **MANDATORY: Run `git diff` to review ALL changes from last commit**
-5. ✅ **Use terminal troubleshooting steps if commands fail**
-6. ✅ **Generate commit message based on complete diff, not conversation context**
-7. ✅ Write a proper Conventional Commit message in English
-8. ✅ Review the diff to ensure only intended changes are included
-9. ✅ **AUTOMATICALLY provide commit message after code changes**
-10. ✅ **OUTPUT ONLY THE COMMIT MESSAGE TEXT, NOT GIT COMMANDS**
+### Lint Error Workflow
+```
+User: "コミットしたい"
+→ Stage changes
+→ Pre-commit hook fails
+→ Show lint errors
+→ Response: "Please fix lint errors before committing"
+```
 
-## Development Workflow
+## Performance Considerations
 
-### After Each Code Change Session:
-1. **Review all changes made**: `git diff HEAD` (use troubleshooting steps if needed)
-2. **Stage changes**: `git add .`
-3. **Generate commit message**: Based on complete diff analysis
-4. **Provide ONLY the commit message text**: Clean, copy-paste ready format
-5. **Document what was changed**: Clear explanation in Japanese for user understanding
+### Parallel Operations
+- Run git status and git diff in parallel when possible
+- Use efficient git commands
+- Minimize terminal round-trips
 
-### Terminal Session Management:
-- Monitor command success/failure status
-- Be prepared to start new sessions with `cd` commands
-- Use reliable command patterns for critical operations
-- Verify working directory before important git operations
+### Caching
+- Cache git status between operations
+- Reuse diff analysis if files unchanged
+- Optimize for common workflow patterns
 
-This ensures continuous documentation, proper version control, and reliable terminal operations throughout development. 
+## Monitoring and Feedback
+
+### Success Metrics
+- Commit success rate
+- Message quality scores
+- User satisfaction feedback
+
+### Error Tracking
+- Terminal command failure rates
+- Common error patterns
+- User intervention requirements
+
+## Continuous Improvement
+
+### Message Quality
+- Learn from user modifications
+- Improve pattern recognition
+- Enhance scope detection
+
+### Workflow Optimization
+- Reduce confirmation steps for trusted users
+- Streamline common patterns
+- Add shortcuts for frequent operations
+
+This automated workflow ensures consistent, high-quality commits while reducing manual overhead for the user.
