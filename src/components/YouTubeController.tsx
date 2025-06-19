@@ -17,7 +17,14 @@ const YouTubeController = () => {
   }, []);
 
   const getStateText = (state: number) =>
-    ["終了", "再生中", "一時停止", "バッファリング", "", "頭出し済み"][state + 1] || "不明";
+    ({
+      [-1]: "再生前",
+      0: "終了",
+      1: "再生中",
+      2: "一時停止",
+      3: "バッファリング",
+      5: "頭出し済み",
+    })[state] || "不明";
 
   const buttonStyle = {
     padding: "8px 16px",
