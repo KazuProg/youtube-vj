@@ -1,0 +1,154 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# VJ Web アプリケーション プロジェクト概要
+
+## 1. プロジェクト名
+
+YouTube VJ React App
+
+## 2. 目的
+
+YouTube iframe API を活用し、MIDI コントローラーによる柔軟な制御が可能な VJ (Video Jockey) Web アプリケーションの構築。特に、ユーザーがカスタムスクリプトを記述して MIDI コントロールを詳細にマッピングできる機能に焦点を当てています。
+
+## 3. 主要要件
+
+### 実装済み機能 ✅
+* **リアルタイムプレイヤー制御:** YouTube プレイヤーの状態（再生/一時停止、速度、音量、ミュート）をリアルタイムで表示・制御
+* **プログレス表示:** 動画の現在時間と総時間をリアルタイムで表示
+* **直感的UI制御:** スライダーベースの音量・速度制御とボタンによる基本操作
+* **状態同期:** プレイヤーとUIの完全な状態同期
+
+### 計画中機能 🚧
+* **柔軟なタイミング調整:** 動画の再生速度やテンポの動的な変更の高度化
+* **2つの動画切り替え:** 複数の YouTube 動画ソース間でのスムーズな切り替え
+* **MIDI コントローラー対応:** 外部 MIDI デバイスからの入力（ノブ、ボタンなど）によるアプリの制御
+* **カスタムスクリプトによる MIDI マッピング:**
+    * ユーザーが UI を通じて MIDI コントロールと VJ パラメータを割り当て可能
+    * 割り当てた動作を JavaScript で記述したカスタムスクリプトでさらに細かく調整可能
+    * **高いセキュリティ:** ユーザー提供のスクリプトを安全なサンドボックス環境（`iframe` + `sandbox` 属性 + `postMessage`）で実行
+
+### 将来構想 💭
+* **Chrome 拡張機能と連携したアプリ制御**
+* **サーバーサイド不要:** 全ての機能がクライアントサイドで完結
+
+## 4. 技術スタック
+
+* **フロントエンドフレームワーク:** React 18 with TypeScript
+* **ビルドツール:** Vite
+* **動画再生:** YouTube iframe API with react-youtube
+* **状態管理:** React hooks (useState, useEffect, useCallback)
+* **コードフォーマッター:** Biome
+* **将来予定:**
+  * **状態管理:** Zustand (VJ パラメータ、MIDI マッピング設定の管理)
+  * **MIDI 連携:** Web MIDI API
+  * **カスタムスクリプト実行環境:** `iframe` + `sandbox` 属性 + `window.postMessage`
+  * **ストレージ:** `localStorage` (MIDI マッピング設定の永続化)
+
+## 5. 現在のディレクトリ構成
+
+```
+src/
+├── App.tsx                    // アプリケーションのルートコンポーネント
+├── components/                // 再利用可能なUIコンポーネント
+│   ├── YouTubePlayer.tsx      // YouTube iframe APIラッパー（リアルタイム状態管理）
+│   └── YouTubeController.tsx  // プレイヤー制御UI（スライダーベース）
+├── assets/                    // 静的アセット
+├── types/                     // TypeScript型定義
+├── App.css                    // アプリケーションスタイル
+├── index.css                  // グローバルスタイル
+└── main.tsx                   // エントリーポイント
+```
+
+### 将来予定の構成
+
+```
+src/
+├── App.tsx                    
+├── components/                // 再利用可能なUIコンポーネント
+│   ├── YouTubePlayer.tsx      // 現在実装済み
+│   ├── YouTubeController.tsx  // 現在実装済み
+│   └── MidiMappingEditor.tsx  // MIDIマッピング設定画面
+├── hooks/                     // カスタムフック
+│   ├── useMidiController.ts   // Web MIDI APIラッパー
+│   └── useSafeScriptExecutor.ts // セキュアスクリプト実行
+├── stores/                    // Zustandストア
+│   ├── midiMappingStore.ts    // MIDIマッピング設定管理
+│   └── vjParamsStore.ts       // VJパラメータ管理
+├── features/                  // 機能別コンポーネント
+│   └── VJCore/
+│       └── VJScreen.tsx       // VJ画面メインコンポーネント
+└── public/                    // サンドボックス関連
+    ├── sandbox.html           // iframeソース
+    └── sandbox.js             // スクリプト実行ロジック
+```
+
+## 6. 現在の実装詳細
+
+### 6.1. YouTube プレイヤー（実装済み）
+
+**YouTubePlayer.tsx**
+* YouTube iframe API の完全ラッパー
+* リアルタイム状態管理（playerState, playbackRate, volume, isMuted, currentTime, duration）
+* useEffect による効率的な状態同期
+* useImperativeHandle による親コンポーネントへのAPI公開
+* onStatusChange コールバックによる状態通知
+
+**主要機能:**
+* 再生/一時停止制御
+* 音量・ミュート制御
+* 再生速度制御（0.25x - 2x、0.05刻み）
+* プログレス追跡（requestAnimationFrame使用）
+* 状態の完全同期
+
+### 6.2. ユーザーインターフェース（実装済み）
+
+**YouTubeController.tsx**
+* スライダーベースの直感的制御
+* リアルタイム状態表示
+* グリッドレイアウトによる情報表示
+* useCallback による最適化
+
+**UI要素:**
+* プログレスバー（読み取り専用）
+* 音量スライダー（0-100%）
+* 速度スライダー（0.25x-2x、0.05刻み）
+* 基本制御ボタン（Play/Pause/Mute/Unmute）
+* 状態表示パネル（状態/速度/音量/ミュート/時間）
+
+### 6.3. パフォーマンス最適化
+
+* useCallback によるコールバック関数のメモ化
+* useEffect の依存配列最適化
+* 冗長なハンドラー関数の削除（約60%のコード削減）
+* インライン関数によるメモリ効率改善
+
+## 7. 今後の実装予定
+
+### 7.1. MIDI コントローラー連携
+
+* `useMidiController.ts`: Web MIDI API の安全なラッパー
+* リアルタイム MIDI イベント処理
+* デバイス接続/切断の自動検出
+
+### 7.2. カスタムスクリプトマッピング
+
+* `MidiMappingEditor.tsx`: MIDI マッピング設定UI
+* `useSafeScriptExecutor.ts`: セキュアなスクリプト実行環境
+* `sandbox.html/js`: iframe ベースのスクリプト実行
+
+### 7.3. マルチチャンネル対応
+
+* 複数の YouTube プレイヤー管理
+* チャンネル間の切り替え機能
+* 独立した状態管理
+
+## 8. 開発方針
+
+* **セキュリティ第一:** ユーザースクリプトの安全な実行
+* **パフォーマンス重視:** 最小限の再レンダリング
+* **直感的UI:** スライダーベースの操作性
+* **型安全性:** TypeScript による厳密な型チェック
+* **保守性:** 簡潔で読みやすいコード
