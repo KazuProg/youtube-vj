@@ -65,6 +65,12 @@ When code changes are made, follow this process:
 - ✅ **DO** provide commit messages proactively without waiting for user request
 - The commit message must reflect ALL changes since the last commit, even if they span multiple conversations
 
+#### **COMMIT MESSAGE OUTPUT FORMAT**
+- **ONLY output the commit message text itself**
+- **DO NOT include git commands (git add, git commit, etc.)**
+- **DO NOT include command examples unless specifically requested**
+- **Present the message in a clean, copy-paste ready format**
+
 #### Workflow:
 ```bash
 # 1. Check current status
@@ -80,7 +86,7 @@ git add .
 git diff --cached
 
 # 5. Generate commit message based on COMPLETE diff
-# 6. Commit with proper Conventional Commits format
+# 6. OUTPUT ONLY THE COMMIT MESSAGE TEXT
 ```
 
 #### Terminal Command Troubleshooting
@@ -212,6 +218,7 @@ src/
 7. ✅ Write a proper Conventional Commit message in English
 8. ✅ Review the diff to ensure only intended changes are included
 9. ✅ **AUTOMATICALLY provide commit message after code changes**
+10. ✅ **OUTPUT ONLY THE COMMIT MESSAGE TEXT, NOT GIT COMMANDS**
 
 ## Development Workflow
 
@@ -219,7 +226,7 @@ src/
 1. **Review all changes made**: `git diff HEAD` (use troubleshooting steps if needed)
 2. **Stage changes**: `git add .`
 3. **Generate commit message**: Based on complete diff analysis
-4. **Provide ready-to-use commit command**: With proper Conventional Commits format
+4. **Provide ONLY the commit message text**: Clean, copy-paste ready format
 5. **Document what was changed**: Clear explanation in Japanese for user understanding
 
 ### Terminal Session Management:
