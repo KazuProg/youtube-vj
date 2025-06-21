@@ -1,9 +1,4 @@
 ---
-description: 
-globs: 
-alwaysApply: true
----
----
 description: Automated git commit workflow with conventional commits
 globs: 
 alwaysApply: true
@@ -58,15 +53,50 @@ When users express commit intention using these phrases, the automated workflow 
    - Example message: "ステージングされたファイルがありません。以下のコマンドでファイルをステージングしてください: `git add <filename>`"
    - Only proceed if staged changes exist
 
-### Step 3: Diff Analysis
-1. **Retrieve complete diff**
+### Step 3: Diff Analysis (CRITICAL - MANDATORY VALIDATION)
+
+**🚨 ABSOLUTE REQUIREMENT: MUST EXECUTE `git diff --cached` BEFORE ANY COMMIT OPERATION**
+
+1. **Mandatory Diff Verification (絶対必須)**
    ```bash
-   git diff --cached | cat
+   git status        # First: Check overall repository state
+   git diff --cached | cat  # Second: MUST review staged changes
    ```
 
-2. **Handle new files**
+2. **Critical Pre-Commit Validation Checklist**
+   - ✅ **MUST execute `git diff --cached` and analyze output**
+   - ✅ **MUST verify that commit message matches ONLY staged files**
+   - ✅ **MUST NOT include unstaged files in commit message**
+   - ✅ **MUST respect user's intentional staging decisions**
+   - ✅ **MUST generate commit message based ONLY on staged diff content**
+
+3. **Staging Verification Rules**
+   - **Never assume**: Always verify what is actually staged
+   - **User Intent**: Respect user's explicit staging choices
+   - **Accuracy**: Commit message must reflect ONLY staged changes
+   - **Verification**: If unsure, ask user to confirm staging intent
+
+4. **Diff Analysis Process**
+   - **Complete diff retrieval**: Full `git diff --cached` output
+   - **File-by-file analysis**: Review each staged file change
+   - **Change type identification**: Categorize modifications appropriately
+   - **Message alignment**: Ensure commit message describes actual staged changes
+
+5. **Error Prevention**
+   - **Mismatch Detection**: Flag if commit message doesn't match staged content
+   - **Missing Files**: Never reference unstaged files in commit message
+   - **User Communication**: Clearly explain what will be committed
+
+6. **Handle new files**
    - For new files: Read file content directly
    - Explain that file content equals diff for new files
+
+**VIOLATION CONSEQUENCES**: 
+- If this step is skipped or executed incorrectly, it results in:
+  - ❌ Inaccurate commit messages
+  - ❌ Unintended file inclusion/exclusion
+  - ❌ Loss of user trust and workflow integrity
+  - ❌ Violation of explicit user staging decisions
 
 ### Step 4: Commit Message Generation
 1. **Analyze diff content**
@@ -115,6 +145,31 @@ When users express commit intention using these phrases, the automated workflow 
 
 ## Safety Measures
 
+### Critical Workflow Execution Policy (最重要ポリシー)
+**🚨 ZERO TOLERANCE FOR WORKFLOW VIOLATIONS**
+
+1. **Mandatory Verification Sequence**
+   ```bash
+   # MUST ALWAYS execute in this exact order:
+   git status                    # 1. Check repository state
+   git diff --cached | cat       # 2. Review staged changes
+   # 3. Generate commit message based ONLY on staged diff
+   # 4. Execute commit
+   ```
+
+2. **Forbidden Actions**
+   - ❌ **NEVER commit without `git diff --cached` verification**
+   - ❌ **NEVER generate commit messages without reviewing actual staged changes**
+   - ❌ **NEVER assume what files are staged**
+   - ❌ **NEVER include unstaged files in commit descriptions**
+   - ❌ **NEVER override user's intentional staging decisions**
+
+3. **Required Verification Points**
+   - ✅ Staged files list matches commit message content
+   - ✅ Unstaged files are explicitly excluded from commit message
+   - ✅ User's staging intent is respected and preserved
+   - ✅ Commit message accurately reflects actual changes being committed
+
 ### Staging Policy (最重要ルール)
 - **絶対に `git add` を自動実行しない**
 - ユーザーが明示的にステージングしたファイルのみ処理
@@ -128,6 +183,12 @@ When users express commit intention using these phrases, the automated workflow 
 
 ### Rollback Capability
 - Provide instructions for `git reset --soft HEAD^` if needed
+
+### Diff Verification Accountability
+- **Every commit operation MUST be preceded by diff verification**
+- **Commit messages MUST be generated from actual staged content**
+- **No exceptions**: This rule applies to ALL commit operations
+- **Accountability**: Any violation of this policy is a critical workflow failure
 
 ## Commit Message Standards
 
@@ -173,7 +234,7 @@ If user requests custom message:
 User: "コミットして"
 → Check git status
 → Verify staged changes exist
-→ Analyze diff
+→ Analyze diff with git diff --cached
 → Generate: "feat: add new YouTube player controls"
 → Execute commit
 ```
@@ -195,4 +256,14 @@ User: "コミットしたい"
 → Response: "Please fix lint errors before committing"
 ```
 
-This automated workflow ensures consistent, high-quality commits while reducing manual overhead for the user.
+### Critical Verification Workflow (NEW)
+```
+User: "コミット"
+→ git status (check repository state)
+→ git diff --cached | cat (MANDATORY - review staged changes)
+→ Verify commit message matches ONLY staged files
+→ Generate accurate commit message
+→ Execute commit
+```
+
+This automated workflow ensures consistent, high-quality commits while maintaining strict verification standards and respecting user intent. 
