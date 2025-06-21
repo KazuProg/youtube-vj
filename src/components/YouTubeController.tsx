@@ -1,8 +1,9 @@
 import { useCallback, useRef, useState } from "react";
-import YouTubePlayer, { type YouTubePlayerRef, type PlayerStatus } from "./YouTubePlayer";
+import YTPlayerForVJ, { type YTPlayerForVJRef } from "./YTPlayerForVJ";
+import type { PlayerStatus } from "./YouTubePlayer";
 
 const YouTubeController = () => {
-  const playerRef = useRef<YouTubePlayerRef>(null);
+  const playerRef = useRef<YTPlayerForVJRef>(null);
   const [playerStatus, setPlayerStatus] = useState<PlayerStatus>({
     playerState: 0,
     playbackRate: 1,
@@ -37,7 +38,7 @@ const YouTubeController = () => {
   return (
     <div>
       <h2>YouTube Controller</h2>
-      <YouTubePlayer ref={playerRef} onStatusChange={handleStatusChange} />
+      <YTPlayerForVJ ref={playerRef} onStatusChange={handleStatusChange} />
 
       <div
         style={{
