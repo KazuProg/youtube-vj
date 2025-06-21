@@ -42,11 +42,7 @@
       "biome lint --write",
       "tsc --noEmit --skipLibCheck"
     ],
-    "*.{json,md,css,html}": [
-      "biome format --write"
-    ],
-    "*.{ts,tsx}": [
-      "bash -c 'echo \"🔍 TypeScript型チェック中...\"'"
-    ]
+    "*.{json,md,css,html}": ["biome format --write"],
+    "*.{ts,tsx}": ["bash -c 'echo \"🔍 TypeScript型チェック中...\"'"]
   }
 }
