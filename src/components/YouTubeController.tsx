@@ -94,8 +94,7 @@ const YouTubeController = () => {
               min="0"
               max={playerStatus.duration}
               value={playerStatus.currentTime}
-              readOnly
-              onChange={(e) => playerRef.current?.seekTo(Number(e.target.value), true)}
+              onChange={(e) => playerRef.current?.seekToWithSync(Number(e.target.value), true)}
             />
           </label>
           <label>
