@@ -1,0 +1,148 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Terminal Command Execution Rules
+
+## Overview
+
+This rule defines proper usage of the `run_terminal_cmd` tool, specifically focusing on the correct setting of the `is_background` parameter to prevent unnecessary waiting states and improve user experience.
+
+## Problem Description
+
+When using `run_terminal_cmd` with `is_background: false`, the system enters a waiting state after command completion, requiring the user to manually click "Move to Background" or "Skip" to continue. This creates poor user experience and workflow interruption.
+
+## Core Rule: Default to Background Execution
+
+**🚨 CRITICAL RULE: Use `is_background: true` for most terminal commands**
+
+## Command Categories and Settings
+
+### 1. Standard Commands (Use `is_background: true`)
+
+**Git Operations:**
+- `git status`
+- `git diff`, `git diff --cached`
+- `git commit -m "message"`
+- `git add`, `git push`, `git pull`
+- `git log`, `git branch`
+
+**Package Management:**
+- `npm install`, `npm run build`, `npm run test`
+- `yarn install`, `yarn build`
+- `pip install package`
+
+**File Operations:**
+- `ls`, `ls -la`, `pwd`
+- `cat file.txt`, `head file.txt`, `tail file.txt`
+- `cp`, `mv` (non-interactive)
+- `mkdir`, `rmdir`
+
+**Development Tools:**
+- `tsc --noEmit`, `npm run type-check`
+- `biome check`, `biome lint`
+- `docker ps`, `docker logs`
+
+### 2. Interactive Commands (Use `is_background: false`)
+
+**Only use for commands that REQUIRE user interaction:**
+- `sudo` commands requiring password
+- Text editors (`vim`, `nano`, `emacs`)
+- Interactive installers/setup wizards
+- Commands with confirmation prompts
+- Database shells (`mysql`, `psql`)
+
+### 3. Long-running Services (Use `is_background: true`)
+
+**Background services and development servers:**
+- `npm run dev`, `yarn dev`
+- `docker-compose up`
+- `python manage.py runserver`
+- Build processes and test suites
+
+## Implementation Examples
+
+### ✅ CORRECT Usage
+
+```xml
+<!-- Standard quick commands -->
+<invoke name="run_terminal_cmd">
+<parameter name="command">git status</parameter>
+<parameter name="explanation">Check repository state</parameter>
+<parameter name="is_background">true</parameter>
+</invoke>
+
+<!-- Build/test commands -->
+<invoke name="run_terminal_cmd">
+<parameter name="command">npm run build</parameter>
+<parameter name="explanation">Build the project</parameter>
+<parameter name="is_background">true</parameter>
+</invoke>
+
+<!-- Interactive command requiring user input -->
+<invoke name="run_terminal_cmd">
+<parameter name="command">sudo apt install package</parameter>
+<parameter name="explanation">Install requires password input</parameter>
+<parameter name="is_background">false</parameter>
+</invoke>
+```
+
+### ❌ INCORRECT Usage
+
+```xml
+<!-- DON'T do this for standard commands -->
+<invoke name="run_terminal_cmd">
+<parameter name="command">git status</parameter>
+<parameter name="explanation">Check repository state</parameter>
+<parameter name="is_background">false</parameter>
+</invoke>
+
+<!-- DON'T do this for file operations -->
+<invoke name="run_terminal_cmd">
+<parameter name="command">ls -la</parameter>
+<parameter name="explanation">List files</parameter>
+<parameter name="is_background">false</parameter>
+</invoke>
+```
+
+## Decision Tree
+
+When choosing `is_background` value, ask:
+
+1. **Does the command require user input?**
+   - YES → `is_background: false`
+   - NO → Continue to step 2
+
+2. **Is this a standard CLI command that finishes quickly?**
+   - YES → `is_background: true`
+   - NO → Continue to step 3
+
+3. **Is this a long-running process or service?**
+   - YES → `is_background: true`
+   - NO → Default to `is_background: true`
+
+## Impact on User Experience
+
+### With Correct Settings:
+- ✅ Smooth workflow without interruptions
+- ✅ Commands execute and continue automatically
+- ✅ Reduced manual intervention required
+
+### With Incorrect Settings:
+- ❌ Frequent "Move to Background" clicks required
+- ❌ Workflow interruptions and delays
+- ❌ Poor user experience
+
+## Exception Cases
+
+Rare cases where you might need `is_background: false` for non-interactive commands:
+- When you need to show command output immediately for debugging
+- When command failure needs immediate attention
+- When demonstrating command execution step-by-step
+
+## Default Rule Summary
+
+**ALWAYS default to `is_background: true` unless the command explicitly requires user interaction.**
+
+This rule ensures optimal user experience and workflow efficiency by eliminating unnecessary waiting states.
