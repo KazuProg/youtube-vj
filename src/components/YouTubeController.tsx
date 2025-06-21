@@ -13,6 +13,8 @@ const YouTubeController = () => {
     duration: 0,
   });
 
+  const syncKey = "vj-sync"; // 固定値として定義
+
   const handleStatusChange = useCallback((status: PlayerStatus) => {
     setPlayerStatus(status);
   }, []);
@@ -38,7 +40,12 @@ const YouTubeController = () => {
   return (
     <div>
       <h2>YouTube Controller</h2>
-      <YTPlayerForVJ ref={playerRef} onStatusChange={handleStatusChange} />
+      <YTPlayerForVJ
+        ref={playerRef}
+        onStatusChange={handleStatusChange}
+        syncMode="controller"
+        syncKey={syncKey}
+      />
 
       <div
         style={{
