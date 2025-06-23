@@ -1,22 +1,13 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import YouTubePlayer, { type YouTubePlayerRef, type PlayerStatus } from "./YouTubePlayer";
 
-// YouTubePlayerRefを継承して、VJ用のプレイヤー参照型を定義
-export interface YTPlayerForVJRef extends YouTubePlayerRef {
-  // 手動でのseek操作（同期位置更新付き）
-  seekToWithSync: (seconds: number, allowSeekAhead: boolean) => void;
-}
-
 // localStorage用の同期データ型
 interface VJSyncData {
   videoId: string;
-  playerState: number;
   playbackRate: number;
-  volume: number;
-  isMuted: boolean;
   currentTime: number;
-  duration: number;
   lastUpdated: number;
+  paused: boolean;
 }
 
 interface YTPlayerForVJProps {
@@ -26,7 +17,7 @@ interface YTPlayerForVJProps {
   syncKey?: string; // 同期用のキー（複数のプレイヤーを区別）
 }
 
-const YTPlayerForVJ = forwardRef<YTPlayerForVJRef, YTPlayerForVJProps>(
+const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
   (
     { onStatusChange, autoLoop = true, syncMode = "controller", syncKey = "vj-player-default" },
     ref
@@ -65,13 +56,10 @@ const YTPlayerForVJ = forwardRef<YTPlayerForVJRef, YTPlayerForVJProps>(
 
         const syncData: VJSyncData = {
           videoId,
-          playerState: status.playerState,
           playbackRate: status.playbackRate,
-          volume: status.volume,
-          isMuted: status.isMuted,
           currentTime: status.currentTime,
-          duration: status.duration,
           lastUpdated: Date.now(),
+          paused: status.playerState === 2,
         };
 
         try {
@@ -104,13 +92,10 @@ const YTPlayerForVJ = forwardRef<YTPlayerForVJRef, YTPlayerForVJProps>(
 
         const syncData: VJSyncData = {
           videoId,
-          playerState: currentStatus.playerState,
           playbackRate: currentStatus.playbackRate,
-          volume: currentStatus.volume,
-          isMuted: currentStatus.isMuted,
           currentTime: currentTime, // 手動変更された位置
-          duration: currentStatus.duration,
           lastUpdated: now,
+          paused: currentStatus.playerState === 2,
         };
 
         try {
@@ -146,31 +131,15 @@ const YTPlayerForVJ = forwardRef<YTPlayerForVJRef, YTPlayerForVJProps>(
 
     // 再生状態同期の処理
     const syncPlayerState = useCallback((player: YouTubePlayerRef, syncData: VJSyncData) => {
-      if (player.playerState !== syncData.playerState) {
-        if (syncData.playerState === 1) {
-          // YT.PlayerState.PLAYING
-          player.playVideo();
-        } else if (syncData.playerState === 2) {
-          // YT.PlayerState.PAUSED
-          player.pauseVideo();
-        }
+      if (syncData.paused) {
+        player.pauseVideo();
+      } else {
+        player.playVideo();
       }
     }, []);
 
     // 音量・ミュート状態同期の処理
     const syncAudio = useCallback((player: YouTubePlayerRef, syncData: VJSyncData) => {
-      if (player.isMuted !== syncData.isMuted) {
-        if (syncData.isMuted) {
-          player.mute();
-        } else {
-          player.unMute();
-        }
-      }
-
-      if (!syncData.isMuted && Math.abs(player.volume - syncData.volume) > 1) {
-        player.setVolume(syncData.volume);
-      }
-
       // 再生速度の同期
       if (Math.abs(player.playbackRate - syncData.playbackRate) > 0.01) {
         player.setPlaybackRate(syncData.playbackRate);
@@ -263,7 +232,6 @@ const YTPlayerForVJ = forwardRef<YTPlayerForVJRef, YTPlayerForVJProps>(
             playVideo: () => {},
             pauseVideo: () => {},
             seekTo: () => {},
-            seekToWithSync: () => {},
             mute: () => {},
             unMute: () => {},
             setVolume: () => {},
@@ -280,7 +248,7 @@ const YTPlayerForVJ = forwardRef<YTPlayerForVJRef, YTPlayerForVJProps>(
         return {
           ...baseRef,
           // 手動seek操作時は同期位置も更新
-          seekToWithSync: (seconds: number, allowSeekAhead: boolean) => {
+          seekTo: (seconds: number, allowSeekAhead: boolean) => {
             baseRef.seekTo(seconds, allowSeekAhead);
             saveSeekPosition(seconds);
           },

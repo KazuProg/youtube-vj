@@ -1,9 +1,9 @@
 import { useCallback, useRef, useState } from "react";
-import YTPlayerForVJ, { type YTPlayerForVJRef } from "./YTPlayerForVJ";
-import type { PlayerStatus } from "./YouTubePlayer";
+import YTPlayerForVJ from "./YTPlayerForVJ";
+import type { PlayerStatus, YouTubePlayerRef } from "./YouTubePlayer";
 
 const YouTubeController = () => {
-  const playerRef = useRef<YTPlayerForVJRef>(null);
+  const playerRef = useRef<YouTubePlayerRef>(null);
   const [playerStatus, setPlayerStatus] = useState<PlayerStatus>({
     playerState: 0,
     playbackRate: 1,
@@ -94,7 +94,7 @@ const YouTubeController = () => {
               min="0"
               max={playerStatus.duration}
               value={playerStatus.currentTime}
-              onChange={(e) => playerRef.current?.seekToWithSync(Number(e.target.value), true)}
+              onChange={(e) => playerRef.current?.seekTo(Number(e.target.value), true)}
             />
           </label>
           <label>
