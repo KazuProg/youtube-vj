@@ -282,48 +282,7 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       [saveSeekPosition]
     );
 
-    return (
-      <div style={{ position: "relative", display: "inline-block" }}>
-        {/* 同期モード表示 */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            background: syncMode === "controller" ? "rgba(0,255,0,0.8)" : "rgba(255,0,0,0.8)",
-            color: "white",
-            padding: "2px 8px",
-            fontSize: "12px",
-            zIndex: 1000,
-            borderRadius: "0 0 4px 0",
-          }}
-        >
-          {syncMode === "controller" ? "CONTROLLER" : "PROJECTION"}
-        </div>
-
-        {/* 投影画面の場合は同期状態を表示 */}
-        {syncMode === "projection" && (
-          <div
-            style={{
-              position: "absolute",
-              top: "30px",
-              left: "0",
-              background: "rgba(0,0,0,0.7)",
-              color: "#fff",
-              padding: "4px 8px",
-              fontSize: "10px",
-              zIndex: 999,
-              borderRadius: "0 4px 4px 0",
-              maxWidth: "200px",
-            }}
-          >
-            最終同期: {new Date(lastSyncTime).toLocaleTimeString()}
-          </div>
-        )}
-
-        <YouTubePlayer ref={youtubePlayerRef} onStatusChange={handleStatusChange} />
-      </div>
-    );
+    return <YouTubePlayer ref={youtubePlayerRef} onStatusChange={handleStatusChange} />;
   }
 );
 
