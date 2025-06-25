@@ -50,45 +50,39 @@ function App() {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("mode") === "projection") {
     return (
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#000",
-          color: "#fff",
-        }}
-      >
-        <div style={{ textAlign: "center", width: "100%" }}>
-          {/* 全画面ボタン */}
-          <button
-            type="button"
-            onClick={() => {
-              if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-              }
-            }}
-            style={{
-              position: "absolute",
-              top: "10px",
-              right: "10px",
-              padding: "8px 16px",
-              backgroundColor: "rgba(255,255,255,0.2)",
-              color: "white",
-              border: "1px solid rgba(255,255,255,0.3)",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "12px",
-              zIndex: 1000,
-            }}
-          >
-            🔳 全画面表示
-          </button>
+      <>
+        {/* 全画面ボタン */}
+        <button
+          type="button"
+          onClick={() => {
+            if (document.documentElement.requestFullscreen) {
+              document.documentElement.requestFullscreen();
+            }
+          }}
+          style={{
+            position: "fixed",
+            top: "10px",
+            right: "10px",
+            padding: "8px 16px",
+            backgroundColor: "rgba(255,255,255,0.2)",
+            color: "white",
+            border: "1px solid rgba(255,255,255,0.3)",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "12px",
+            zIndex: 1000,
+          }}
+        >
+          🔳 全画面表示
+        </button>
 
-          <YTPlayerForVJ syncMode="projection" syncKey={LOCAL_STORAGE_KEY.player} autoLoop={true} />
-        </div>
-      </div>
+        <YTPlayerForVJ
+          style={{ position: "fixed", inset: 0 }}
+          syncMode="projection"
+          syncKey={LOCAL_STORAGE_KEY.player}
+          autoLoop={true}
+        />
+      </>
     );
   }
 

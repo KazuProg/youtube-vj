@@ -43,6 +43,7 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
     <div>
       <h2>YouTube Controller</h2>
       <YTPlayerForVJ
+        style={{ width: "640px", height: "360px" }}
         ref={playerRef}
         onStatusChange={handleStatusChange}
         syncMode="controller"

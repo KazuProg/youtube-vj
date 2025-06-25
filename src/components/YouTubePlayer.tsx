@@ -28,11 +28,12 @@ export interface PlayerStatus {
 }
 
 interface YouTubePlayerProps {
+  style?: React.CSSProperties;
   onStatusChange?: (status: PlayerStatus) => void;
 }
 
 const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(
-  ({ onStatusChange }, ref) => {
+  ({ style, onStatusChange }, ref) => {
     const playerRef = useRef<YTPlayerTypes | null>(null);
     const [playerState, setPlayerState] = useState(0);
     const [playbackRate, setPlaybackRate] = useState(1);
@@ -117,11 +118,12 @@ const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(
 
     return (
       <YouTube
+        style={style}
         videoId="42jhMWfKY9Y"
         opts={
           {
-            width: "640",
-            height: "360",
+            width: "100%",
+            height: "100%",
             playerVars: { autoplay: 1 },
           } as Options
         }

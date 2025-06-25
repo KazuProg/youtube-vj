@@ -11,6 +11,7 @@ interface VJSyncData {
 }
 
 interface YTPlayerForVJProps {
+  style?: React.CSSProperties;
   onStatusChange?: (status: PlayerStatus) => void;
   autoLoop?: boolean; // VJ用: ループ機能のオン/オフ
   syncMode?: "controller" | "projection"; // 同期モード: コントローラー画面か投影画面か
@@ -19,7 +20,13 @@ interface YTPlayerForVJProps {
 
 const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
   (
-    { onStatusChange, autoLoop = true, syncMode = "controller", syncKey = "vj-player-default" },
+    {
+      style,
+      onStatusChange,
+      autoLoop = true,
+      syncMode = "controller",
+      syncKey = "vj-player-default",
+    },
     ref
   ) => {
     const youtubePlayerRef = useRef<YouTubePlayerRef>(null);
@@ -281,7 +288,9 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       [saveSeekPosition]
     );
 
-    return <YouTubePlayer ref={youtubePlayerRef} onStatusChange={handleStatusChange} />;
+    return (
+      <YouTubePlayer style={style} ref={youtubePlayerRef} onStatusChange={handleStatusChange} />
+    );
   }
 );
 
