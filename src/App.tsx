@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import YTPlayerForVJ from "./components/YTPlayerForVJ";
 import YouTubeController from "./components/YouTubeController";
 import "./App.css";
+import { LOCAL_STORAGE_KEY } from "./constants";
 
 function App() {
   const [projectionWindow, setProjectionWindow] = useState<Window | null>(null);
@@ -23,8 +24,7 @@ function App() {
 
   // 別ウィンドウで投影画面を開く
   const openProjectionWindow = () => {
-    const syncKey = "vj-sync";
-    const projectionUrl = `${window.location.origin}${window.location.pathname}?mode=projection&syncKey=${syncKey}`;
+    const projectionUrl = `${window.location.origin}${window.location.pathname}?mode=projection`;
 
     const newWindow = window.open(
       projectionUrl,
@@ -49,8 +49,6 @@ function App() {
   // 投影画面専用の表示（URLパラメータでmode=projectionの場合）
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("mode") === "projection") {
-    const syncKey = urlParams.get("syncKey") || "vj-sync";
-
     return (
       <div
         style={{
@@ -88,7 +86,7 @@ function App() {
             🔳 全画面表示
           </button>
 
-          <YTPlayerForVJ syncMode="projection" syncKey={syncKey} autoLoop={true} />
+          <YTPlayerForVJ syncMode="projection" syncKey={LOCAL_STORAGE_KEY.player} autoLoop={true} />
         </div>
       </div>
     );
@@ -166,7 +164,7 @@ function App() {
       </div>
 
       {/* コントローラー */}
-      <YouTubeController />
+      <YouTubeController localStorageKey={LOCAL_STORAGE_KEY.player} />
     </div>
   );
 }

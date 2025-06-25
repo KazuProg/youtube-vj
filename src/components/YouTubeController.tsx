@@ -2,7 +2,11 @@ import { useCallback, useRef, useState } from "react";
 import YTPlayerForVJ from "./YTPlayerForVJ";
 import type { PlayerStatus, YouTubePlayerRef } from "./YouTubePlayer";
 
-const YouTubeController = () => {
+type YouTubeControllerProps = {
+  localStorageKey: string;
+};
+
+const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
   const playerRef = useRef<YouTubePlayerRef>(null);
   const [playerStatus, setPlayerStatus] = useState<PlayerStatus>({
     playerState: 0,
@@ -12,8 +16,6 @@ const YouTubeController = () => {
     currentTime: 0,
     duration: 0,
   });
-
-  const syncKey = "vj-sync"; // 固定値として定義
 
   const handleStatusChange = useCallback((status: PlayerStatus) => {
     setPlayerStatus(status);
@@ -44,7 +46,7 @@ const YouTubeController = () => {
         ref={playerRef}
         onStatusChange={handleStatusChange}
         syncMode="controller"
-        syncKey={syncKey}
+        syncKey={localStorageKey}
       />
 
       <div

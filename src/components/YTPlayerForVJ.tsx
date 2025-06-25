@@ -25,7 +25,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
     const youtubePlayerRef = useRef<YouTubePlayerRef>(null);
     const [lastSyncTime, setLastSyncTime] = useState(0);
     const syncIntervalRef = useRef<number | null>(null);
-    const storageKey = `vj-sync-${syncKey}`;
 
     // 前回の状態を記録（変更検知用）
     const previousStatus = useRef<PlayerStatus | null>(null);
@@ -63,12 +62,12 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
         };
 
         try {
-          localStorage.setItem(storageKey, JSON.stringify(syncData));
+          localStorage.setItem(syncKey, JSON.stringify(syncData));
         } catch (error) {
           console.error("Error saving to localStorage:", error);
         }
       },
-      [syncMode, storageKey]
+      [syncMode, syncKey]
     );
 
     // 手動での再生位置変更時の同期（seekTo操作用）
@@ -99,18 +98,18 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
         };
 
         try {
-          localStorage.setItem(storageKey, JSON.stringify(syncData));
+          localStorage.setItem(syncKey, JSON.stringify(syncData));
         } catch (error) {
           console.error("Error saving seek position:", error);
         }
       },
-      [syncMode, storageKey]
+      [syncMode, syncKey]
     );
 
     // localStorageから状態を読み込み
     const loadFromStorage = useCallback((): VJSyncData | null => {
       try {
-        const data = localStorage.getItem(storageKey);
+        const data = localStorage.getItem(syncKey);
         if (data) {
           const syncData: VJSyncData = JSON.parse(data);
           return syncData;
@@ -119,7 +118,7 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
         console.error("Error loading from localStorage:", error);
       }
       return null;
-    }, [storageKey]);
+    }, [syncKey]);
 
     // 時間同期の処理
     const syncTime = useCallback((player: YouTubePlayerRef, syncData: VJSyncData) => {
@@ -201,7 +200,7 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
     useEffect(() => {
       if (syncMode === "projection") {
         const handleStorageChange = (e: StorageEvent) => {
-          if (e.key === storageKey && e.newValue) {
+          if (e.key === syncKey && e.newValue) {
             syncFromStorage();
           }
         };
@@ -209,7 +208,7 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
         window.addEventListener("storage", handleStorageChange);
         return () => window.removeEventListener("storage", handleStorageChange);
       }
-    }, [syncMode, storageKey, syncFromStorage]);
+    }, [syncMode, syncKey, syncFromStorage]);
 
     const handleStatusChange = useCallback(
       (status: PlayerStatus) => {
