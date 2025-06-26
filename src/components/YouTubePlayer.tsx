@@ -124,7 +124,13 @@ const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(
           {
             width: "100%",
             height: "100%",
-            playerVars: { autoplay: 1 },
+            playerVars: {
+              autoplay: 1,
+              controls: 0,
+              disablekb: 1,
+              // biome-ignore lint/style/useNamingConvention: YouTube API official parameter name
+              iv_load_policy: 3,
+            },
           } as Options
         }
         onReady={handleReady}
