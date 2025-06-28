@@ -50,39 +50,12 @@ function App() {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("mode") === "projection") {
     return (
-      <>
-        {/* 全画面ボタン */}
-        <button
-          type="button"
-          onClick={() => {
-            if (document.documentElement.requestFullscreen) {
-              document.documentElement.requestFullscreen();
-            }
-          }}
-          style={{
-            position: "fixed",
-            top: "10px",
-            right: "10px",
-            padding: "8px 16px",
-            backgroundColor: "rgba(255,255,255,0.2)",
-            color: "white",
-            border: "1px solid rgba(255,255,255,0.3)",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "12px",
-            zIndex: 1000,
-          }}
-        >
-          🔳 全画面表示
-        </button>
-
-        <YTPlayerForVJ
-          style={{ position: "fixed", inset: 0 }}
-          syncMode="projection"
-          syncKey={LOCAL_STORAGE_KEY.player}
-          autoLoop={true}
-        />
-      </>
+      <YTPlayerForVJ
+        style={{ position: "fixed", inset: 0 }}
+        syncMode="projection"
+        syncKey={LOCAL_STORAGE_KEY.player}
+        autoLoop={true}
+      />
     );
   }
 
