@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
 import YouTubePlayer, { type YouTubePlayerRef, type PlayerStatus } from "./YouTubePlayer";
 
 // localStorage用の同期データ型
@@ -30,7 +30,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
     ref
   ) => {
     const youtubePlayerRef = useRef<YouTubePlayerRef>(null);
-    const [lastSyncTime, setLastSyncTime] = useState(0);
     const syncIntervalRef = useRef<number | null>(null);
 
     // 前回の状態を記録（変更検知用）
@@ -159,37 +158,32 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
     }, []);
 
     // 投影画面での同期処理
-    const syncFromStorage = useCallback(
-      (forceSync = false) => {
-        if (syncMode !== "projection" || !youtubePlayerRef.current) {
-          return;
+    const syncFromStorage = useCallback(() => {
+      if (syncMode !== "projection" || !youtubePlayerRef.current) {
+        return;
+      }
+
+      const syncData = loadFromStorage();
+      if (!syncData) {
+        return;
+      }
+
+      try {
+        const player = youtubePlayerRef.current;
+
+        // プレイヤーが準備完了しているかチェック
+        if (player.duration <= 0) {
+          return; // プレイヤー未準備の場合はスキップ
         }
 
-        const syncData = loadFromStorage();
-        if (!syncData || (!forceSync && syncData.lastUpdated <= lastSyncTime)) {
-          return;
-        }
-
-        try {
-          const player = youtubePlayerRef.current;
-
-          // プレイヤーが準備完了しているかチェック
-          if (player.duration <= 0) {
-            return; // プレイヤー未準備の場合はスキップ
-          }
-
-          // 各同期処理を実行
-          syncTime(player, syncData);
-          syncPlayerState(player, syncData);
-          syncAudio(player, syncData);
-
-          setLastSyncTime(syncData.lastUpdated);
-        } catch (error) {
-          console.error("Error during sync:", error);
-        }
-      },
-      [syncMode, loadFromStorage, lastSyncTime, syncTime, syncPlayerState, syncAudio]
-    );
+        // 各同期処理を実行
+        syncTime(player, syncData);
+        syncPlayerState(player, syncData);
+        syncAudio(player, syncData);
+      } catch (error) {
+        console.error("Error during sync:", error);
+      }
+    }, [syncMode, loadFromStorage, syncTime, syncPlayerState, syncAudio]);
 
     // 定期的な同期処理（投影画面用）
     useEffect(() => {
@@ -246,7 +240,7 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
     useEffect(() => {
       if (syncMode === "projection") {
         const timeoutId = setTimeout(() => {
-          syncFromStorage(true); // 強制同期でlastSyncTime制限を無視
+          syncFromStorage(); // 強制同期でlastSyncTime制限を無視
         }, 3000); // 3秒遅延でプレイヤーの初期化完了を待つ
 
         return () => clearTimeout(timeoutId);
