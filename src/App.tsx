@@ -52,7 +52,6 @@ function App() {
     return (
       <YTPlayerForVJ
         style={{ position: "fixed", inset: 0 }}
-        syncMode="projection"
         syncKey={LOCAL_STORAGE_KEY.player}
         autoLoop={true}
       />

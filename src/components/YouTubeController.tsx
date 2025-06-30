@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import YTPlayerForVJ from "./YTPlayerForVJ";
+import YTPlayerForController from "./YTPlayerForController";
 import type { PlayerStatus, YouTubePlayerRef } from "./YouTubePlayer";
 
 type YouTubeControllerProps = {
@@ -42,11 +42,10 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
   return (
     <div>
       <h2>YouTube Controller</h2>
-      <YTPlayerForVJ
+      <YTPlayerForController
         style={{ width: "640px", height: "360px" }}
         ref={playerRef}
         onStatusChange={handleStatusChange}
-        syncMode="controller"
         syncKey={localStorageKey}
       />
 
