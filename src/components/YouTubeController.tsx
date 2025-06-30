@@ -6,6 +6,15 @@ type YouTubeControllerProps = {
   localStorageKey: string;
 };
 
+// localStorage用の同期データ型（投影画面用：音量・ミュート除外）
+interface VJSyncData {
+  videoId: string;
+  playbackRate: number;
+  currentTime: number;
+  lastUpdated: number;
+  paused: boolean;
+}
+
 const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
   const playerRef = useRef<YouTubePlayerRef>(null);
   const [playerStatus, setPlayerStatus] = useState<PlayerStatus>({
@@ -16,6 +25,31 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
     currentTime: 0,
     duration: 0,
   });
+
+  // localStorageに状態を書き込む関数
+  const writeToStorage = useCallback(
+    (updates: Partial<Omit<VJSyncData, "videoId" | "lastUpdated">> = {}) => {
+      const beforeData = {
+        playbackRate: playerStatus.playbackRate,
+        currentTime: playerStatus.currentTime,
+        paused: playerStatus.playerState === 2,
+      };
+
+      const syncData: VJSyncData = {
+        videoId: "42jhMWfKY9Y",
+        lastUpdated: Date.now(),
+        ...beforeData,
+        ...updates,
+      };
+
+      try {
+        localStorage.setItem(localStorageKey, JSON.stringify(syncData));
+      } catch (error) {
+        console.error("Error writing to localStorage:", error);
+      }
+    },
+    [localStorageKey, playerStatus]
+  );
 
   const handleStatusChange = useCallback((status: PlayerStatus) => {
     setPlayerStatus(status);
@@ -65,10 +99,11 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
               ...buttonStyle,
               backgroundColor: playerStatus.playerState === 1 ? "#f44336" : "#4CAF50",
             }}
-            onClick={() =>
-              playerStatus.playerState === 1
-                ? playerRef.current?.pauseVideo()
-                : playerRef.current?.playVideo()
+            onClick={
+              () =>
+                playerStatus.playerState === 1
+                  ? writeToStorage({ paused: true }) // 一時停止
+                  : writeToStorage({ paused: false }) // 再生
             }
           >
             {playerStatus.playerState === 1 ? "Pause" : "Play"}
@@ -79,9 +114,15 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
               ...buttonStyle,
               backgroundColor: playerStatus.isMuted ? "#2196F3" : "#ff9800",
             }}
-            onClick={() =>
-              playerStatus.isMuted ? playerRef.current?.unMute() : playerRef.current?.mute()
-            }
+            onClick={() => {
+              const newMuted = !playerStatus.isMuted;
+              // 直接操作のみ（localStorageには保存しない）
+              if (newMuted) {
+                playerRef.current?.mute();
+              } else {
+                playerRef.current?.unMute();
+              }
+            }}
           >
             {playerStatus.isMuted ? "Unmute" : "Mute"}
           </button>
@@ -96,7 +137,7 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
               min="0"
               max={playerStatus.duration}
               value={playerStatus.currentTime}
-              onChange={(e) => playerRef.current?.seekTo(Number(e.target.value), true)}
+              onChange={(e) => writeToStorage({ currentTime: Number(e.target.value) })}
             />
           </label>
           <label>
@@ -106,7 +147,11 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
               min="0"
               max="100"
               value={playerStatus.volume}
-              onChange={(e) => playerRef.current?.setVolume(Number(e.target.value))}
+              onChange={(e) => {
+                const newVolume = Number(e.target.value);
+                // 直接操作のみ（localStorageには保存しない）
+                playerRef.current?.setVolume(newVolume);
+              }}
             />
           </label>
           <label>
@@ -117,7 +162,7 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
               max="2"
               step="0.05"
               value={playerStatus.playbackRate}
-              onChange={(e) => playerRef.current?.setPlaybackRate(Number(e.target.value))}
+              onChange={(e) => writeToStorage({ playbackRate: Number(e.target.value) })}
             />
           </label>
         </div>

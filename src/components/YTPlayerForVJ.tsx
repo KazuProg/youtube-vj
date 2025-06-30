@@ -59,7 +59,7 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       }
     }, []);
 
-    // 再生速度同期の処理（投影画面：音量・ミュートは除外）
+    // 再生速度同期の処理（投影画面専用：音量制御なし）
     const syncPlaybackRate = useCallback((player: YouTubePlayerRef, syncData: VJSyncData) => {
       // 再生速度の同期のみ
       if (Math.abs(player.playbackRate - syncData.playbackRate) > 0.01) {
@@ -128,11 +128,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
           } catch (error) {
             console.error("Error during VJ video loop:", error);
           }
-        }
-
-        // 投影画面：常にミュート状態を維持
-        if (!status.isMuted && youtubePlayerRef.current) {
-          youtubePlayerRef.current.mute();
         }
 
         // 親コンポーネントに状態変更を通知

@@ -1,15 +1,14 @@
 import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
-import YouTubePlayer, { type YouTubePlayerRef, type PlayerStatus } from "./YouTubePlayer";
+import YTPlayerForVJ from "./YTPlayerForVJ";
+import type { PlayerStatus, YouTubePlayerRef } from "./YouTubePlayer";
 
-// localStorage用の同期データ型（コントローラー用：音量・ミュート含む）
+// localStorage用の同期データ型（投影画面用：音量・ミュート除外）
 interface VJSyncData {
   videoId: string;
   playbackRate: number;
   currentTime: number;
   lastUpdated: number;
   paused: boolean;
-  volume: number;
-  isMuted: boolean;
 }
 
 interface YTPlayerForControllerProps {
@@ -31,7 +30,7 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
     },
     ref
   ) => {
-    const youtubePlayerRef = useRef<YouTubePlayerRef>(null);
+    const ytPlayerRef = useRef<YouTubePlayerRef>(null);
     const previousStatus = useRef<PlayerStatus | null>(null);
     const lastSeekTime = useRef<number>(0);
 
@@ -46,8 +45,6 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
           !prev ||
           prev.playerState !== status.playerState || // 再生状態変更
           Math.abs(prev.playbackRate - status.playbackRate) > 0.01 || // 速度変更
-          Math.abs(prev.volume - status.volume) > 1 || // 音量変更
-          prev.isMuted !== status.isMuted || // ミュート状態変更
           Math.abs(prev.duration - status.duration) > 1; // 動画変更
 
         if (!shouldSync) {
@@ -60,8 +57,6 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
           currentTime: status.currentTime,
           lastUpdated: Date.now(),
           paused: status.playerState === 2,
-          volume: status.volume,
-          isMuted: status.isMuted,
         };
 
         try {
@@ -94,8 +89,6 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
           currentTime: currentTime, // 手動変更された位置
           lastUpdated: now,
           paused: currentStatus.playerState === 2,
-          volume: currentStatus.volume,
-          isMuted: currentStatus.isMuted,
         };
 
         try {
@@ -110,10 +103,10 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
     const handleStatusChange = useCallback(
       (status: PlayerStatus) => {
         // VJ用: 動画が終了したら自動ループ（オプション有効時）
-        if (autoLoop && status.playerState === 0 && youtubePlayerRef.current) {
+        if (autoLoop && status.playerState === 0 && ytPlayerRef.current) {
           try {
-            youtubePlayerRef.current.seekTo(0, true);
-            youtubePlayerRef.current.playVideo();
+            ytPlayerRef.current.seekTo(0, true);
+            ytPlayerRef.current.playVideo();
           } catch (error) {
             console.error("Error during VJ video loop:", error);
           }
@@ -135,7 +128,7 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
     useImperativeHandle(
       ref,
       () => {
-        const baseRef = youtubePlayerRef.current;
+        const baseRef = ytPlayerRef.current;
         if (!baseRef) {
           return {
             playVideo: () => {},
@@ -167,7 +160,12 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
     );
 
     return (
-      <YouTubePlayer style={style} ref={youtubePlayerRef} onStatusChange={handleStatusChange} />
+      <YTPlayerForVJ
+        style={style}
+        ref={ytPlayerRef}
+        onStatusChange={handleStatusChange}
+        syncKey={syncKey}
+      />
     );
   }
 );
