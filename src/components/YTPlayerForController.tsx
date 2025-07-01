@@ -1,4 +1,5 @@
 import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import { useXWinSync } from "../hooks/useXWinSync";
 import YTPlayerForVJ from "./YTPlayerForVJ";
 import type { PlayerStatus, YouTubePlayerRef } from "./YouTubePlayer";
 
@@ -34,7 +35,10 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
     const previousStatus = useRef<PlayerStatus | null>(null);
     const lastSeekTime = useRef<number>(0);
 
-    // localStorageに状態を保存（コントローラー専用）
+    // useXWinSyncフックを使用
+    const { writeToStorage: writeToXWinSync } = useXWinSync(syncKey);
+
+    // 状態を保存（コントローラー専用）
     const saveToStorage = useCallback(
       (status: PlayerStatus, forceSync = false) => {
         const prev = previousStatus.current;
@@ -59,13 +63,9 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
           paused: status.playerState === 2,
         };
 
-        try {
-          localStorage.setItem(syncKey, JSON.stringify(syncData));
-        } catch (error) {
-          console.error("Error saving to localStorage:", error);
-        }
+        writeToXWinSync(syncData);
       },
-      [syncKey, videoId]
+      [writeToXWinSync, videoId]
     );
 
     // 手動での再生位置変更時の同期（seekTo操作用）
@@ -91,13 +91,9 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
           paused: currentStatus.playerState === 2,
         };
 
-        try {
-          localStorage.setItem(syncKey, JSON.stringify(syncData));
-        } catch (error) {
-          console.error("Error saving seek position:", error);
-        }
+        writeToXWinSync(syncData);
       },
-      [syncKey, videoId]
+      [writeToXWinSync, videoId]
     );
 
     const handleStatusChange = useCallback(

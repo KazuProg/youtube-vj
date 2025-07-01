@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import { useXWinSync } from "../hooks/useXWinSync";
 import YTPlayerForController from "./YTPlayerForController";
 import type { PlayerStatus, YouTubePlayerRef } from "./YouTubePlayer";
 
@@ -26,7 +27,10 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
     duration: 0,
   });
 
-  // localStorageに状態を書き込む関数
+  // useXWinSyncフックを使用
+  const { writeToStorage: writeToXWinSync } = useXWinSync(localStorageKey);
+
+  // 既存のwriteToStorage関数をuseXWinSyncに置き換え
   const writeToStorage = useCallback(
     (updates: Partial<Omit<VJSyncData, "videoId" | "lastUpdated">> = {}) => {
       const beforeData = {
@@ -42,13 +46,9 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
         ...updates,
       };
 
-      try {
-        localStorage.setItem(localStorageKey, JSON.stringify(syncData));
-      } catch (error) {
-        console.error("Error writing to localStorage:", error);
-      }
+      writeToXWinSync(syncData);
     },
-    [localStorageKey, playerStatus]
+    [writeToXWinSync, playerStatus]
   );
 
   const handleStatusChange = useCallback((status: PlayerStatus) => {

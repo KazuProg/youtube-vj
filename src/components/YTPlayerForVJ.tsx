@@ -1,4 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
+import { useXWinSync } from "../hooks/useXWinSync";
 import YouTubePlayer, { type YouTubePlayerRef, type PlayerStatus } from "./YouTubePlayer";
 
 // localStorage用の同期データ型（投影画面用：音量・ミュート除外）
@@ -20,21 +21,10 @@ interface YTPlayerForVJProps {
 const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
   ({ style, onStatusChange, autoLoop = true, syncKey = "vj-player-default" }, ref) => {
     const youtubePlayerRef = useRef<YouTubePlayerRef>(null);
-    const syncIntervalRef = useRef<number | null>(null);
+    const lastSyncDataRef = useRef<VJSyncData | null>(null);
 
-    // localStorageから状態を読み込み（投影画面専用）
-    const loadFromStorage = useCallback((): VJSyncData | null => {
-      try {
-        const data = localStorage.getItem(syncKey);
-        if (data) {
-          const syncData: VJSyncData = JSON.parse(data);
-          return syncData;
-        }
-      } catch (error) {
-        console.error("Error loading from localStorage:", error);
-      }
-      return null;
-    }, [syncKey]);
+    // useXWinSyncフックを使用（投影画面は読み取り専用）
+    const { readFromStorage, onXWinSync } = useXWinSync(syncKey);
 
     // 時間同期の処理
     const syncTime = useCallback((player: YouTubePlayerRef, syncData: VJSyncData) => {
@@ -67,55 +57,47 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       }
     }, []);
 
-    // 投影画面での同期処理
-    const syncFromStorage = useCallback(() => {
-      if (!youtubePlayerRef.current) {
-        return;
-      }
-
-      const syncData = loadFromStorage();
-      if (!syncData) {
-        return;
-      }
-
-      try {
-        const player = youtubePlayerRef.current;
-
-        // プレイヤーが準備完了しているかチェック
-        if (player.duration <= 0) {
-          return; // プレイヤー未準備の場合はスキップ
+    // 同期処理のメイン関数
+    const handleSyncData = useCallback(
+      (syncData: VJSyncData) => {
+        if (!youtubePlayerRef.current) {
+          return;
         }
 
-        // 各同期処理を実行
-        syncTime(player, syncData);
-        syncPlayerState(player, syncData);
-        syncPlaybackRate(player, syncData);
-      } catch (error) {
-        console.error("Error during sync:", error);
-      }
-    }, [loadFromStorage, syncTime, syncPlayerState, syncPlaybackRate]);
+        // 同じデータなら処理をスキップ（パフォーマンス最適化）
+        if (
+          lastSyncDataRef.current &&
+          lastSyncDataRef.current.lastUpdated === syncData.lastUpdated
+        ) {
+          return;
+        }
 
-    // 定期的な同期処理（投影画面用）
+        try {
+          const player = youtubePlayerRef.current;
+          if (player.duration <= 0) {
+            return; // プレイヤー未準備の場合はスキップ
+          }
+
+          // 各種同期処理実行
+          syncTime(player, syncData);
+          syncPlayerState(player, syncData);
+          syncPlaybackRate(player, syncData);
+
+          // 処理済みデータを記録
+          lastSyncDataRef.current = syncData;
+        } catch (error) {
+          console.error("Error during sync:", error);
+        }
+      },
+      [syncTime, syncPlayerState, syncPlaybackRate]
+    );
+
+    // useXWinSyncからのイベントで同期処理を実行
     useEffect(() => {
-      syncIntervalRef.current = setInterval(syncFromStorage, 100); // 100msごとに同期チェック
-      return () => {
-        if (syncIntervalRef.current) {
-          clearInterval(syncIntervalRef.current);
-        }
-      };
-    }, [syncFromStorage]);
-
-    // storage eventによる即座の同期（別タブ・別ウィンドウ間）
-    useEffect(() => {
-      const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === syncKey && e.newValue) {
-          syncFromStorage();
-        }
-      };
-
-      window.addEventListener("storage", handleStorageChange);
-      return () => window.removeEventListener("storage", handleStorageChange);
-    }, [syncKey, syncFromStorage]);
+      return onXWinSync((syncData) => {
+        handleSyncData(syncData);
+      });
+    }, [onXWinSync, handleSyncData]);
 
     const handleStatusChange = useCallback(
       (status: PlayerStatus) => {
@@ -139,7 +121,11 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
     // 投影画面のマウント時に一度だけ初期同期を実行
     useEffect(() => {
       const timeoutId = setTimeout(() => {
-        syncFromStorage(); // 3秒遅延でプレイヤーの初期化完了を待つ
+        // 初期同期実行
+        const initialData = readFromStorage();
+        if (initialData) {
+          handleSyncData(initialData);
+        }
 
         // 投影画面：確実にミュートに設定
         if (youtubePlayerRef.current) {
@@ -148,7 +134,7 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       }, 3000);
 
       return () => clearTimeout(timeoutId);
-    }, [syncFromStorage]);
+    }, [readFromStorage, handleSyncData]);
 
     // 投影画面用のref（基本機能のみ）
     useImperativeHandle(
