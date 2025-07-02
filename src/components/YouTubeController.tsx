@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useXWinSync } from "../hooks/useXWinSync";
 import YTPlayerForController from "./YTPlayerForController";
-import type { PlayerStatus, YouTubePlayerRef } from "./YouTubePlayer";
+import type { PlayerStatus, YouTubePlayerRef } from "./YTPlayerForVJ";
 
 type YouTubeControllerProps = {
   localStorageKey: string;

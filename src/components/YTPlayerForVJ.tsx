@@ -1,8 +1,33 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import YouTube from "react-youtube";
+import type { Options, YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
 import { useXWinSync } from "../hooks/useXWinSync";
-import YouTubePlayer, { type YouTubePlayerRef, type PlayerStatus } from "./YouTubePlayer";
 
-// localStorage用の同期データ型（投影画面用：音量・ミュート除外）
+export interface YouTubePlayerRef {
+  playVideo: () => void;
+  pauseVideo: () => void;
+  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+  mute: () => void;
+  unMute: () => void;
+  setVolume: (volume: number) => void;
+  setPlaybackRate: (rate: number) => void;
+  isMuted: boolean;
+  playerState: number;
+  playbackRate: number;
+  volume: number;
+  currentTime: number;
+  duration: number;
+}
+
+export interface PlayerStatus {
+  playerState: number;
+  playbackRate: number;
+  volume: number;
+  isMuted: boolean;
+  currentTime: number;
+  duration: number;
+}
+
 interface VJSyncData {
   videoId: string;
   playbackRate: number;
@@ -20,47 +45,118 @@ interface YTPlayerForVJProps {
 
 const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
   ({ style, onStatusChange, autoLoop = true, syncKey = "vj-player-default" }, ref) => {
-    const youtubePlayerRef = useRef<YouTubePlayerRef>(null);
+    const playerRef = useRef<YTPlayerTypes | null>(null);
+    const [playerState, setPlayerState] = useState(0);
+    const [playbackRate, setPlaybackRate] = useState(1);
+    const [volume, setVolume] = useState(100);
+    const [isMuted, setIsMuted] = useState(true);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+
     const lastSyncDataRef = useRef<VJSyncData | null>(null);
 
     // useXWinSyncフックを使用（投影画面は読み取り専用）
     const { readFromStorage, onXWinSync } = useXWinSync(syncKey);
 
-    // 時間同期の処理
-    const syncTime = useCallback((player: YouTubePlayerRef, syncData: VJSyncData) => {
-      // 時間経過を考慮した現在の再生位置を計算
-      const timeSinceUpdate = (Date.now() - syncData.lastUpdated) / 1000; // 秒に変換
-      const adjustedCurrentTime = syncData.paused
-        ? syncData.currentTime // 一時停止中は時間を進めない
-        : syncData.currentTime + timeSinceUpdate * syncData.playbackRate; // 再生中は経過時間を加算
+    useEffect(() => {
+      if (playerRef.current) {
+        try {
+          if (isMuted) {
+            playerRef.current.mute();
+          } else {
+            playerRef.current.unMute();
+            playerRef.current.setVolume(volume);
+          }
+          playerRef.current.setPlaybackRate(playbackRate);
+        } catch (error) {
+          console.warn("Player not ready yet:", error);
+        }
+      }
 
-      const timeDiff = Math.abs(player.currentTime - adjustedCurrentTime);
-      if (timeDiff > 1.0) {
-        player.seekTo(adjustedCurrentTime, true);
+      onStatusChange?.({
+        playerState,
+        playbackRate,
+        volume,
+        isMuted,
+        currentTime,
+        duration,
+      });
+    }, [playerState, playbackRate, volume, isMuted, currentTime, duration, onStatusChange]);
+
+    const handleReady = useCallback(async (event: { target: YTPlayerTypes }) => {
+      try {
+        playerRef.current = event.target;
+
+        event.target.mute();
+        setIsMuted(true);
+        event.target.playVideo();
+
+        const duration = await event.target.getDuration();
+        setDuration(duration);
+
+        // currentTimeの更新ループ
+        const updateCurrentTime = async () => {
+          if (playerRef.current) {
+            try {
+              const currentTime = await playerRef.current.getCurrentTime();
+              setCurrentTime(currentTime);
+            } catch {
+              // Player not ready yet, skip
+            }
+          }
+          requestAnimationFrame(updateCurrentTime);
+        };
+        updateCurrentTime();
+      } catch (error) {
+        console.error("Error initializing YouTube player:", error);
       }
     }, []);
+
+    // 時間同期の処理
+    const syncTime = useCallback(
+      (syncData: VJSyncData) => {
+        if (!playerRef.current) {
+          return;
+        }
+        const timeSinceUpdate = (Date.now() - syncData.lastUpdated) / 1000;
+        const adjustedCurrentTime = syncData.paused
+          ? syncData.currentTime
+          : syncData.currentTime + timeSinceUpdate * syncData.playbackRate;
+
+        const timeDiff = Math.abs(currentTime - adjustedCurrentTime);
+        if (timeDiff > 1.0) {
+          playerRef.current.seekTo(adjustedCurrentTime, true);
+        }
+      },
+      [currentTime]
+    );
 
     // 再生状態同期の処理
-    const syncPlayerState = useCallback((player: YouTubePlayerRef, syncData: VJSyncData) => {
+    const syncPlayerState = useCallback((syncData: VJSyncData) => {
+      if (!playerRef.current) {
+        return;
+      }
+
       if (syncData.paused) {
-        player.pauseVideo();
+        playerRef.current.pauseVideo();
       } else {
-        player.playVideo();
+        playerRef.current.playVideo();
       }
     }, []);
 
-    // 再生速度同期の処理（投影画面専用：音量制御なし）
-    const syncPlaybackRate = useCallback((player: YouTubePlayerRef, syncData: VJSyncData) => {
-      // 再生速度の同期のみ
-      if (Math.abs(player.playbackRate - syncData.playbackRate) > 0.01) {
-        player.setPlaybackRate(syncData.playbackRate);
-      }
-    }, []);
+    const syncPlaybackRate = useCallback(
+      (syncData: VJSyncData) => {
+        if (Math.abs(playbackRate - syncData.playbackRate) > 0.01) {
+          setPlaybackRate(syncData.playbackRate);
+        }
+      },
+      [playbackRate]
+    );
 
     // 同期処理のメイン関数
     const handleSyncData = useCallback(
       (syncData: VJSyncData) => {
-        if (!youtubePlayerRef.current) {
+        if (!playerRef.current) {
           return;
         }
 
@@ -73,23 +169,19 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
         }
 
         try {
-          const player = youtubePlayerRef.current;
-          if (player.duration <= 0) {
-            return; // プレイヤー未準備の場合はスキップ
+          if (duration <= 0) {
+            return;
           }
 
-          // 各種同期処理実行
-          syncTime(player, syncData);
-          syncPlayerState(player, syncData);
-          syncPlaybackRate(player, syncData);
-
-          // 処理済みデータを記録
+          syncTime(syncData);
+          syncPlayerState(syncData);
+          syncPlaybackRate(syncData);
           lastSyncDataRef.current = syncData;
         } catch (error) {
           console.error("Error during sync:", error);
         }
       },
-      [syncTime, syncPlayerState, syncPlaybackRate]
+      [syncTime, syncPlayerState, syncPlaybackRate, duration]
     );
 
     // useXWinSyncからのイベントで同期処理を実行
@@ -101,12 +193,10 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
 
     const handleStatusChange = useCallback(
       (status: PlayerStatus) => {
-        // VJ用: 動画が終了したら自動ループ（オプション有効時）
-        if (autoLoop && status.playerState === 0 && youtubePlayerRef.current) {
-          // 0 = YT.PlayerState.ENDED
+        if (autoLoop && status.playerState === 0 && playerRef.current) {
           try {
-            youtubePlayerRef.current.seekTo(0, true);
-            youtubePlayerRef.current.playVideo();
+            playerRef.current.seekTo(0, true);
+            playerRef.current.playVideo();
           } catch (error) {
             console.error("Error during VJ video loop:", error);
           }
@@ -118,7 +208,21 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       [autoLoop, onStatusChange]
     );
 
-    // 投影画面のマウント時に一度だけ初期同期を実行
+    const handleStateChange = useCallback(
+      (data: number) => {
+        setPlayerState(data);
+        handleStatusChange({
+          playerState: data,
+          playbackRate,
+          volume,
+          isMuted,
+          currentTime,
+          duration,
+        });
+      },
+      [handleStatusChange, playbackRate, volume, isMuted, currentTime, duration]
+    );
+
     useEffect(() => {
       const timeoutId = setTimeout(() => {
         // 初期同期実行
@@ -127,9 +231,8 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
           handleSyncData(initialData);
         }
 
-        // 投影画面：確実にミュートに設定
-        if (youtubePlayerRef.current) {
-          youtubePlayerRef.current.mute();
+        if (playerRef.current) {
+          playerRef.current.mute();
         }
       }, 3000);
 
@@ -139,33 +242,46 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
     // 投影画面用のref（基本機能のみ）
     useImperativeHandle(
       ref,
-      () => {
-        const baseRef = youtubePlayerRef.current;
-        if (!baseRef) {
-          return {
-            playVideo: () => {},
-            pauseVideo: () => {},
-            seekTo: () => {},
-            mute: () => {},
-            unMute: () => {},
-            setVolume: () => {},
-            setPlaybackRate: () => {},
-            isMuted: false,
-            playerState: 0,
-            playbackRate: 1,
-            volume: 100,
-            currentTime: 0,
-            duration: 0,
-          };
-        }
-
-        return baseRef;
-      },
-      []
+      () => ({
+        playVideo: () => playerRef.current?.playVideo(),
+        pauseVideo: () => playerRef.current?.pauseVideo(),
+        seekTo: (seconds: number, allowSeekAhead: boolean) =>
+          playerRef.current?.seekTo(seconds, allowSeekAhead),
+        mute: () => setIsMuted(true),
+        unMute: () => setIsMuted(false),
+        setVolume,
+        setPlaybackRate,
+        isMuted,
+        playerState,
+        playbackRate,
+        volume,
+        currentTime,
+        duration,
+      }),
+      [isMuted, playerState, playbackRate, volume, currentTime, duration]
     );
 
     return (
-      <YouTubePlayer style={style} ref={youtubePlayerRef} onStatusChange={handleStatusChange} />
+      <YouTube
+        style={style}
+        videoId="42jhMWfKY9Y"
+        opts={
+          {
+            width: "100%",
+            height: "100%",
+            playerVars: {
+              autoplay: 1,
+              controls: 0,
+              disablekb: 1,
+              // biome-ignore lint/style/useNamingConvention: YouTube API official parameter name
+              iv_load_policy: 3,
+            },
+          } as Options
+        }
+        onReady={handleReady}
+        onStateChange={(e) => handleStateChange(e.data)}
+        onPlaybackRateChange={(e) => setPlaybackRate(e.data)}
+      />
     );
   }
 );

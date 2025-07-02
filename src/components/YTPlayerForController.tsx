@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 import { useXWinSync } from "../hooks/useXWinSync";
 import YTPlayerForVJ from "./YTPlayerForVJ";
-import type { PlayerStatus, YouTubePlayerRef } from "./YouTubePlayer";
+import type { PlayerStatus, YouTubePlayerRef } from "./YTPlayerForVJ";
 
 // localStorage用の同期データ型（投影画面用：音量・ミュート除外）
 interface VJSyncData {
