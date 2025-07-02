@@ -39,8 +39,8 @@ interface VJSyncData {
 interface YTPlayerForVJProps {
   style?: React.CSSProperties;
   onStatusChange?: (status: PlayerStatus) => void;
-  autoLoop?: boolean; // VJ用: ループ機能のオン/オフ
-  syncKey?: string; // 同期用のキー（複数のプレイヤーを区別）
+  autoLoop?: boolean;
+  syncKey?: string;
 }
 
 const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
@@ -54,8 +54,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
     const [duration, setDuration] = useState(0);
 
     const lastSyncDataRef = useRef<VJSyncData | null>(null);
-
-    // useXWinSyncフックを使用（投影画面は読み取り専用）
     const { readFromStorage, onXWinSync } = useXWinSync(syncKey);
 
     useEffect(() => {
@@ -94,7 +92,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
         const duration = await event.target.getDuration();
         setDuration(duration);
 
-        // currentTimeの更新ループ
         const updateCurrentTime = async () => {
           if (playerRef.current) {
             try {
@@ -112,7 +109,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       }
     }, []);
 
-    // 時間同期の処理
     const syncTime = useCallback(
       (syncData: VJSyncData) => {
         if (!playerRef.current) {
@@ -131,7 +127,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       [currentTime]
     );
 
-    // 再生状態同期の処理
     const syncPlayerState = useCallback((syncData: VJSyncData) => {
       if (!playerRef.current) {
         return;
@@ -153,14 +148,12 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       [playbackRate]
     );
 
-    // 同期処理のメイン関数
     const handleSyncData = useCallback(
       (syncData: VJSyncData) => {
         if (!playerRef.current) {
           return;
         }
 
-        // 同じデータなら処理をスキップ（パフォーマンス最適化）
         if (
           lastSyncDataRef.current &&
           lastSyncDataRef.current.lastUpdated === syncData.lastUpdated
@@ -184,7 +177,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       [syncTime, syncPlayerState, syncPlaybackRate, duration]
     );
 
-    // useXWinSyncからのイベントで同期処理を実行
     useEffect(() => {
       return onXWinSync((syncData) => {
         handleSyncData(syncData);
@@ -202,7 +194,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
           }
         }
 
-        // 親コンポーネントに状態変更を通知
         onStatusChange?.(status);
       },
       [autoLoop, onStatusChange]
@@ -225,7 +216,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
 
     useEffect(() => {
       const timeoutId = setTimeout(() => {
-        // 初期同期実行
         const initialData = readFromStorage();
         if (initialData) {
           handleSyncData(initialData);
@@ -239,7 +229,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       return () => clearTimeout(timeoutId);
     }, [readFromStorage, handleSyncData]);
 
-    // 投影画面用のref（基本機能のみ）
     useImperativeHandle(
       ref,
       () => ({

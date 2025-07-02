@@ -3,7 +3,6 @@ import { useXWinSync } from "../hooks/useXWinSync";
 import YTPlayerForVJ from "./YTPlayerForVJ";
 import type { PlayerStatus, YouTubePlayerRef } from "./YTPlayerForVJ";
 
-// localStorage用の同期データ型（投影画面用：音量・ミュート除外）
 interface VJSyncData {
   videoId: string;
   playbackRate: number;
@@ -35,24 +34,21 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
     const previousStatus = useRef<PlayerStatus | null>(null);
     const lastSeekTime = useRef<number>(0);
 
-    // useXWinSyncフックを使用
     const { writeToStorage: writeToXWinSync } = useXWinSync(syncKey);
 
-    // 状態を保存（コントローラー専用）
     const saveToStorage = useCallback(
       (status: PlayerStatus, forceSync = false) => {
         const prev = previousStatus.current;
 
-        // 重要な変更のみ同期（パフォーマンス最適化）
         const shouldSync =
           forceSync ||
           !prev ||
-          prev.playerState !== status.playerState || // 再生状態変更
-          Math.abs(prev.playbackRate - status.playbackRate) > 0.01 || // 速度変更
-          Math.abs(prev.duration - status.duration) > 1; // 動画変更
+          prev.playerState !== status.playerState ||
+          Math.abs(prev.playbackRate - status.playbackRate) > 0.01 ||
+          Math.abs(prev.duration - status.duration) > 1;
 
         if (!shouldSync) {
-          return; // 重要でない変更はスキップ
+          return;
         }
 
         const syncData: VJSyncData = {
@@ -68,11 +64,9 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
       [writeToXWinSync, videoId]
     );
 
-    // 手動での再生位置変更時の同期（seekTo操作用）
     const saveSeekPosition = useCallback(
       (currentTime: number) => {
         const now = Date.now();
-        // 連続したseek操作を制限（100ms以内は無視）
         if (now - lastSeekTime.current < 100) {
           return;
         }
@@ -86,7 +80,7 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
         const syncData: VJSyncData = {
           videoId,
           playbackRate: currentStatus.playbackRate,
-          currentTime: currentTime, // 手動変更された位置
+          currentTime: currentTime,
           lastUpdated: now,
           paused: currentStatus.playerState === 2,
         };
@@ -98,7 +92,6 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
 
     const handleStatusChange = useCallback(
       (status: PlayerStatus) => {
-        // VJ用: 動画が終了したら自動ループ（オプション有効時）
         if (autoLoop && status.playerState === 0 && ytPlayerRef.current) {
           try {
             ytPlayerRef.current.seekTo(0, true);
@@ -108,19 +101,13 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
           }
         }
 
-        // 状態をlocalStorageに保存
         saveToStorage(status);
-
-        // 前回の状態を更新
         previousStatus.current = status;
-
-        // 親コンポーネントに状態変更を通知
         onStatusChange?.(status);
       },
       [autoLoop, onStatusChange, saveToStorage]
     );
 
-    // コントローラー用の拡張ref（seek操作時の同期付き）
     useImperativeHandle(
       ref,
       () => {
@@ -145,7 +132,6 @@ const YTPlayerForController = forwardRef<YouTubePlayerRef, YTPlayerForController
 
         return {
           ...baseRef,
-          // 手動seek操作時は同期位置も更新
           seekTo: (seconds: number, allowSeekAhead: boolean) => {
             baseRef.seekTo(seconds, allowSeekAhead);
             saveSeekPosition(seconds);

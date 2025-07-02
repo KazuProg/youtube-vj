@@ -7,7 +7,6 @@ type YouTubeControllerProps = {
   localStorageKey: string;
 };
 
-// localStorage用の同期データ型（投影画面用：音量・ミュート除外）
 interface VJSyncData {
   videoId: string;
   playbackRate: number;
@@ -27,10 +26,8 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
     duration: 0,
   });
 
-  // useXWinSyncフックを使用
   const { writeToStorage: writeToXWinSync } = useXWinSync(localStorageKey);
 
-  // 既存のwriteToStorage関数をuseXWinSyncに置き換え
   const writeToStorage = useCallback(
     (updates: Partial<Omit<VJSyncData, "videoId" | "lastUpdated">> = {}) => {
       const beforeData = {
@@ -91,7 +88,6 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
           borderRadius: "8px",
         }}
       >
-        {/* プレイヤー制御 */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "20px" }}>
           <button
             type="button"
@@ -99,11 +95,10 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
               ...buttonStyle,
               backgroundColor: playerStatus.playerState === 1 ? "#f44336" : "#4CAF50",
             }}
-            onClick={
-              () =>
-                playerStatus.playerState === 1
-                  ? writeToStorage({ paused: true }) // 一時停止
-                  : writeToStorage({ paused: false }) // 再生
+            onClick={() =>
+              playerStatus.playerState === 1
+                ? writeToStorage({ paused: true })
+                : writeToStorage({ paused: false })
             }
           >
             {playerStatus.playerState === 1 ? "Pause" : "Play"}
@@ -116,7 +111,6 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
             }}
             onClick={() => {
               const newMuted = !playerStatus.isMuted;
-              // 直接操作のみ（localStorageには保存しない）
               if (newMuted) {
                 playerRef.current?.mute();
               } else {
@@ -128,7 +122,6 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
           </button>
         </div>
 
-        {/* スライダー制御 */}
         <div style={{ display: "flex", gap: "20px", alignItems: "center", marginBottom: "20px" }}>
           <label>
             進捗:{" "}
@@ -149,7 +142,6 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
               value={playerStatus.volume}
               onChange={(e) => {
                 const newVolume = Number(e.target.value);
-                // 直接操作のみ（localStorageには保存しない）
                 playerRef.current?.setVolume(newVolume);
               }}
             />
@@ -167,7 +159,6 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
           </label>
         </div>
 
-        {/* 状態表示 */}
         <div
           style={{
             display: "grid",
