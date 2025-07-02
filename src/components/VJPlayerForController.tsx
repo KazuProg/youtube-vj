@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 import { useXWinSync } from "../hooks/useXWinSync";
-import YTPlayerForVJ from "./YTPlayerForVJ";
-import type { PlayerStatus, YouTubePlayerRef } from "./YTPlayerForVJ";
+import YTPlayerForVJ from "./VJPlayer";
+import type { PlayerStatus, YouTubePlayerRef } from "./VJPlayer";
 
 interface VJSyncData {
   videoId: string;

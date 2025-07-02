@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import YTPlayerForVJ from "./components/YTPlayerForVJ";
-import YouTubeController from "./components/YouTubeController";
+import YouTubeController from "./components/VJController";
+import YTPlayerForVJ from "./components/VJPlayer";
 import "./App.css";
 import { LOCAL_STORAGE_KEY } from "./constants";
 
