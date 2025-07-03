@@ -1,70 +1,67 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useXWinSync } from "../hooks/useXWinSync";
-import YTPlayerForVJ from "./VJPlayer";
-import type { PlayerStatus, VJPlayerRef } from "./VJPlayer";
+import type {
+  PlayerStatus,
+  VJControllerRef,
+  VJPlayerProps,
+  VJPlayerRef,
+  VJSyncData,
+} from "../types/vj";
+import { DEFAULT_VALUES } from "../types/vj";
+import VJPlayer from "./VJPlayer";
 
-interface VJSyncData {
-  videoId: string;
-  playbackRate: number;
-  currentTime: number;
-  lastUpdated: number;
-  paused: boolean;
-}
-
-interface YTPlayerForControllerProps {
-  style?: React.CSSProperties;
-  onStatusChange?: (status: PlayerStatus) => void;
-  autoLoop?: boolean;
-  syncKey?: string;
-  videoId?: string;
-}
-
-export interface VJControllerRef {
-  playVideo: () => void;
-  pauseVideo: () => void;
-  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
-  mute: () => void;
-  unMute: () => void;
-  setVolume: (volume: number) => void;
-  setPlaybackRate: (rate: number) => void;
-  isMuted: boolean;
-  playerState: number;
-  playbackRate: number;
-  volume: number;
-  currentTime: number;
-  duration: number;
-}
-
-const YTPlayerForController = forwardRef<VJControllerRef, YTPlayerForControllerProps>(
+const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
   (
     {
       style,
       onStatusChange,
       autoLoop = true,
-      syncKey = "vj-player-default",
-      videoId = "42jhMWfKY9Y",
+      syncKey = DEFAULT_VALUES.syncKey,
+      videoId = DEFAULT_VALUES.videoId,
     },
     ref
   ) => {
     const vjPlayerRef = useRef<VJPlayerRef | null>(null);
-    const previousStatus = useRef<PlayerStatus | null>(null);
-    const lastSeekTime = useRef<number>(0);
-    const [volume, setVolume] = useState(100);
-    const [isMuted, setIsMuted] = useState(true);
-    const [playbackRate, setPlaybackRate] = useState(1);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const { writeToStorage: writeToXWinSync } = useXWinSync(syncKey);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [playerState, setPlayerState] = useState<number | null>(null);
+    const previousStatusRef = useRef<PlayerStatus | null>(null);
+    const lastSeekTimeRef = useRef<number>(0);
+    const isInitializedRef = useRef(false);
 
+    // プレイヤー状態
+    const [volume, setVolume] = useState<number>(DEFAULT_VALUES.volume);
+    const [isMuted, setIsMuted] = useState<boolean>(true);
+    const [playbackRate, setPlaybackRate] = useState<number>(DEFAULT_VALUES.playbackRate);
+    const [currentTime, setCurrentTime] = useState<number>(0);
+    const [duration, setDuration] = useState<number>(0);
+    const [playerState, setPlayerState] = useState<number>(0);
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+
+    const { writeToStorage: writeToXWinSync } = useXWinSync(syncKey);
+
+    // プレイヤー取得
     const getPlayer = useCallback(() => {
       return vjPlayerRef.current?.originalPlayer;
     }, []);
 
+    // 安全な非同期プレイヤー操作
+    const safePlayerOperation = useCallback(
+      async (operation: () => Promise<void> | void) => {
+        if (!isInitializedRef.current || !getPlayer()) {
+          return;
+        }
+
+        try {
+          await operation();
+        } catch (error) {
+          console.warn("Player operation failed:", error);
+        }
+      },
+      [getPlayer]
+    );
+
+    // ストレージ保存
     const saveToStorage = useCallback(
       (status: PlayerStatus, forceSync = false) => {
-        const prev = previousStatus.current;
+        const prev = previousStatusRef.current;
 
         const shouldSync =
           forceSync ||
@@ -78,7 +75,7 @@ const YTPlayerForController = forwardRef<VJControllerRef, YTPlayerForControllerP
         }
 
         const syncData: VJSyncData = {
-          videoId,
+          videoId: videoId ?? DEFAULT_VALUES.videoId,
           playbackRate: status.playbackRate,
           currentTime: status.currentTime,
           lastUpdated: Date.now(),
@@ -90,23 +87,24 @@ const YTPlayerForController = forwardRef<VJControllerRef, YTPlayerForControllerP
       [writeToXWinSync, videoId]
     );
 
+    // シーク位置の保存（デバウンス付き）
     const saveSeekPosition = useCallback(
-      (currentTime: number) => {
+      (targetTime: number) => {
         const now = Date.now();
-        if (now - lastSeekTime.current < 100) {
+        if (now - lastSeekTimeRef.current < DEFAULT_VALUES.seekDebounce) {
           return;
         }
-        lastSeekTime.current = now;
+        lastSeekTimeRef.current = now;
 
-        const currentStatus = previousStatus.current;
+        const currentStatus = previousStatusRef.current;
         if (!currentStatus) {
           return;
         }
 
         const syncData: VJSyncData = {
-          videoId,
+          videoId: videoId ?? DEFAULT_VALUES.videoId,
           playbackRate: currentStatus.playbackRate,
-          currentTime: currentTime,
+          currentTime: targetTime,
           lastUpdated: now,
           paused: currentStatus.playerState === 2,
         };
@@ -116,107 +114,130 @@ const YTPlayerForController = forwardRef<VJControllerRef, YTPlayerForControllerP
       [writeToXWinSync, videoId]
     );
 
+    // 子プレイヤーの状態変更処理
     const handleStatusChange = useCallback(
       (status: PlayerStatus) => {
-        if (autoLoop && status.playerState === 0 && vjPlayerRef.current) {
-          try {
-            saveSeekPosition(0);
-            setIsPlaying(true);
-          } catch (error) {
-            console.error("Error during VJ video loop:", error);
-          }
+        // 自動ループ処理
+        if (autoLoop && status.playerState === 0) {
+          saveSeekPosition(0);
+          setIsPlaying(true);
         }
 
-        // 実際のプレイヤー状態をローカル状態に反映
+        // 状態の更新
         setPlayerState(status.playerState);
         setPlaybackRate(status.playbackRate);
         setCurrentTime(status.currentTime);
         setDuration(status.duration);
 
+        // ストレージ保存
         saveToStorage(status);
-        previousStatus.current = status;
+        previousStatusRef.current = status;
+
+        // 親への通知
         onStatusChange?.(status);
       },
       [autoLoop, onStatusChange, saveToStorage, saveSeekPosition]
     );
 
-    // 状態変更時のリアルタイム通知
+    // 再生速度変更の適用
     useEffect(() => {
-      if (onStatusChange) {
-        onStatusChange(
-          previousStatus.current || {
-            playerState: playerState ?? 0,
-            playbackRate,
-            currentTime,
-            duration,
-          }
-        );
-      }
-    }, [playerState, playbackRate, currentTime, duration, onStatusChange]);
+      safePlayerOperation(() => {
+        getPlayer()?.setPlaybackRate(playbackRate);
+      });
+    }, [playbackRate, safePlayerOperation, getPlayer]);
 
-    // 再生速度変更の処理
+    // 音量・ミュート設定の適用
     useEffect(() => {
-      if (vjPlayerRef.current) {
-        try {
-          getPlayer()?.setPlaybackRate(playbackRate);
-        } catch (error) {
-          console.warn("Player not ready for playback rate change:", error);
+      safePlayerOperation(async () => {
+        const player = getPlayer();
+        if (!player) {
+          return;
         }
-      }
-    }, [playbackRate, getPlayer]);
 
-    useEffect(() => {
-      if (vjPlayerRef.current) {
         if (isMuted) {
-          getPlayer()?.mute();
+          await player.mute();
         } else {
-          getPlayer()?.unMute();
-          getPlayer()?.setVolume(volume);
+          await player.unMute();
+          await player.setVolume(volume);
         }
-      }
-    }, [volume, isMuted, getPlayer]);
+      });
+    }, [volume, isMuted, safePlayerOperation, getPlayer]);
 
+    // 再生状態の適用
+    useEffect(() => {
+      safePlayerOperation(async () => {
+        const player = getPlayer();
+        if (!player) {
+          return;
+        }
+
+        if (isPlaying) {
+          await player.playVideo();
+        } else {
+          await player.pauseVideo();
+        }
+      });
+    }, [isPlaying, safePlayerOperation, getPlayer]);
+
+    // 初期化完了フラグの設定
     useEffect(() => {
       if (vjPlayerRef.current) {
-        if (isPlaying) {
-          getPlayer()?.playVideo();
-        } else {
-          getPlayer()?.pauseVideo();
-        }
+        isInitializedRef.current = true;
       }
-    }, [isPlaying, getPlayer]);
+    }, []);
 
+    // 外部API（useImperativeHandle）
     useImperativeHandle(
       ref,
       () => ({
+        // 制御メソッド
         playVideo: () => setIsPlaying(true),
         pauseVideo: () => setIsPlaying(false),
-        seekTo: (seconds: number) => saveSeekPosition(seconds),
+        seekTo: (seconds: number) => {
+          safePlayerOperation(() => {
+            getPlayer()?.seekTo(seconds, true);
+          });
+          saveSeekPosition(seconds);
+        },
         mute: () => setIsMuted(true),
         unMute: () => setIsMuted(false),
-        setVolume: (volume: number) => setVolume(volume),
+        setVolume: (newVolume: number) => setVolume(Math.max(0, Math.min(100, newVolume))),
         setPlaybackRate: (rate: number) => setPlaybackRate(rate),
-        isMuted: isMuted,
-        playerState: playerState ?? 0,
-        playbackRate: playbackRate,
-        volume: volume,
-        currentTime: currentTime,
-        duration: duration,
+
+        // 状態プロパティ
+        isMuted,
+        playerState,
+        playbackRate,
+        volume,
+        currentTime,
+        duration,
       }),
-      [isMuted, volume, playbackRate, playerState, currentTime, duration, saveSeekPosition]
+      [
+        isMuted,
+        playerState,
+        playbackRate,
+        volume,
+        currentTime,
+        duration,
+        safePlayerOperation,
+        getPlayer,
+        saveSeekPosition,
+      ]
     );
 
     return (
-      <YTPlayerForVJ
+      <VJPlayer
         style={style}
         ref={vjPlayerRef}
         onStatusChange={handleStatusChange}
         syncKey={syncKey}
+        videoId={videoId}
+        autoLoop={autoLoop}
       />
     );
   }
 );
 
-YTPlayerForController.displayName = "YTPlayerForController";
+VJPlayerForController.displayName = "VJPlayerForController";
 
-export default YTPlayerForController;
+export default VJPlayerForController;

@@ -1,200 +1,350 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useXWinSync } from "../hooks/useXWinSync";
-import YTPlayerForController, { type VJControllerRef } from "./VJPlayerForController";
+import type { VJControllerRef, VJSyncData } from "../types/vj";
+import { DEFAULT_VALUES, PLAYER_STATE_MAP } from "../types/vj";
+import VJPlayerForController from "./VJPlayerForController";
 
-type YouTubeControllerProps = {
+interface VJControllerProps {
   localStorageKey: string;
-};
-
-interface VJSyncData {
-  videoId: string;
-  playbackRate: number;
-  currentTime: number;
-  lastUpdated: number;
-  paused: boolean;
 }
 
-const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
+// スタイル定数
+const STYLES = {
+  container: {
+    fontFamily: "Arial, sans-serif",
+    maxWidth: "800px",
+    margin: "0 auto",
+    padding: "20px",
+  },
+  title: {
+    fontSize: "24px",
+    fontWeight: "bold",
+    marginBottom: "20px",
+    color: "#333",
+  },
+  player: {
+    width: "100%",
+    maxWidth: "640px",
+    height: "360px",
+    borderRadius: "8px",
+    overflow: "hidden",
+    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+  },
+  controlPanel: {
+    marginTop: "20px",
+    padding: "20px",
+    border: "2px solid #e0e0e0",
+    borderRadius: "8px",
+    backgroundColor: "#f9f9f9",
+  },
+  buttonGroup: {
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap" as const,
+    marginBottom: "20px",
+  },
+  button: {
+    padding: "10px 20px",
+    border: "none",
+    borderRadius: "6px",
+    color: "white",
+    fontSize: "14px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    minWidth: "80px",
+  },
+  sliderGroup: {
+    display: "flex",
+    gap: "20px",
+    alignItems: "center",
+    marginBottom: "20px",
+    flexWrap: "wrap" as const,
+  },
+  sliderContainer: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "5px",
+    minWidth: "150px",
+  },
+  label: {
+    fontSize: "14px",
+    fontWeight: "bold",
+    color: "#555",
+  },
+  slider: {
+    width: "100%",
+    height: "8px",
+    borderRadius: "4px",
+    background: "#ddd",
+    outline: "none",
+    cursor: "pointer",
+  },
+  statusGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: "15px",
+    marginTop: "10px",
+  },
+  statusItem: {
+    padding: "10px",
+    backgroundColor: "#fff",
+    borderRadius: "6px",
+    border: "1px solid #e0e0e0",
+    fontSize: "14px",
+  },
+  statusLabel: {
+    fontWeight: "bold",
+    color: "#666",
+  },
+  statusValue: {
+    fontWeight: "bold",
+    color: "#333",
+  },
+} as const;
+
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Refactoring planned for future iterations
+const VJController = ({ localStorageKey }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
-  const [vjController, setVjController] = useState<VJControllerRef | null>(null);
+  const [controller, setController] = useState<VJControllerRef | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const { writeToStorage: writeToXWinSync } = useXWinSync(localStorageKey);
 
+  // ストレージ書き込み
   const writeToStorage = useCallback(
     (updates: Partial<Omit<VJSyncData, "videoId" | "lastUpdated">> = {}) => {
-      const beforeData = {
-        playbackRate: vjController?.playbackRate ?? 1,
-        currentTime: vjController?.currentTime ?? 0,
-        paused: vjController?.playerState === 2,
-      };
+      if (!controller) {
+        return;
+      }
 
-      const syncData: VJSyncData = {
-        videoId: "42jhMWfKY9Y",
-        lastUpdated: Date.now(),
-        ...beforeData,
-        ...updates,
-      };
+      try {
+        const syncData: VJSyncData = {
+          videoId: DEFAULT_VALUES.videoId,
+          lastUpdated: Date.now(),
+          playbackRate: controller.playbackRate,
+          currentTime: controller.currentTime,
+          paused: controller.playerState === 2,
+          ...updates,
+        };
 
-      writeToXWinSync(syncData);
+        writeToXWinSync(syncData);
+        setError(null);
+      } catch (error) {
+        console.error("Failed to write to storage:", error);
+        setError("同期エラーが発生しました");
+      }
     },
-    [
-      writeToXWinSync,
-      vjController?.playbackRate,
-      vjController?.currentTime,
-      vjController?.playerState,
-    ]
+    [writeToXWinSync, controller]
   );
 
-  // リアルタイム状態更新のコールバック
+  // コントローラー状態の更新
   const handleStatusChange = useCallback(() => {
     if (playerRef.current) {
-      // 新しいオブジェクトを作成して状態更新を確実に行う
-      setVjController({ ...playerRef.current });
+      setController({ ...playerRef.current });
     }
   }, []);
 
-  // 初回設定
+  // 初期化
   useEffect(() => {
     if (playerRef.current) {
-      setVjController(playerRef.current);
+      setController(playerRef.current);
     }
   }, []);
 
-  const getStateText = (state: number) =>
-    ({
-      [-1]: "再生前",
-      0: "終了",
-      1: "再生中",
-      2: "一時停止",
-      3: "バッファリング",
-      5: "頭出し済み",
-    })[state] || "不明";
+  // 再生/一時停止の切り替え
+  const togglePlayPause = useCallback(() => {
+    if (!controller) {
+      return;
+    }
 
-  const buttonStyle = {
-    padding: "8px 16px",
-    border: "none",
-    borderRadius: "4px",
-    color: "white",
-    cursor: "pointer",
-  };
+    const isPlaying = controller.playerState === 1;
+    writeToStorage({ paused: isPlaying });
+  }, [controller, writeToStorage]);
+
+  // ミュート/ミュート解除の切り替え
+  const toggleMute = useCallback(() => {
+    if (!controller) {
+      return;
+    }
+
+    if (controller.isMuted) {
+      controller.unMute();
+    } else {
+      controller.mute();
+    }
+  }, [controller]);
+
+  // 進捗変更
+  const handleProgressChange = useCallback(
+    (value: number) => {
+      writeToStorage({ currentTime: value });
+    },
+    [writeToStorage]
+  );
+
+  // 音量変更
+  const handleVolumeChange = useCallback(
+    (value: number) => {
+      controller?.setVolume(value);
+    },
+    [controller]
+  );
+
+  // 速度変更
+  const handleSpeedChange = useCallback(
+    (value: number) => {
+      writeToStorage({ playbackRate: value });
+    },
+    [writeToStorage]
+  );
+
+  // 時間のフォーマット
+  const formatTime = useCallback((seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  }, []);
+
+  // エラー表示
+  const ErrorMessage = error ? (
+    <div
+      style={{
+        padding: "10px",
+        backgroundColor: "#ffebee",
+        border: "1px solid #f44336",
+        borderRadius: "4px",
+        color: "#c62828",
+        marginBottom: "10px",
+      }}
+    >
+      {error}
+    </div>
+  ) : null;
 
   return (
-    <div>
-      <h2>YouTube Controller</h2>
-      <YTPlayerForController
-        style={{ width: "640px", height: "360px" }}
+    <div style={STYLES.container}>
+      <h2 style={STYLES.title}>VJ Controller</h2>
+
+      {ErrorMessage}
+
+      <VJPlayerForController
+        style={STYLES.player}
         ref={playerRef}
         syncKey={localStorageKey}
         onStatusChange={handleStatusChange}
       />
 
-      <div
-        style={{
-          marginTop: "20px",
-          padding: "20px",
-          border: "2px solid #ccc",
-          borderRadius: "8px",
-        }}
-      >
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "20px" }}>
+      <div style={STYLES.controlPanel}>
+        {/* 制御ボタン */}
+        <div style={STYLES.buttonGroup}>
           <button
             type="button"
             style={{
-              ...buttonStyle,
-              backgroundColor: vjController?.playerState === 1 ? "#f44336" : "#4CAF50",
+              ...STYLES.button,
+              backgroundColor: controller?.playerState === 1 ? "#f44336" : "#4CAF50",
             }}
-            onClick={() =>
-              vjController?.playerState === 1
-                ? writeToStorage({ paused: true })
-                : writeToStorage({ paused: false })
-            }
+            onClick={togglePlayPause}
+            disabled={!controller}
           >
-            {vjController?.playerState === 1 ? "Pause" : "Play"}
+            {controller?.playerState === 1 ? "一時停止" : "再生"}
           </button>
+
           <button
             type="button"
             style={{
-              ...buttonStyle,
-              backgroundColor: vjController?.isMuted ? "#2196F3" : "#ff9800",
+              ...STYLES.button,
+              backgroundColor: controller?.isMuted ? "#2196F3" : "#ff9800",
             }}
-            onClick={() => {
-              const newMuted = !vjController?.isMuted;
-              if (newMuted) {
-                vjController?.mute();
-              } else {
-                vjController?.unMute();
-              }
-            }}
+            onClick={toggleMute}
+            disabled={!controller}
           >
-            {vjController?.isMuted ? "Unmute" : "Mute"}
+            {controller?.isMuted ? "ミュート解除" : "ミュート"}
           </button>
         </div>
 
-        <div style={{ display: "flex", gap: "20px", alignItems: "center", marginBottom: "20px" }}>
-          <label>
-            進捗:{" "}
+        {/* スライダー */}
+        <div style={STYLES.sliderGroup}>
+          <div style={STYLES.sliderContainer}>
+            <label style={STYLES.label} htmlFor="progress-slider">
+              進捗 ({formatTime(controller?.currentTime ?? 0)} /{" "}
+              {formatTime(controller?.duration ?? 0)})
+            </label>
             <input
+              id="progress-slider"
               type="range"
+              style={STYLES.slider}
               min="0"
-              max={vjController?.duration ?? 0}
-              value={vjController?.currentTime ?? 0}
-              onChange={(e) => writeToStorage({ currentTime: Number(e.target.value) })}
+              max={controller?.duration ?? 0}
+              value={controller?.currentTime ?? 0}
+              onChange={(e) => handleProgressChange(Number(e.target.value))}
+              disabled={!controller}
             />
-          </label>
-          <label>
-            音量:{" "}
+          </div>
+
+          <div style={STYLES.sliderContainer}>
+            <label style={STYLES.label} htmlFor="volume-slider">
+              音量 ({Math.round(controller?.volume ?? 0)}%)
+            </label>
             <input
+              id="volume-slider"
               type="range"
+              style={STYLES.slider}
               min="0"
               max="100"
-              value={vjController?.volume ?? 100}
-              onChange={(e) => {
-                const newVolume = Number(e.target.value);
-                vjController?.setVolume(newVolume);
-              }}
+              value={controller?.volume ?? 100}
+              onChange={(e) => handleVolumeChange(Number(e.target.value))}
+              disabled={!controller}
             />
-          </label>
-          <label>
-            速度:{" "}
+          </div>
+
+          <div style={STYLES.sliderContainer}>
+            <label style={STYLES.label} htmlFor="speed-slider">
+              速度 ({controller?.playbackRate ?? 1}x)
+            </label>
             <input
+              id="speed-slider"
               type="range"
+              style={STYLES.slider}
               min="0.25"
               max="2"
               step="0.05"
-              value={vjController?.playbackRate ?? 1}
-              onChange={(e) => writeToStorage({ playbackRate: Number(e.target.value) })}
+              value={controller?.playbackRate ?? 1}
+              onChange={(e) => handleSpeedChange(Number(e.target.value))}
+              disabled={!controller}
             />
-          </label>
+          </div>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-            gap: "10px",
-          }}
-        >
-          <div>
-            状態: <strong>{getStateText(vjController?.playerState ?? 0)}</strong>
+        {/* 状態表示 */}
+        <div style={STYLES.statusGrid}>
+          <div style={STYLES.statusItem}>
+            <span style={STYLES.statusLabel}>状態: </span>
+            <span style={STYLES.statusValue}>
+              {PLAYER_STATE_MAP[controller?.playerState ?? 0] || "不明"}
+            </span>
           </div>
-          <div>
-            速度: <strong>{vjController?.playbackRate}x</strong>
+
+          <div style={STYLES.statusItem}>
+            <span style={STYLES.statusLabel}>速度: </span>
+            <span style={STYLES.statusValue}>{controller?.playbackRate ?? 1}x</span>
           </div>
-          <div>
-            音量: <strong>{Math.round(vjController?.volume ?? 0)}%</strong>
+
+          <div style={STYLES.statusItem}>
+            <span style={STYLES.statusLabel}>音量: </span>
+            <span style={STYLES.statusValue}>{Math.round(controller?.volume ?? 0)}%</span>
           </div>
-          <div>
-            ミュート:{" "}
-            <strong style={{ color: vjController?.isMuted ? "#f44336" : "#4CAF50" }}>
-              {vjController?.isMuted ? "ON" : "OFF"}
-            </strong>
-          </div>
-          <div>
-            時間:{" "}
-            <strong>
-              {Math.round(vjController?.currentTime ?? 0)}s /{" "}
-              {Math.round(vjController?.duration ?? 0)}s
-            </strong>
+
+          <div style={STYLES.statusItem}>
+            <span style={STYLES.statusLabel}>ミュート: </span>
+            <span
+              style={{
+                ...STYLES.statusValue,
+                color: controller?.isMuted ? "#f44336" : "#4CAF50",
+              }}
+            >
+              {controller?.isMuted ? "ON" : "OFF"}
+            </span>
           </div>
         </div>
       </div>
@@ -202,4 +352,4 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
   );
 };
 
-export default YouTubeController;
+export default VJController;
