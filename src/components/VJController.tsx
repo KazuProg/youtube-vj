@@ -1,7 +1,6 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useXWinSync } from "../hooks/useXWinSync";
-import type { PlayerStatus, YouTubePlayerRef } from "./VJPlayer";
-import YTPlayerForController from "./VJPlayerForController";
+import YTPlayerForController, { type VJControllerRef } from "./VJPlayerForController";
 
 type YouTubeControllerProps = {
   localStorageKey: string;
@@ -16,24 +15,17 @@ interface VJSyncData {
 }
 
 const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
-  const playerRef = useRef<YouTubePlayerRef>(null);
-  const [playerStatus, setPlayerStatus] = useState<PlayerStatus>({
-    playerState: 0,
-    playbackRate: 1,
-    volume: 100,
-    isMuted: true,
-    currentTime: 0,
-    duration: 0,
-  });
+  const playerRef = useRef<VJControllerRef | null>(null);
+  const [vjController, setVjController] = useState<VJControllerRef | null>(null);
 
   const { writeToStorage: writeToXWinSync } = useXWinSync(localStorageKey);
 
   const writeToStorage = useCallback(
     (updates: Partial<Omit<VJSyncData, "videoId" | "lastUpdated">> = {}) => {
       const beforeData = {
-        playbackRate: playerStatus.playbackRate,
-        currentTime: playerStatus.currentTime,
-        paused: playerStatus.playerState === 2,
+        playbackRate: vjController?.playbackRate ?? 1,
+        currentTime: vjController?.currentTime ?? 0,
+        paused: vjController?.playerState === 2,
       };
 
       const syncData: VJSyncData = {
@@ -45,11 +37,27 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
 
       writeToXWinSync(syncData);
     },
-    [writeToXWinSync, playerStatus]
+    [
+      writeToXWinSync,
+      vjController?.playbackRate,
+      vjController?.currentTime,
+      vjController?.playerState,
+    ]
   );
 
-  const handleStatusChange = useCallback((status: PlayerStatus) => {
-    setPlayerStatus(status);
+  // リアルタイム状態更新のコールバック
+  const handleStatusChange = useCallback(() => {
+    if (playerRef.current) {
+      // 新しいオブジェクトを作成して状態更新を確実に行う
+      setVjController({ ...playerRef.current });
+    }
+  }, []);
+
+  // 初回設定
+  useEffect(() => {
+    if (playerRef.current) {
+      setVjController(playerRef.current);
+    }
   }, []);
 
   const getStateText = (state: number) =>
@@ -76,8 +84,8 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
       <YTPlayerForController
         style={{ width: "640px", height: "360px" }}
         ref={playerRef}
-        onStatusChange={handleStatusChange}
         syncKey={localStorageKey}
+        onStatusChange={handleStatusChange}
       />
 
       <div
@@ -93,32 +101,32 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
             type="button"
             style={{
               ...buttonStyle,
-              backgroundColor: playerStatus.playerState === 1 ? "#f44336" : "#4CAF50",
+              backgroundColor: vjController?.playerState === 1 ? "#f44336" : "#4CAF50",
             }}
             onClick={() =>
-              playerStatus.playerState === 1
+              vjController?.playerState === 1
                 ? writeToStorage({ paused: true })
                 : writeToStorage({ paused: false })
             }
           >
-            {playerStatus.playerState === 1 ? "Pause" : "Play"}
+            {vjController?.playerState === 1 ? "Pause" : "Play"}
           </button>
           <button
             type="button"
             style={{
               ...buttonStyle,
-              backgroundColor: playerStatus.isMuted ? "#2196F3" : "#ff9800",
+              backgroundColor: vjController?.isMuted ? "#2196F3" : "#ff9800",
             }}
             onClick={() => {
-              const newMuted = !playerStatus.isMuted;
+              const newMuted = !vjController?.isMuted;
               if (newMuted) {
-                playerRef.current?.mute();
+                vjController?.mute();
               } else {
-                playerRef.current?.unMute();
+                vjController?.unMute();
               }
             }}
           >
-            {playerStatus.isMuted ? "Unmute" : "Mute"}
+            {vjController?.isMuted ? "Unmute" : "Mute"}
           </button>
         </div>
 
@@ -128,8 +136,8 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
             <input
               type="range"
               min="0"
-              max={playerStatus.duration}
-              value={playerStatus.currentTime}
+              max={vjController?.duration ?? 0}
+              value={vjController?.currentTime ?? 0}
               onChange={(e) => writeToStorage({ currentTime: Number(e.target.value) })}
             />
           </label>
@@ -139,10 +147,10 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
               type="range"
               min="0"
               max="100"
-              value={playerStatus.volume}
+              value={vjController?.volume ?? 100}
               onChange={(e) => {
                 const newVolume = Number(e.target.value);
-                playerRef.current?.setVolume(newVolume);
+                vjController?.setVolume(newVolume);
               }}
             />
           </label>
@@ -153,7 +161,7 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
               min="0.25"
               max="2"
               step="0.05"
-              value={playerStatus.playbackRate}
+              value={vjController?.playbackRate ?? 1}
               onChange={(e) => writeToStorage({ playbackRate: Number(e.target.value) })}
             />
           </label>
@@ -167,24 +175,25 @@ const YouTubeController = ({ localStorageKey }: YouTubeControllerProps) => {
           }}
         >
           <div>
-            状態: <strong>{getStateText(playerStatus.playerState)}</strong>
+            状態: <strong>{getStateText(vjController?.playerState ?? 0)}</strong>
           </div>
           <div>
-            速度: <strong>{playerStatus.playbackRate}x</strong>
+            速度: <strong>{vjController?.playbackRate}x</strong>
           </div>
           <div>
-            音量: <strong>{Math.round(playerStatus.volume)}%</strong>
+            音量: <strong>{Math.round(vjController?.volume ?? 0)}%</strong>
           </div>
           <div>
             ミュート:{" "}
-            <strong style={{ color: playerStatus.isMuted ? "#f44336" : "#4CAF50" }}>
-              {playerStatus.isMuted ? "ON" : "OFF"}
+            <strong style={{ color: vjController?.isMuted ? "#f44336" : "#4CAF50" }}>
+              {vjController?.isMuted ? "ON" : "OFF"}
             </strong>
           </div>
           <div>
             時間:{" "}
             <strong>
-              {Math.round(playerStatus.currentTime)}s / {Math.round(playerStatus.duration)}s
+              {Math.round(vjController?.currentTime ?? 0)}s /{" "}
+              {Math.round(vjController?.duration ?? 0)}s
             </strong>
           </div>
         </div>

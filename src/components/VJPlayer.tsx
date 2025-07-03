@@ -3,27 +3,9 @@ import YouTube from "react-youtube";
 import type { Options, YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
 import { useXWinSync } from "../hooks/useXWinSync";
 
-export interface YouTubePlayerRef {
-  playVideo: () => void;
-  pauseVideo: () => void;
-  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
-  mute: () => void;
-  unMute: () => void;
-  setVolume: (volume: number) => void;
-  setPlaybackRate: (rate: number) => void;
-  isMuted: boolean;
-  playerState: number;
-  playbackRate: number;
-  volume: number;
-  currentTime: number;
-  duration: number;
-}
-
 export interface PlayerStatus {
   playerState: number;
   playbackRate: number;
-  volume: number;
-  isMuted: boolean;
   currentTime: number;
   duration: number;
 }
@@ -43,13 +25,17 @@ interface YTPlayerForVJProps {
   syncKey?: string;
 }
 
-const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
+export interface VJPlayerRef {
+  originalPlayer: YTPlayerTypes;
+  currentTime: number;
+  duration: number;
+}
+
+const YTPlayerForVJ = forwardRef<VJPlayerRef, YTPlayerForVJProps>(
   ({ style, onStatusChange, autoLoop = true, syncKey = "vj-player-default" }, ref) => {
     const playerRef = useRef<YTPlayerTypes | null>(null);
     const [playerState, setPlayerState] = useState(0);
     const [playbackRate, setPlaybackRate] = useState(1);
-    const [volume, setVolume] = useState(100);
-    const [isMuted, setIsMuted] = useState(true);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
 
@@ -59,12 +45,6 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
     useEffect(() => {
       if (playerRef.current) {
         try {
-          if (isMuted) {
-            playerRef.current.mute();
-          } else {
-            playerRef.current.unMute();
-            playerRef.current.setVolume(volume);
-          }
           playerRef.current.setPlaybackRate(playbackRate);
         } catch (error) {
           console.warn("Player not ready yet:", error);
@@ -74,19 +54,16 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
       onStatusChange?.({
         playerState,
         playbackRate,
-        volume,
-        isMuted,
         currentTime,
         duration,
       });
-    }, [playerState, playbackRate, volume, isMuted, currentTime, duration, onStatusChange]);
+    }, [playerState, playbackRate, currentTime, duration, onStatusChange]);
 
     const handleReady = useCallback(async (event: { target: YTPlayerTypes }) => {
       try {
         playerRef.current = event.target;
 
         event.target.mute();
-        setIsMuted(true);
         event.target.playVideo();
 
         const duration = await event.target.getDuration();
@@ -205,13 +182,11 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
         handleStatusChange({
           playerState: data,
           playbackRate,
-          volume,
-          isMuted,
           currentTime,
           duration,
         });
       },
-      [handleStatusChange, playbackRate, volume, isMuted, currentTime, duration]
+      [handleStatusChange, playbackRate, currentTime, duration]
     );
 
     useEffect(() => {
@@ -232,22 +207,11 @@ const YTPlayerForVJ = forwardRef<YouTubePlayerRef, YTPlayerForVJProps>(
     useImperativeHandle(
       ref,
       () => ({
-        playVideo: () => playerRef.current?.playVideo(),
-        pauseVideo: () => playerRef.current?.pauseVideo(),
-        seekTo: (seconds: number, allowSeekAhead: boolean) =>
-          playerRef.current?.seekTo(seconds, allowSeekAhead),
-        mute: () => setIsMuted(true),
-        unMute: () => setIsMuted(false),
-        setVolume,
-        setPlaybackRate,
-        isMuted,
-        playerState,
-        playbackRate,
-        volume,
+        originalPlayer: playerRef.current as YTPlayerTypes,
         currentTime,
         duration,
       }),
-      [isMuted, playerState, playbackRate, volume, currentTime, duration]
+      [currentTime, duration]
     );
 
     return (
