@@ -1,4 +1,12 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import YouTube from "react-youtube";
 import type { Options, YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
 import { useXWinSync } from "../hooks/useXWinSync";
@@ -175,6 +183,37 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       playbackRateRef.current = rate;
     }, []);
 
+    // YouTube Player のオプション（メモ化）
+    const youtubeOpts = useMemo(
+      () => ({
+        width: "100%",
+        height: "100%",
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          disablekb: 1,
+          // biome-ignore lint/style/useNamingConvention: YouTube API official parameter name
+          iv_load_policy: 3,
+        },
+      }),
+      []
+    );
+
+    // イベントハンドラーのメモ化
+    const handleStateChangeWrapper = useCallback(
+      (e: { data: number }) => {
+        handleStateChange(e.data);
+      },
+      [handleStateChange]
+    );
+
+    const handlePlaybackRateChangeWrapper = useCallback(
+      (e: { data: number }) => {
+        handlePlaybackRateChange(e.data);
+      },
+      [handlePlaybackRateChange]
+    );
+
     // 状態変更時の通知
     useEffect(() => {
       const status: PlayerStatus = {
@@ -236,22 +275,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       <YouTube
         style={style}
         videoId={videoId}
-        opts={
-          {
-            width: "100%",
-            height: "100%",
-            playerVars: {
-              autoplay: 1,
-              controls: 0,
-              disablekb: 1,
-              // biome-ignore lint/style/useNamingConvention: YouTube API official parameter name
-              iv_load_policy: 3,
-            },
-          } as Options
-        }
+        opts={youtubeOpts as Options}
         onReady={handleReady}
-        onStateChange={(e) => handleStateChange(e.data)}
-        onPlaybackRateChange={(e) => handlePlaybackRateChange(e.data)}
+        onStateChange={handleStateChangeWrapper}
+        onPlaybackRateChange={handlePlaybackRateChangeWrapper}
       />
     );
   }
