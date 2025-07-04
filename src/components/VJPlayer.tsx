@@ -20,11 +20,16 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const animationFrameRef = useRef<number | null>(null);
     const lastSyncDataRef = useRef<VJSyncData | null>(null);
     const isInitializedRef = useRef(false);
+    const baseTimestampRef = useRef<number>(0);
+    const baseCurrentTimeRef = useRef<number>(0);
+    const playbackRateRef = useRef<number>(DEFAULT_VALUES.playbackRate);
 
     const [playerState, setPlayerState] = useState<number>(0);
     const [playbackRate, setPlaybackRate] = useState<number>(DEFAULT_VALUES.playbackRate);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
+    const [baseTimestamp, setBaseTimestamp] = useState<number>(0);
+    const [baseCurrentTime, setBaseCurrentTime] = useState<number>(0);
 
     const { readFromStorage, onXWinSync } = useXWinSync(syncKey);
 
@@ -37,14 +42,22 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     // 現在時間の更新ループ
-    const updateCurrentTime = useCallback(async () => {
+    const updateCurrentTime = useCallback(() => {
       if (!playerRef.current) {
         return;
       }
+      if (!baseTimestampRef.current) {
+        return;
+      }
+      if (!playbackRateRef.current) {
+        return;
+      }
+
+      const timeSinceUpdate = (Date.now() - baseTimestampRef.current) / 1000;
+      const adjustedTime = baseCurrentTimeRef.current + timeSinceUpdate * playbackRateRef.current;
 
       try {
-        const time = await playerRef.current.getCurrentTime();
-        setCurrentTime(time);
+        setCurrentTime(adjustedTime);
       } catch (error) {
         console.warn("Failed to get current time:", error);
       }
@@ -88,6 +101,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const handleSyncData = useCallback(
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Refactoring planned for future iterations
       async (syncData: VJSyncData) => {
+        console.log("syncData", syncData);
         if (!playerRef.current || !isInitializedRef.current) {
           return;
         }
@@ -96,6 +110,11 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         if (lastSyncDataRef.current?.lastUpdated === syncData.lastUpdated) {
           return;
         }
+
+        setBaseTimestamp(syncData.lastUpdated);
+        setBaseCurrentTime(syncData.currentTime);
+        baseTimestampRef.current = syncData.lastUpdated;
+        baseCurrentTimeRef.current = syncData.currentTime;
 
         try {
           // 時間同期
@@ -121,6 +140,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           if (Math.abs(playbackRate - syncData.playbackRate) > 0.01) {
             await playerRef.current.setPlaybackRate(syncData.playbackRate);
             setPlaybackRate(syncData.playbackRate);
+            playbackRateRef.current = syncData.playbackRate;
           }
 
           lastSyncDataRef.current = syncData;
@@ -152,6 +172,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     // 再生速度変更処理
     const handlePlaybackRateChange = useCallback((rate: number) => {
       setPlaybackRate(rate);
+      playbackRateRef.current = rate;
     }, []);
 
     // 状態変更時の通知
@@ -174,7 +195,17 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           console.warn("Player not ready for playback rate change:", error);
         }
       }
+      playbackRateRef.current = playbackRate;
     }, [playbackRate]);
+
+    // Ref値の同期
+    useEffect(() => {
+      baseTimestampRef.current = baseTimestamp;
+    }, [baseTimestamp]);
+
+    useEffect(() => {
+      baseCurrentTimeRef.current = baseCurrentTime;
+    }, [baseCurrentTime]);
 
     // 外部同期リスナー
     useEffect(() => {
