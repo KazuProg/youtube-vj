@@ -36,8 +36,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const [playbackRate, setPlaybackRate] = useState<number>(DEFAULT_VALUES.playbackRate);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
-    const [baseTimestamp, setBaseTimestamp] = useState<number>(0);
-    const [baseCurrentTime, setBaseCurrentTime] = useState<number>(0);
 
     const { readFromStorage, onXWinSync } = useXWinSync(syncKey);
 
@@ -119,8 +117,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           return;
         }
 
-        setBaseTimestamp(syncData.lastUpdated);
-        setBaseCurrentTime(syncData.currentTime);
         baseTimestampRef.current = syncData.lastUpdated;
         baseCurrentTimeRef.current = syncData.currentTime;
 
@@ -236,15 +232,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       }
       playbackRateRef.current = playbackRate;
     }, [playbackRate]);
-
-    // Ref値の同期
-    useEffect(() => {
-      baseTimestampRef.current = baseTimestamp;
-    }, [baseTimestamp]);
-
-    useEffect(() => {
-      baseCurrentTimeRef.current = baseCurrentTime;
-    }, [baseCurrentTime]);
 
     // 外部同期リスナー
     useEffect(() => {
