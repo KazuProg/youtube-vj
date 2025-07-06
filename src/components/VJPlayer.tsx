@@ -29,7 +29,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const syncDataRef = useRef<VJSyncData | null>(null);
 
     const [playerState, setPlayerState] = useState<number>(0);
-    const [playbackRate, setPlaybackRate] = useState<number>(DEFAULT_VALUES.playbackRate);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
 
@@ -118,15 +117,14 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           }
 
           // 再生速度同期
-          if (Math.abs(playbackRate - syncData.playbackRate) > 0.01) {
+          if (Math.abs(syncData.playbackRate - syncData.playbackRate) > 0.01) {
             await playerRef.current.setPlaybackRate(syncData.playbackRate);
-            setPlaybackRate(syncData.playbackRate);
           }
         } catch (error) {
           console.error("Error during sync:", error);
         }
       },
-      [currentTime, playbackRate]
+      [currentTime]
     );
 
     // 状態変更処理
@@ -146,11 +144,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       },
       [autoLoop]
     );
-
-    // 再生速度変更処理
-    const handlePlaybackRateChange = useCallback((rate: number) => {
-      setPlaybackRate(rate);
-    }, []);
 
     // YouTube Player のオプション（メモ化）
     const youtubeOpts = useMemo(
@@ -176,34 +169,29 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [handleStateChange]
     );
 
-    const handlePlaybackRateChangeWrapper = useCallback(
-      (e: { data: number }) => {
-        handlePlaybackRateChange(e.data);
-      },
-      [handlePlaybackRateChange]
-    );
-
     // 状態変更時の通知
     useEffect(() => {
       const status: PlayerStatus = {
         playerState,
-        playbackRate,
+        playbackRate: syncDataRef.current?.playbackRate ?? DEFAULT_VALUES.playbackRate,
         currentTime,
         duration,
       };
       notifyStatusChange(status);
-    }, [playerState, playbackRate, currentTime, duration, notifyStatusChange]);
+    }, [playerState, currentTime, duration, notifyStatusChange]);
 
     // 再生速度の適用
     useEffect(() => {
       if (playerRef.current) {
         try {
-          playerRef.current.setPlaybackRate(playbackRate);
+          playerRef.current.setPlaybackRate(
+            syncDataRef.current?.playbackRate ?? DEFAULT_VALUES.playbackRate
+          );
         } catch (error) {
           console.warn("Player not ready for playback rate change:", error);
         }
       }
-    }, [playbackRate]);
+    }, []);
 
     // 外部同期リスナー
     useEffect(() => {
@@ -237,7 +225,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         opts={youtubeOpts as Options}
         onReady={handleReady}
         onStateChange={handleStateChangeWrapper}
-        onPlaybackRateChange={handlePlaybackRateChangeWrapper}
       />
     );
   }
