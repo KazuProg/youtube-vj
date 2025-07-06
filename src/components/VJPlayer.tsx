@@ -27,10 +27,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const playerRef = useRef<YTPlayerTypes | null>(null);
     const animationFrameRef = useRef<number | null>(null);
     const syncDataRef = useRef<VJSyncData | null>(null);
-    const isInitializedRef = useRef(false);
-    const baseTimestampRef = useRef<number>(0);
-    const baseCurrentTimeRef = useRef<number>(0);
-    const playbackRateRef = useRef<number>(DEFAULT_VALUES.playbackRate);
 
     const [playerState, setPlayerState] = useState<number>(0);
     const [playbackRate, setPlaybackRate] = useState<number>(DEFAULT_VALUES.playbackRate);
@@ -52,15 +48,13 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       if (!playerRef.current) {
         return;
       }
-      if (!baseTimestampRef.current) {
-        return;
-      }
-      if (!playbackRateRef.current) {
+      if (!syncDataRef.current) {
         return;
       }
 
-      const timeSinceUpdate = (Date.now() - baseTimestampRef.current) / 1000;
-      const adjustedTime = baseCurrentTimeRef.current + timeSinceUpdate * playbackRateRef.current;
+      const timeSinceUpdate = (Date.now() - syncDataRef.current.lastUpdated) / 1000;
+      const adjustedTime =
+        syncDataRef.current.currentTime + timeSinceUpdate * syncDataRef.current.playbackRate;
 
       try {
         setCurrentTime(adjustedTime);
@@ -75,8 +69,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const handleReady = useCallback(
       async (event: { target: YTPlayerTypes }) => {
         try {
-          playerRef.current = event.target;
-
           // 初期設定
           await event.target.mute();
           await event.target.playVideo();
@@ -87,7 +79,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           // 時間更新ループ開始
           updateCurrentTime();
 
-          isInitializedRef.current = true;
+          playerRef.current = event.target;
         } catch (error) {
           console.error("Error initializing YouTube player:", error);
         }
@@ -100,13 +92,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Refactoring planned for future iterations
       async (syncData: VJSyncData) => {
         console.log("syncData", syncData);
-        if (!playerRef.current || !isInitializedRef.current) {
+        if (!playerRef.current) {
           return;
         }
         syncDataRef.current = syncData;
-
-        baseTimestampRef.current = syncData.lastUpdated;
-        baseCurrentTimeRef.current = syncData.currentTime;
 
         try {
           // 時間同期
@@ -132,7 +121,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           if (Math.abs(playbackRate - syncData.playbackRate) > 0.01) {
             await playerRef.current.setPlaybackRate(syncData.playbackRate);
             setPlaybackRate(syncData.playbackRate);
-            playbackRateRef.current = syncData.playbackRate;
           }
         } catch (error) {
           console.error("Error during sync:", error);
@@ -162,7 +150,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     // 再生速度変更処理
     const handlePlaybackRateChange = useCallback((rate: number) => {
       setPlaybackRate(rate);
-      playbackRateRef.current = rate;
     }, []);
 
     // YouTube Player のオプション（メモ化）
@@ -209,14 +196,13 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
     // 再生速度の適用
     useEffect(() => {
-      if (playerRef.current && isInitializedRef.current) {
+      if (playerRef.current) {
         try {
           playerRef.current.setPlaybackRate(playbackRate);
         } catch (error) {
           console.warn("Player not ready for playback rate change:", error);
         }
       }
-      playbackRateRef.current = playbackRate;
     }, [playbackRate]);
 
     // 外部同期リスナー
