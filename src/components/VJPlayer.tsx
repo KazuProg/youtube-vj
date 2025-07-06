@@ -26,7 +26,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ) => {
     const playerRef = useRef<YTPlayerTypes | null>(null);
     const animationFrameRef = useRef<number | null>(null);
-    const lastSyncDataRef = useRef<VJSyncData | null>(null);
+    const syncDataRef = useRef<VJSyncData | null>(null);
     const isInitializedRef = useRef(false);
     const baseTimestampRef = useRef<number>(0);
     const baseCurrentTimeRef = useRef<number>(0);
@@ -37,7 +37,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
 
-    const { readFromStorage, onXWinSync } = useXWinSync(syncKey);
+    const { onXWinSync } = useXWinSync(syncKey);
 
     // プレイヤー状態の通知
     const notifyStatusChange = useCallback(
@@ -88,19 +88,11 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           updateCurrentTime();
 
           isInitializedRef.current = true;
-
-          // 初期同期データの読み込み
-          setTimeout(() => {
-            const initialData = readFromStorage();
-            if (initialData) {
-              handleSyncData(initialData);
-            }
-          }, 3000);
         } catch (error) {
           console.error("Error initializing YouTube player:", error);
         }
       },
-      [updateCurrentTime, readFromStorage]
+      [updateCurrentTime]
     );
 
     // 同期データの処理
@@ -111,11 +103,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         if (!playerRef.current || !isInitializedRef.current) {
           return;
         }
-
-        // 重複チェック
-        if (lastSyncDataRef.current?.lastUpdated === syncData.lastUpdated) {
-          return;
-        }
+        syncDataRef.current = syncData;
 
         baseTimestampRef.current = syncData.lastUpdated;
         baseCurrentTimeRef.current = syncData.currentTime;
@@ -146,8 +134,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
             setPlaybackRate(syncData.playbackRate);
             playbackRateRef.current = syncData.playbackRate;
           }
-
-          lastSyncDataRef.current = syncData;
         } catch (error) {
           console.error("Error during sync:", error);
         }
