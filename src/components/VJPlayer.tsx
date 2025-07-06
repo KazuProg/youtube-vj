@@ -88,7 +88,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
     // 同期データの処理
     const handleSyncData = useCallback(
-      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Refactoring planned for future iterations
       async (syncData: VJSyncData) => {
         console.log("syncData", syncData);
         if (!playerRef.current) {
@@ -117,9 +116,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           }
 
           // 再生速度同期
-          if (Math.abs(syncData.playbackRate - syncData.playbackRate) > 0.01) {
-            await playerRef.current.setPlaybackRate(syncData.playbackRate);
-          }
+          await playerRef.current.setPlaybackRate(syncData.playbackRate);
         } catch (error) {
           console.error("Error during sync:", error);
         }
