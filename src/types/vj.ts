@@ -83,3 +83,11 @@ export const DEFAULT_VALUES = {
   seekThreshold: 1.0,
   seekDebounce: 100,
 } as const;
+
+export const INITIAL_SYNC_DATA = {
+  videoId: DEFAULT_VALUES.videoId,
+  playbackRate: DEFAULT_VALUES.playbackRate,
+  currentTime: 0,
+  lastUpdated: 0,
+  paused: false,
+} as const;

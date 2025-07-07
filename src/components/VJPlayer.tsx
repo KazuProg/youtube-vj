@@ -11,7 +11,7 @@ import YouTube from "react-youtube";
 import type { Options, YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
 import { useXWinSync } from "../hooks/useXWinSync";
 import type { PlayerStatus, VJPlayerProps, VJPlayerRef, VJSyncData } from "../types/vj";
-import { DEFAULT_VALUES } from "../types/vj";
+import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "../types/vj";
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   (
@@ -26,7 +26,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ) => {
     const playerRef = useRef<YTPlayerTypes | null>(null);
     const animationFrameRef = useRef<number | null>(null);
-    const syncDataRef = useRef<VJSyncData | null>(null);
+    const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
 
     const [playerState, setPlayerState] = useState<number>(0);
     const [currentTime, setCurrentTime] = useState<number>(0);
@@ -47,7 +47,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       if (!playerRef.current) {
         return;
       }
-      if (!syncDataRef.current) {
+      if (syncDataRef.current.lastUpdated === 0) {
         return;
       }
 
@@ -170,7 +170,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     useEffect(() => {
       const status: PlayerStatus = {
         playerState,
-        playbackRate: syncDataRef.current?.playbackRate ?? DEFAULT_VALUES.playbackRate,
+        playbackRate: syncDataRef.current.playbackRate,
         currentTime,
         duration,
       };
@@ -181,9 +181,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     useEffect(() => {
       if (playerRef.current) {
         try {
-          playerRef.current.setPlaybackRate(
-            syncDataRef.current?.playbackRate ?? DEFAULT_VALUES.playbackRate
-          );
+          playerRef.current.setPlaybackRate(syncDataRef.current.playbackRate);
         } catch (error) {
           console.warn("Player not ready for playback rate change:", error);
         }
