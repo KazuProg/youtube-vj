@@ -7,7 +7,7 @@ import type {
   VJPlayerRef,
   VJSyncData,
 } from "../types/vj";
-import { DEFAULT_VALUES } from "../types/vj";
+import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "../types/vj";
 import VJPlayer from "./VJPlayer";
 
 const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
@@ -36,11 +36,27 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
     const { writeToStorage: writeToXWinSync } = useXWinSync(syncKey);
+    const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
+
+    // syncDataRefを更新し、同時にwriteToXWinSyncを呼び出す
+    const updateSyncData = useCallback(
+      (partialSyncData: Partial<VJSyncData>) => {
+        const newSyncData = { ...syncDataRef.current, ...partialSyncData };
+        syncDataRef.current = newSyncData;
+        writeToXWinSync(newSyncData);
+      },
+      [writeToXWinSync]
+    );
 
     // プレイヤー取得
     const getPlayer = useCallback(() => {
       return vjPlayerRef.current?.originalPlayer;
     }, []);
+
+    // 初期化時のみ実行
+    useEffect(() => {
+      updateSyncData({ ...INITIAL_SYNC_DATA });
+    }, [updateSyncData]);
 
     // 安全な非同期プレイヤー操作
     const safePlayerOperation = useCallback(
@@ -74,17 +90,14 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
           return;
         }
 
-        const syncData: VJSyncData = {
-          videoId: videoId ?? DEFAULT_VALUES.videoId,
+        updateSyncData({
           playbackRate: status.playbackRate,
           currentTime: status.currentTime,
           lastUpdated: Date.now(),
           paused: status.playerState === 2,
-        };
-
-        writeToXWinSync(syncData);
+        });
       },
-      [writeToXWinSync, videoId]
+      [updateSyncData]
     );
 
     // シーク位置の保存（デバウンス付き）
@@ -101,17 +114,12 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
           return;
         }
 
-        const syncData: VJSyncData = {
-          videoId: videoId ?? DEFAULT_VALUES.videoId,
-          playbackRate: currentStatus.playbackRate,
+        updateSyncData({
           currentTime: targetTime,
           lastUpdated: now,
-          paused: currentStatus.playerState === 2,
-        };
-
-        writeToXWinSync(syncData);
+        });
       },
-      [writeToXWinSync, videoId]
+      [updateSyncData]
     );
 
     // 子プレイヤーの状態変更処理
