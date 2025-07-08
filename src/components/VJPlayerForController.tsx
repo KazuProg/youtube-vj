@@ -202,10 +202,10 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
         playVideo: () => setIsPlaying(true),
         pauseVideo: () => setIsPlaying(false),
         seekTo: (seconds: number) => {
-          safePlayerOperation(() => {
-            getPlayer()?.seekTo(seconds, true);
+          updateSyncData({
+            currentTime: seconds,
+            lastUpdated: Date.now(),
           });
-          saveSeekPosition(seconds);
         },
         mute: () => setIsMuted(true),
         unMute: () => setIsMuted(false),
@@ -220,17 +220,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
         currentTime,
         duration,
       }),
-      [
-        isMuted,
-        playerState,
-        playbackRate,
-        volume,
-        currentTime,
-        duration,
-        safePlayerOperation,
-        getPlayer,
-        saveSeekPosition,
-      ]
+      [isMuted, playerState, playbackRate, volume, currentTime, duration, updateSyncData]
     );
 
     return (
