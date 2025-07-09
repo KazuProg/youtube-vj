@@ -29,7 +29,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
     // プレイヤー状態
     const [volume, setVolume] = useState<number>(DEFAULT_VALUES.volume);
     const [isMuted, setIsMuted] = useState<boolean>(true);
-    const [playbackRate, setPlaybackRate] = useState<number>(DEFAULT_VALUES.playbackRate);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
     const [playerState, setPlayerState] = useState<number>(0);
@@ -133,7 +132,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
 
         // 状態の更新
         setPlayerState(status.playerState);
-        setPlaybackRate(status.playbackRate);
         setCurrentTime(status.currentTime);
         setDuration(status.duration);
 
@@ -146,13 +144,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
       },
       [autoLoop, onStatusChange, saveToStorage, saveSeekPosition]
     );
-
-    // 再生速度変更の適用
-    useEffect(() => {
-      safePlayerOperation(() => {
-        getPlayer()?.setPlaybackRate(playbackRate);
-      });
-    }, [playbackRate, safePlayerOperation, getPlayer]);
 
     // 音量・ミュート設定の適用
     useEffect(() => {
@@ -210,17 +201,21 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
         mute: () => setIsMuted(true),
         unMute: () => setIsMuted(false),
         setVolume: (newVolume: number) => setVolume(Math.max(0, Math.min(100, newVolume))),
-        setPlaybackRate: (rate: number) => setPlaybackRate(rate),
+        setPlaybackRate: (rate: number) => {
+          updateSyncData({
+            playbackRate: rate,
+          });
+        },
 
         // 状態プロパティ
         isMuted,
         playerState,
-        playbackRate,
+        playbackRate: syncDataRef.current.playbackRate,
         volume,
         currentTime,
         duration,
       }),
-      [isMuted, playerState, playbackRate, volume, currentTime, duration, updateSyncData]
+      [isMuted, playerState, volume, currentTime, duration, updateSyncData]
     );
 
     return (
