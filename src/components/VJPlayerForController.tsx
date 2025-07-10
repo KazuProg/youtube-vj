@@ -32,7 +32,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
     const [playerState, setPlayerState] = useState<number>(0);
-    const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
     const { writeToStorage: writeToXWinSync } = useXWinSync(syncKey);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
@@ -127,7 +126,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
         // 自動ループ処理
         if (autoLoop && status.playerState === 0) {
           saveSeekPosition(0);
-          setIsPlaying(true);
         }
 
         // 状態の更新
@@ -162,22 +160,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
       });
     }, [volume, isMuted, safePlayerOperation, getPlayer]);
 
-    // 再生状態の適用
-    useEffect(() => {
-      safePlayerOperation(async () => {
-        const player = getPlayer();
-        if (!player) {
-          return;
-        }
-
-        if (isPlaying) {
-          await player.playVideo();
-        } else {
-          await player.pauseVideo();
-        }
-      });
-    }, [isPlaying, safePlayerOperation, getPlayer]);
-
     // 初期化完了フラグの設定
     useEffect(() => {
       if (vjPlayerRef.current) {
@@ -190,8 +172,18 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
       ref,
       () => ({
         // 制御メソッド
-        playVideo: () => setIsPlaying(true),
-        pauseVideo: () => setIsPlaying(false),
+        playVideo: () => {
+          updateSyncData({
+            lastUpdated: Date.now(), // 再生開始時間の記録
+            paused: false,
+          });
+        },
+        pauseVideo: () => {
+          updateSyncData({
+            currentTime, // 一時停止位置の記録
+            paused: true,
+          });
+        },
         seekTo: (seconds: number) => {
           updateSyncData({
             currentTime: seconds,

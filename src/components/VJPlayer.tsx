@@ -50,15 +50,18 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       if (syncDataRef.current.lastUpdated === 0) {
         return;
       }
+      if (syncDataRef.current.paused) {
+        setCurrentTime(syncDataRef.current.currentTime);
+      } else {
+        const timeSinceUpdate = (Date.now() - syncDataRef.current.lastUpdated) / 1000;
+        const adjustedTime =
+          syncDataRef.current.currentTime + timeSinceUpdate * syncDataRef.current.playbackRate;
 
-      const timeSinceUpdate = (Date.now() - syncDataRef.current.lastUpdated) / 1000;
-      const adjustedTime =
-        syncDataRef.current.currentTime + timeSinceUpdate * syncDataRef.current.playbackRate;
-
-      try {
-        setCurrentTime(adjustedTime);
-      } catch (error) {
-        console.warn("Failed to get current time:", error);
+        try {
+          setCurrentTime(adjustedTime);
+        } catch (error) {
+          console.warn("Failed to get current time:", error);
+        }
       }
 
       animationFrameRef.current = requestAnimationFrame(updateCurrentTime);
