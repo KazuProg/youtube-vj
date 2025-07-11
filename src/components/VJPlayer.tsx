@@ -32,7 +32,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
 
-    const { onXWinSync } = useXWinSync(syncKey);
+    const { onXWinSync, readFromStorage } = useXWinSync(syncKey);
 
     // プレイヤー状態の通知
     const notifyStatusChange = useCallback(
@@ -82,11 +82,16 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           updateCurrentTime();
 
           playerRef.current = event.target;
+
+          const syncData = await readFromStorage();
+          if (syncData) {
+            handleSyncData(syncData);
+          }
         } catch (error) {
           console.error("Error initializing YouTube player:", error);
         }
       },
-      [updateCurrentTime]
+      [updateCurrentTime, readFromStorage]
     );
 
     // 同期データの処理
