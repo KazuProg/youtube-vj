@@ -27,6 +27,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const playerRef = useRef<YTPlayerTypes | null>(null);
     const animationFrameRef = useRef<number | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
+    const syncIntervalRef = useRef<number | null>(null);
 
     const [playerState, setPlayerState] = useState<number>(0);
     const [currentTime, setCurrentTime] = useState<number>(0);
@@ -67,6 +68,41 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       animationFrameRef.current = requestAnimationFrame(updateCurrentTime);
     }, []);
 
+    const syncTiming = useCallback(async () => {
+      if (!playerRef.current) {
+        return;
+      }
+      const syncData = syncDataRef.current;
+
+      try {
+        // 時間同期
+        const timeSinceUpdate = (Date.now() - syncData.lastUpdated) / 1000;
+        const adjustedTime = syncData.paused
+          ? syncData.currentTime
+          : syncData.currentTime + timeSinceUpdate * syncData.playbackRate;
+
+        // currentTimeを直接参照せず、計算値を使用
+        const currentPlayerTime = await playerRef.current.getCurrentTime();
+        const timeDiff = Math.abs(currentPlayerTime - adjustedTime);
+        if (timeDiff > DEFAULT_VALUES.seekThreshold) {
+          await playerRef.current.seekTo(adjustedTime, true);
+        }
+
+        // 再生状態同期
+        const currentState = await playerRef.current.getPlayerState();
+        if (syncData.paused && currentState === 1) {
+          await playerRef.current.pauseVideo();
+        } else if (!syncData.paused && currentState === 2) {
+          await playerRef.current.playVideo();
+        }
+
+        // 再生速度同期
+        await playerRef.current.setPlaybackRate(syncData.playbackRate);
+      } catch (error) {
+        console.error("Error during sync:", error);
+      }
+    }, []);
+
     // プレイヤー初期化
     const handleReady = useCallback(
       async (event: { target: YTPlayerTypes }) => {
@@ -87,49 +123,29 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           if (syncData) {
             handleSyncData(syncData);
           }
+
+          // 定期同期の開始
+          syncIntervalRef.current = setInterval(syncTiming, 1000);
         } catch (error) {
           console.error("Error initializing YouTube player:", error);
         }
       },
-      [updateCurrentTime, readFromStorage]
+      [updateCurrentTime, readFromStorage, syncTiming]
     );
 
     // 同期データの処理
     const handleSyncData = useCallback(
-      async (syncData: VJSyncData) => {
+      (syncData: VJSyncData) => {
         console.log("syncData", syncData);
         if (!playerRef.current) {
           return;
         }
         syncDataRef.current = syncData;
 
-        try {
-          // 時間同期
-          const timeSinceUpdate = (Date.now() - syncData.lastUpdated) / 1000;
-          const adjustedTime = syncData.paused
-            ? syncData.currentTime
-            : syncData.currentTime + timeSinceUpdate * syncData.playbackRate;
-
-          const timeDiff = Math.abs(currentTime - adjustedTime);
-          if (timeDiff > DEFAULT_VALUES.seekThreshold) {
-            await playerRef.current.seekTo(adjustedTime, true);
-          }
-
-          // 再生状態同期
-          const currentState = await playerRef.current.getPlayerState();
-          if (syncData.paused && currentState === 1) {
-            await playerRef.current.pauseVideo();
-          } else if (!syncData.paused && currentState === 2) {
-            await playerRef.current.playVideo();
-          }
-
-          // 再生速度同期
-          await playerRef.current.setPlaybackRate(syncData.playbackRate);
-        } catch (error) {
-          console.error("Error during sync:", error);
-        }
+        // 即座に同期を実行（定期同期とは別に）
+        syncTiming();
       },
-      [currentTime]
+      [syncTiming]
     );
 
     // 状態変更処理
@@ -206,6 +222,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       return () => {
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
+        }
+        if (syncIntervalRef.current) {
+          clearInterval(syncIntervalRef.current);
         }
       };
     }, []);
