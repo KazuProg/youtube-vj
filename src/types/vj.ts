@@ -46,6 +46,7 @@ export interface VJPlayerRef {
   originalPlayer: YouTubePlayer;
   currentTime: number;
   duration: number;
+  getCurrentTime: () => number | null;
 }
 
 /** VJコントローラーのRef型 */

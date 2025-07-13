@@ -43,30 +43,32 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [onStatusChange]
     );
 
+    const getCurrentTime = useCallback(() => {
+      if (!playerRef.current || syncDataRef.current.lastUpdated === 0) {
+        return null;
+      }
+
+      if (syncDataRef.current.paused) {
+        return syncDataRef.current.currentTime;
+      }
+
+      const timeSinceUpdate = (Date.now() - syncDataRef.current.lastUpdated) / 1000;
+      const adjustedTime =
+        syncDataRef.current.currentTime + timeSinceUpdate * syncDataRef.current.playbackRate;
+
+      return adjustedTime;
+    }, []);
+
     // 現在時間の更新ループ
     const updateCurrentTime = useCallback(() => {
-      if (!playerRef.current) {
+      const currentTime = getCurrentTime();
+      if (currentTime === null) {
         return;
       }
-      if (syncDataRef.current.lastUpdated === 0) {
-        return;
-      }
-      if (syncDataRef.current.paused) {
-        setCurrentTime(syncDataRef.current.currentTime);
-      } else {
-        const timeSinceUpdate = (Date.now() - syncDataRef.current.lastUpdated) / 1000;
-        const adjustedTime =
-          syncDataRef.current.currentTime + timeSinceUpdate * syncDataRef.current.playbackRate;
-
-        try {
-          setCurrentTime(adjustedTime);
-        } catch (error) {
-          console.warn("Failed to get current time:", error);
-        }
-      }
+      setCurrentTime(currentTime);
 
       animationFrameRef.current = requestAnimationFrame(updateCurrentTime);
-    }, []);
+    }, [getCurrentTime]);
 
     const syncTiming = useCallback(async () => {
       if (!playerRef.current) {
@@ -76,16 +78,13 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
       try {
         // 時間同期
-        const timeSinceUpdate = (Date.now() - syncData.lastUpdated) / 1000;
-        const adjustedTime = syncData.paused
-          ? syncData.currentTime
-          : syncData.currentTime + timeSinceUpdate * syncData.playbackRate;
-
-        // currentTimeを直接参照せず、計算値を使用
-        const currentPlayerTime = await playerRef.current.getCurrentTime();
-        const timeDiff = Math.abs(currentPlayerTime - adjustedTime);
-        if (timeDiff > DEFAULT_VALUES.seekThreshold) {
-          await playerRef.current.seekTo(adjustedTime, true);
+        const expectedCurrentTime = getCurrentTime();
+        if (expectedCurrentTime !== null) {
+          const currentPlayerTime = await playerRef.current.getCurrentTime();
+          const timeDiff = Math.abs(currentPlayerTime - expectedCurrentTime);
+          if (timeDiff > DEFAULT_VALUES.seekThreshold) {
+            await playerRef.current.seekTo(expectedCurrentTime, true);
+          }
         }
 
         // 再生状態同期
@@ -101,7 +100,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       } catch (error) {
         console.error("Error during sync:", error);
       }
-    }, []);
+    }, [getCurrentTime]);
 
     // プレイヤー初期化
     const handleReady = useCallback(
@@ -236,8 +235,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         originalPlayer: playerRef.current as YTPlayerTypes,
         currentTime,
         duration,
+        getCurrentTime,
       }),
-      [currentTime, duration]
+      [currentTime, duration, getCurrentTime]
     );
 
     return (
