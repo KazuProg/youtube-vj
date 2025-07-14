@@ -29,18 +29,18 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     const getCurrentTime = useCallback(() => {
+      const syncData = syncDataRef.current;
       try {
-        if (!playerRef.current || syncDataRef.current.lastUpdated === 0) {
+        if (!playerRef.current || syncData.lastUpdated === 0) {
           return null;
         }
 
-        if (syncDataRef.current.paused) {
-          return syncDataRef.current.currentTime;
+        if (syncData.paused) {
+          return syncData.currentTime;
         }
 
-        const timeSinceUpdate = (Date.now() - syncDataRef.current.lastUpdated) / 1000;
-        const adjustedTime =
-          syncDataRef.current.currentTime + timeSinceUpdate * syncDataRef.current.playbackRate;
+        const timeSinceUpdate = (Date.now() - syncData.lastUpdated) / 1000;
+        const adjustedTime = syncData.currentTime + timeSinceUpdate * syncData.playbackRate;
 
         return adjustedTime;
       } catch (error) {
@@ -50,7 +50,8 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     }, []);
 
     const syncTiming = useCallback(async () => {
-      if (!playerRef.current) {
+      const player = playerRef.current;
+      if (!player) {
         return;
       }
       const syncData = syncDataRef.current;
@@ -59,23 +60,23 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         // 時間同期
         const expectedCurrentTime = getCurrentTime();
         if (expectedCurrentTime !== null) {
-          const currentPlayerTime = await playerRef.current.getCurrentTime();
+          const currentPlayerTime = await player.getCurrentTime();
           const timeDiff = Math.abs(currentPlayerTime - expectedCurrentTime);
           if (timeDiff > DEFAULT_VALUES.seekThreshold) {
-            await playerRef.current.seekTo(expectedCurrentTime, true);
+            await player.seekTo(expectedCurrentTime, true);
           }
         }
 
         // 再生状態同期
-        const currentState = await playerRef.current.getPlayerState();
+        const currentState = await player.getPlayerState();
         if (syncData.paused && currentState === 1) {
-          await playerRef.current.pauseVideo();
+          await player.pauseVideo();
         } else if (!syncData.paused && currentState === 2) {
-          await playerRef.current.playVideo();
+          await player.playVideo();
         }
 
         // 再生速度同期
-        await playerRef.current.setPlaybackRate(syncData.playbackRate);
+        await player.setPlaybackRate(syncData.playbackRate);
       } catch (error) {
         console.error("Error during sync:", error);
       }
@@ -84,15 +85,16 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     // プレイヤー初期化
     const handleReady = useCallback(
       async (event: { target: YTPlayerTypes }) => {
+        const player = event.target;
         try {
           // 初期設定
-          await event.target.mute();
-          await event.target.playVideo();
+          await player.mute();
+          await player.playVideo();
 
-          const playerDuration = await event.target.getDuration();
+          const playerDuration = await player.getDuration();
           setDuration(playerDuration);
 
-          playerRef.current = event.target;
+          playerRef.current = player;
 
           const syncData = await readFromStorage();
           if (syncData) {
