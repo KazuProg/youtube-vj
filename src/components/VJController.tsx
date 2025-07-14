@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 import { useXWinSync } from "../hooks/useXWinSync";
 import type { VJControllerRef, VJSyncData } from "../types/vj";
 import { DEFAULT_VALUES, PLAYER_STATE_MAP } from "../types/vj";
@@ -136,7 +137,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
           lastUpdated: Date.now(),
           playbackRate: controller.playbackRate,
           currentTime: currentTime,
-          paused: controller.playerState === 2,
+          paused: controller.playerState === PlayerStates.PAUSED,
           ...updates,
         };
 
@@ -182,7 +183,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
       return;
     }
 
-    const isPlaying = controller.playerState === 1;
+    const isPlaying = controller.playerState === PlayerStates.PLAYING;
     writeToStorage({ paused: isPlaying });
   }, [controller, writeToStorage]);
 
@@ -266,12 +267,13 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
             type="button"
             style={{
               ...STYLES.button,
-              backgroundColor: controller?.playerState === 1 ? "#f44336" : "#4CAF50",
+              backgroundColor:
+                controller?.playerState === PlayerStates.PLAYING ? "#f44336" : "#4CAF50",
             }}
             onClick={togglePlayPause}
             disabled={!controller}
           >
-            {controller?.playerState === 1 ? "一時停止" : "再生"}
+            {controller?.playerState === PlayerStates.PLAYING ? "一時停止" : "再生"}
           </button>
 
           <button
@@ -344,7 +346,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
           <div style={STYLES.statusItem}>
             <span style={STYLES.statusLabel}>状態: </span>
             <span style={STYLES.statusValue}>
-              {PLAYER_STATE_MAP[controller?.playerState ?? 0] || "不明"}
+              {PLAYER_STATE_MAP[controller?.playerState ?? PlayerStates.UNSTARTED] || "不明"}
             </span>
           </div>
 

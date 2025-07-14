@@ -2,6 +2,7 @@
  * VJアプリケーション共通の型定義
  */
 
+import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 import type { YouTubePlayer } from "youtube-player/dist/types";
 
 /** YouTubeプレイヤーの状態 */
@@ -22,22 +23,12 @@ export interface VJSyncData {
 
 /** プレイヤー状態の日本語表示マップ */
 export const PLAYER_STATE_MAP: Record<number, string> = {
-  [-1]: "再生前",
-  0: "終了",
-  1: "再生中",
-  2: "一時停止",
-  3: "バッファリング",
-  5: "頭出し済み",
-} as const;
-
-/** プレイヤー状態の定数 */
-export const PLAYER_STATES = {
-  unstarted: -1,
-  ended: 0,
-  playing: 1,
-  paused: 2,
-  buffering: 3,
-  cued: 5,
+  [PlayerStates.UNSTARTED]: "再生前",
+  [PlayerStates.ENDED]: "終了",
+  [PlayerStates.PLAYING]: "再生中",
+  [PlayerStates.PAUSED]: "一時停止",
+  [PlayerStates.BUFFERING]: "バッファリング",
+  [PlayerStates.VIDEO_CUED]: "頭出し済み",
 } as const;
 
 /** VJプレイヤーのRef型 */

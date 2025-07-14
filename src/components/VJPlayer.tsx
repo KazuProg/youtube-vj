@@ -1,5 +1,6 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import YouTube from "react-youtube";
+import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 import type { YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
 import { YT_OPTIONS } from "../constants";
 import { useXWinSync } from "../hooks/useXWinSync";
@@ -14,7 +15,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const playerRef = useRef<YTPlayerTypes | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
 
-    const [playerState, setPlayerState] = useState<number>(0);
+    const [playerState, setPlayerState] = useState<number>(PlayerStates.UNSTARTED);
     const [duration, setDuration] = useState<number>(0);
 
     const { onXWinSync, readFromStorage } = useXWinSync(syncKey);
@@ -68,9 +69,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
         // 再生状態同期
         const currentState = await player.getPlayerState();
-        if (syncData.paused && currentState === 1) {
+        if (syncData.paused && currentState === PlayerStates.PLAYING) {
           await player.pauseVideo();
-        } else if (!syncData.paused && currentState === 2) {
+        } else if (!syncData.paused && currentState === PlayerStates.PAUSED) {
           await player.playVideo();
         }
 
@@ -126,7 +127,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       setPlayerState(newState);
 
       // 自動ループ処理
-      if (newState === 0 && playerRef.current) {
+      if (newState === PlayerStates.ENDED && playerRef.current) {
         try {
           playerRef.current.seekTo(0, true);
           playerRef.current.playVideo();

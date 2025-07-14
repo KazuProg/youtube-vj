@@ -1,4 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 import { useXWinSync } from "../hooks/useXWinSync";
 import type {
   PlayerStatus,
@@ -85,7 +86,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
           playbackRate: status.playbackRate,
           currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
           lastUpdated: Date.now(),
-          paused: status.playerState === 2,
+          paused: status.playerState === PlayerStates.PAUSED,
         });
       },
       [updateSyncData]
@@ -117,7 +118,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
     const handleStatusChange = useCallback(
       (status: PlayerStatus) => {
         // 自動ループ処理
-        if (status.playerState === 0) {
+        if (status.playerState === PlayerStates.ENDED) {
           saveSeekPosition(0);
         }
 
