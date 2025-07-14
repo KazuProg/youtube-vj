@@ -1,14 +1,7 @@
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import YouTube from "react-youtube";
-import type { Options, YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
+import type { YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
+import { YT_OPTIONS } from "../constants";
 import { useXWinSync } from "../hooks/useXWinSync";
 import type { PlayerStatus, VJPlayerProps, VJPlayerRef, VJSyncData } from "../types/vj";
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "../types/vj";
@@ -154,22 +147,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [autoLoop]
     );
 
-    // YouTube Player のオプション（メモ化）
-    const youtubeOpts = useMemo(
-      () => ({
-        width: "100%",
-        height: "100%",
-        playerVars: {
-          autoplay: 1,
-          controls: 0,
-          disablekb: 1,
-          // biome-ignore lint/style/useNamingConvention: YouTube API official parameter name
-          iv_load_policy: 3,
-        },
-      }),
-      []
-    );
-
     // イベントハンドラーのメモ化
     const handleStateChangeWrapper = useCallback(
       (e: { data: number }) => {
@@ -228,7 +205,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       <YouTube
         style={style}
         videoId={videoId}
-        opts={youtubeOpts as Options}
+        opts={YT_OPTIONS}
         onReady={handleReady}
         onStateChange={handleStateChangeWrapper}
       />
