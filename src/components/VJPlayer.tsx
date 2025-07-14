@@ -154,17 +154,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       notifyStatusChange(status);
     }, [playerState, duration, notifyStatusChange]);
 
-    // 再生速度の適用
-    useEffect(() => {
-      if (playerRef.current) {
-        try {
-          playerRef.current.setPlaybackRate(syncDataRef.current.playbackRate);
-        } catch (error) {
-          console.warn("Player not ready for playback rate change:", error);
-        }
-      }
-    }, []);
-
     // 外部同期リスナー
     useEffect(() => {
       return onXWinSync(handleSyncData);
