@@ -50,11 +50,7 @@ function App() {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("mode") === "projection") {
     return (
-      <YTPlayerForVJ
-        style={{ position: "fixed", inset: 0 }}
-        syncKey={LOCAL_STORAGE_KEY.player}
-        autoLoop={true}
-      />
+      <YTPlayerForVJ style={{ position: "fixed", inset: 0 }} syncKey={LOCAL_STORAGE_KEY.player} />
     );
   }
 

@@ -8,13 +8,7 @@ import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "../types/vj";
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   (
-    {
-      style,
-      onStatusChange,
-      autoLoop = true,
-      syncKey = DEFAULT_VALUES.syncKey,
-      videoId = DEFAULT_VALUES.videoId,
-    },
+    { style, onStatusChange, syncKey = DEFAULT_VALUES.syncKey, videoId = DEFAULT_VALUES.videoId },
     ref
   ) => {
     const playerRef = useRef<YTPlayerTypes | null>(null);
@@ -130,22 +124,19 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     // 状態変更処理
-    const handleStateChange = useCallback(
-      (newState: number) => {
-        setPlayerState(newState);
+    const handleStateChange = useCallback((newState: number) => {
+      setPlayerState(newState);
 
-        // 自動ループ処理
-        if (autoLoop && newState === 0 && playerRef.current) {
-          try {
-            playerRef.current.seekTo(0, true);
-            playerRef.current.playVideo();
-          } catch (error) {
-            console.error("Error during auto loop:", error);
-          }
+      // 自動ループ処理
+      if (newState === 0 && playerRef.current) {
+        try {
+          playerRef.current.seekTo(0, true);
+          playerRef.current.playVideo();
+        } catch (error) {
+          console.error("Error during auto loop:", error);
         }
-      },
-      [autoLoop]
-    );
+      }
+    }, []);
 
     // イベントハンドラーのメモ化
     const handleStateChangeWrapper = useCallback(

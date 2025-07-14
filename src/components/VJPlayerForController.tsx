@@ -12,13 +12,7 @@ import VJPlayer from "./VJPlayer";
 
 const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
   (
-    {
-      style,
-      onStatusChange,
-      autoLoop = true,
-      syncKey = DEFAULT_VALUES.syncKey,
-      videoId = DEFAULT_VALUES.videoId,
-    },
+    { style, onStatusChange, syncKey = DEFAULT_VALUES.syncKey, videoId = DEFAULT_VALUES.videoId },
     ref
   ) => {
     const vjPlayerRef = useRef<VJPlayerRef | null>(null);
@@ -123,7 +117,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
     const handleStatusChange = useCallback(
       (status: PlayerStatus) => {
         // 自動ループ処理
-        if (autoLoop && status.playerState === 0) {
+        if (status.playerState === 0) {
           saveSeekPosition(0);
         }
 
@@ -138,7 +132,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
         // 親への通知
         onStatusChange?.(status);
       },
-      [autoLoop, onStatusChange, saveToStorage, saveSeekPosition]
+      [onStatusChange, saveToStorage, saveSeekPosition]
     );
 
     // 音量・ミュート設定の適用
@@ -222,7 +216,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
         onStatusChange={handleStatusChange}
         syncKey={syncKey}
         videoId={videoId}
-        autoLoop={autoLoop}
       />
     );
   }

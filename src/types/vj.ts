@@ -68,7 +68,6 @@ export interface VJControllerRef {
 export interface VJPlayerProps {
   style?: React.CSSProperties;
   onStatusChange?: (status: PlayerStatus) => void;
-  autoLoop?: boolean;
   syncKey?: string;
   videoId?: string;
 }
