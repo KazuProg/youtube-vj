@@ -29,7 +29,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
     // プレイヤー状態
     const [volume, setVolume] = useState<number>(DEFAULT_VALUES.volume);
     const [isMuted, setIsMuted] = useState<boolean>(true);
-    const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
     const [playerState, setPlayerState] = useState<number>(0);
 
@@ -90,7 +89,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
 
         updateSyncData({
           playbackRate: status.playbackRate,
-          currentTime: status.currentTime,
+          currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
           lastUpdated: Date.now(),
           paused: status.playerState === 2,
         });
@@ -130,7 +129,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
 
         // 状態の更新
         setPlayerState(status.playerState);
-        setCurrentTime(status.currentTime);
         setDuration(status.duration);
 
         // ストレージ保存
@@ -180,7 +178,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
         },
         pauseVideo: () => {
           updateSyncData({
-            currentTime, // 一時停止位置の記録
+            currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0, // 一時停止位置の記録
             paused: true,
           });
         },
@@ -198,16 +196,23 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
             playbackRate: rate,
           });
         },
+        getCurrentTime: () => {
+          try {
+            return vjPlayerRef.current?.getCurrentTime() ?? null;
+          } catch (error) {
+            console.warn("Failed to get current time:", error);
+            return null;
+          }
+        },
 
         // 状態プロパティ
         isMuted,
         playerState,
         playbackRate: syncDataRef.current.playbackRate,
         volume,
-        currentTime,
         duration,
       }),
-      [isMuted, playerState, volume, currentTime, duration, updateSyncData]
+      [isMuted, playerState, volume, duration, updateSyncData]
     );
 
     return (

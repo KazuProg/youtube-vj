@@ -8,7 +8,6 @@ import type { YouTubePlayer } from "youtube-player/dist/types";
 export interface PlayerStatus {
   playerState: number;
   playbackRate: number;
-  currentTime: number;
   duration: number;
 }
 
@@ -44,7 +43,6 @@ export const PLAYER_STATES = {
 /** VJプレイヤーのRef型 */
 export interface VJPlayerRef {
   originalPlayer: YouTubePlayer;
-  currentTime: number;
   duration: number;
   getCurrentTime: () => number | null;
 }
@@ -58,11 +56,11 @@ export interface VJControllerRef {
   unMute: () => void;
   setVolume: (volume: number) => void;
   setPlaybackRate: (rate: number) => void;
+  getCurrentTime: () => number | null;
   isMuted: boolean;
   playerState: number;
   playbackRate: number;
   volume: number;
-  currentTime: number;
   duration: number;
 }
 

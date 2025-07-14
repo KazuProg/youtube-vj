@@ -25,12 +25,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     ref
   ) => {
     const playerRef = useRef<YTPlayerTypes | null>(null);
-    const animationFrameRef = useRef<number | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
     const syncIntervalRef = useRef<number | null>(null);
 
     const [playerState, setPlayerState] = useState<number>(0);
-    const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
 
     const { onXWinSync, readFromStorage } = useXWinSync(syncKey);
@@ -44,31 +42,25 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     const getCurrentTime = useCallback(() => {
-      if (!playerRef.current || syncDataRef.current.lastUpdated === 0) {
+      try {
+        if (!playerRef.current || syncDataRef.current.lastUpdated === 0) {
+          return null;
+        }
+
+        if (syncDataRef.current.paused) {
+          return syncDataRef.current.currentTime;
+        }
+
+        const timeSinceUpdate = (Date.now() - syncDataRef.current.lastUpdated) / 1000;
+        const adjustedTime =
+          syncDataRef.current.currentTime + timeSinceUpdate * syncDataRef.current.playbackRate;
+
+        return adjustedTime;
+      } catch (error) {
+        console.warn("Failed to calculate current time:", error);
         return null;
       }
-
-      if (syncDataRef.current.paused) {
-        return syncDataRef.current.currentTime;
-      }
-
-      const timeSinceUpdate = (Date.now() - syncDataRef.current.lastUpdated) / 1000;
-      const adjustedTime =
-        syncDataRef.current.currentTime + timeSinceUpdate * syncDataRef.current.playbackRate;
-
-      return adjustedTime;
     }, []);
-
-    // 現在時間の更新ループ
-    const updateCurrentTime = useCallback(() => {
-      const currentTime = getCurrentTime();
-      if (currentTime === null) {
-        return;
-      }
-      setCurrentTime(currentTime);
-
-      animationFrameRef.current = requestAnimationFrame(updateCurrentTime);
-    }, [getCurrentTime]);
 
     const syncTiming = useCallback(async () => {
       if (!playerRef.current) {
@@ -113,9 +105,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           const playerDuration = await event.target.getDuration();
           setDuration(playerDuration);
 
-          // 時間更新ループ開始
-          updateCurrentTime();
-
           playerRef.current = event.target;
 
           const syncData = await readFromStorage();
@@ -129,7 +118,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           console.error("Error initializing YouTube player:", error);
         }
       },
-      [updateCurrentTime, readFromStorage, syncTiming]
+      [readFromStorage, syncTiming]
     );
 
     // 同期データの処理
@@ -189,16 +178,15 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [handleStateChange]
     );
 
-    // 状態変更時の通知
+    // ステータス更新の通知
     useEffect(() => {
       const status: PlayerStatus = {
         playerState,
         playbackRate: syncDataRef.current.playbackRate,
-        currentTime,
         duration,
       };
       notifyStatusChange(status);
-    }, [playerState, currentTime, duration, notifyStatusChange]);
+    }, [playerState, duration, notifyStatusChange]);
 
     // 再生速度の適用
     useEffect(() => {
@@ -219,9 +207,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     // クリーンアップ
     useEffect(() => {
       return () => {
-        if (animationFrameRef.current) {
-          cancelAnimationFrame(animationFrameRef.current);
-        }
         if (syncIntervalRef.current) {
           clearInterval(syncIntervalRef.current);
         }
@@ -233,11 +218,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       ref,
       () => ({
         originalPlayer: playerRef.current as YTPlayerTypes,
-        currentTime,
         duration,
         getCurrentTime,
       }),
-      [currentTime, duration, getCurrentTime]
+      [duration, getCurrentTime]
     );
 
     return (

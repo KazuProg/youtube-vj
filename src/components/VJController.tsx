@@ -108,8 +108,20 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
   const [controller, setController] = useState<VJControllerRef | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [isDestroyed, setIsDestroyed] = useState(false);
 
   const { writeToStorage: writeToXWinSync } = useXWinSync(localStorageKey);
+
+  const updateController = useCallback(() => {
+    if (playerRef.current && !isDestroyed) {
+      const currentTime = playerRef.current.getCurrentTime();
+      if (currentTime !== null) {
+        setCurrentTime(currentTime);
+      }
+      requestAnimationFrame(updateController);
+    }
+  }, [isDestroyed]);
 
   // ストレージ書き込み
   const writeToStorage = useCallback(
@@ -123,7 +135,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
           videoId: DEFAULT_VALUES.videoId,
           lastUpdated: Date.now(),
           playbackRate: controller.playbackRate,
-          currentTime: controller.currentTime,
+          currentTime: currentTime,
           paused: controller.playerState === 2,
           ...updates,
         };
@@ -135,7 +147,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
         setError("同期エラーが発生しました");
       }
     },
-    [writeToXWinSync, controller]
+    [writeToXWinSync, controller, currentTime]
   );
 
   // コントローラー状態の更新
@@ -149,7 +161,19 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
   useEffect(() => {
     if (playerRef.current) {
       setController(playerRef.current);
+      const frameId = requestAnimationFrame(updateController);
+
+      return () => {
+        cancelAnimationFrame(frameId);
+      };
     }
+  }, [updateController]);
+
+  // コンポーネント破棄時のクリーンアップ
+  useEffect(() => {
+    return () => {
+      setIsDestroyed(true);
+    };
   }, []);
 
   // 再生/一時停止の切り替え
@@ -267,8 +291,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
         <div style={STYLES.sliderGroup}>
           <div style={STYLES.sliderContainer}>
             <label style={STYLES.label} htmlFor="progress-slider">
-              進捗 ({formatTime(controller?.currentTime ?? 0)} /{" "}
-              {formatTime(controller?.duration ?? 0)})
+              進捗 ({formatTime(currentTime)} / {formatTime(controller?.duration ?? 0)})
             </label>
             <input
               id="progress-slider"
@@ -276,7 +299,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
               style={STYLES.slider}
               min="0"
               max={controller?.duration ?? 0}
-              value={controller?.currentTime ?? 0}
+              value={currentTime >= 0 ? currentTime : 0}
               onChange={(e) => handleProgressChange(Number(e.target.value))}
               disabled={!controller}
             />
