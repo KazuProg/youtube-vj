@@ -13,7 +13,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ) => {
     const playerRef = useRef<YTPlayerTypes | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
-    const syncIntervalRef = useRef<number | null>(null);
 
     const [playerState, setPlayerState] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
@@ -100,14 +99,11 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           if (syncData) {
             handleSyncData(syncData);
           }
-
-          // 定期同期の開始
-          syncIntervalRef.current = setInterval(syncTiming, 1000);
         } catch (error) {
           console.error("Error initializing YouTube player:", error);
         }
       },
-      [readFromStorage, syncTiming]
+      [readFromStorage]
     );
 
     // 同期データの処理
@@ -174,14 +170,13 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       return onXWinSync(handleSyncData);
     }, [onXWinSync, handleSyncData]);
 
-    // クリーンアップ
+    // 定期同期の開始
     useEffect(() => {
+      const interval = setInterval(syncTiming, 1000);
       return () => {
-        if (syncIntervalRef.current) {
-          clearInterval(syncIntervalRef.current);
-        }
+        clearInterval(interval);
       };
-    }, []);
+    }, [syncTiming]);
 
     // Ref API
     useImperativeHandle(
