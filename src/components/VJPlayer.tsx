@@ -30,15 +30,16 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
     const getCurrentTime = useCallback(() => {
       const syncData = syncDataRef.current;
+
+      if (!playerRef.current || syncData.lastUpdated === 0) {
+        return null;
+      }
+
+      if (syncData.paused) {
+        return syncData.currentTime;
+      }
+
       try {
-        if (!playerRef.current || syncData.lastUpdated === 0) {
-          return null;
-        }
-
-        if (syncData.paused) {
-          return syncData.currentTime;
-        }
-
         const timeSinceUpdate = (Date.now() - syncData.lastUpdated) / 1000;
         const adjustedTime = syncData.currentTime + timeSinceUpdate * syncData.playbackRate;
 
