@@ -124,7 +124,8 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     // 状態変更処理
-    const handleStateChange = useCallback((newState: number) => {
+    const handleStateChange = useCallback((e: { data: number }) => {
+      const newState = e.data;
       setPlayerState(newState);
 
       // 自動ループ処理
@@ -137,14 +138,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         }
       }
     }, []);
-
-    // イベントハンドラーのメモ化
-    const handleStateChangeWrapper = useCallback(
-      (e: { data: number }) => {
-        handleStateChange(e.data);
-      },
-      [handleStateChange]
-    );
 
     // ステータス更新の通知
     useEffect(() => {
@@ -186,7 +179,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         videoId={videoId}
         opts={YT_OPTIONS}
         onReady={handleReady}
-        onStateChange={handleStateChangeWrapper}
+        onStateChange={handleStateChange}
       />
     );
   }
