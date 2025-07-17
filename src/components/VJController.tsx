@@ -107,10 +107,16 @@ const STYLES = {
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Refactoring planned for future iterations
 const VJController = ({ localStorageKey }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
-  const [controller, setController] = useState<VJControllerRef | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [isDestroyed, setIsDestroyed] = useState(false);
+
+  // 個別の状態管理（必要な値のみ）
+  const [playerState, setPlayerState] = useState<number>(0);
+  const [playbackRate, setPlaybackRate] = useState<number>(1);
+  const [volume, setVolume] = useState<number>(100);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [duration, setDuration] = useState<number>(0);
 
   const { writeToStorage: writeToXWinSync } = useXWinSync(localStorageKey);
 
@@ -127,7 +133,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
   // ストレージ書き込み
   const writeToStorage = useCallback(
     (updates: Partial<Omit<VJSyncData, "videoId" | "lastUpdated">> = {}) => {
-      if (!controller) {
+      if (!playerRef.current) {
         return;
       }
 
@@ -135,9 +141,9 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
         const syncData: VJSyncData = {
           videoId: DEFAULT_VALUES.videoId,
           lastUpdated: Date.now(),
-          playbackRate: controller.playbackRate,
+          playbackRate: playbackRate,
           currentTime: currentTime,
-          paused: controller.playerState === PlayerStates.PAUSED,
+          paused: playerState === PlayerStates.PAUSED,
           ...updates,
         };
 
@@ -148,27 +154,38 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
         setError("同期エラーが発生しました");
       }
     },
-    [writeToXWinSync, controller, currentTime]
+    [writeToXWinSync, playbackRate, currentTime, playerState]
   );
 
-  // コントローラー状態の更新
+  // コントローラー状態の更新（シンプル版）
   const handleStatusChange = useCallback(() => {
-    if (playerRef.current) {
-      setController({ ...playerRef.current });
+    if (!playerRef.current) {
+      return;
     }
+
+    const currentController = playerRef.current;
+
+    // 個別の状態を更新（変更があった場合のみ自動的に更新される）
+    setPlayerState(currentController.playerState);
+    setPlaybackRate(currentController.playbackRate);
+    setVolume(currentController.volume);
+    setIsMuted(currentController.isMuted);
+    setDuration(currentController.duration);
   }, []);
 
   // 初期化
   useEffect(() => {
     if (playerRef.current) {
-      setController(playerRef.current);
+      // 初期状態を設定（変更検知ロジックを通して）
+      handleStatusChange();
+
       const frameId = requestAnimationFrame(updateController);
 
       return () => {
         cancelAnimationFrame(frameId);
       };
     }
-  }, [updateController]);
+  }, [updateController, handleStatusChange]);
 
   // コンポーネント破棄時のクリーンアップ
   useEffect(() => {
@@ -179,26 +196,26 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
 
   // 再生/一時停止の切り替え
   const togglePlayPause = useCallback(() => {
-    if (!controller) {
+    if (!playerRef.current) {
       return;
     }
 
-    const isPlaying = controller.playerState === PlayerStates.PLAYING;
+    const isPlaying = playerState === PlayerStates.PLAYING;
     writeToStorage({ paused: isPlaying });
-  }, [controller, writeToStorage]);
+  }, [playerState, writeToStorage]);
 
   // ミュート/ミュート解除の切り替え
   const toggleMute = useCallback(() => {
-    if (!controller) {
+    if (!playerRef.current) {
       return;
     }
 
-    if (controller.isMuted) {
-      controller.unMute();
+    if (isMuted) {
+      playerRef.current.unMute();
     } else {
-      controller.mute();
+      playerRef.current.mute();
     }
-  }, [controller]);
+  }, [isMuted]);
 
   // 進捗変更
   const handleProgressChange = useCallback(
@@ -209,12 +226,9 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
   );
 
   // 音量変更
-  const handleVolumeChange = useCallback(
-    (value: number) => {
-      controller?.setVolume(value);
-    },
-    [controller]
-  );
+  const handleVolumeChange = useCallback((value: number) => {
+    playerRef.current?.setVolume(value);
+  }, []);
 
   // 速度変更
   const handleSpeedChange = useCallback(
@@ -267,25 +281,24 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
             type="button"
             style={{
               ...STYLES.button,
-              backgroundColor:
-                controller?.playerState === PlayerStates.PLAYING ? "#f44336" : "#4CAF50",
+              backgroundColor: playerState === PlayerStates.PLAYING ? "#f44336" : "#4CAF50",
             }}
             onClick={togglePlayPause}
-            disabled={!controller}
+            disabled={!playerRef.current}
           >
-            {controller?.playerState === PlayerStates.PLAYING ? "一時停止" : "再生"}
+            {playerState === PlayerStates.PLAYING ? "一時停止" : "再生"}
           </button>
 
           <button
             type="button"
             style={{
               ...STYLES.button,
-              backgroundColor: controller?.isMuted ? "#2196F3" : "#ff9800",
+              backgroundColor: isMuted ? "#2196F3" : "#ff9800",
             }}
             onClick={toggleMute}
-            disabled={!controller}
+            disabled={!playerRef.current}
           >
-            {controller?.isMuted ? "ミュート解除" : "ミュート"}
+            {isMuted ? "ミュート解除" : "ミュート"}
           </button>
         </div>
 
@@ -293,23 +306,23 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
         <div style={STYLES.sliderGroup}>
           <div style={STYLES.sliderContainer}>
             <label style={STYLES.label} htmlFor="progress-slider">
-              進捗 ({formatTime(currentTime)} / {formatTime(controller?.duration ?? 0)})
+              進捗 ({formatTime(currentTime)} / {formatTime(duration)})
             </label>
             <input
               id="progress-slider"
               type="range"
               style={STYLES.slider}
               min="0"
-              max={controller?.duration ?? 0}
+              max={duration}
               value={currentTime >= 0 ? currentTime : 0}
               onChange={(e) => handleProgressChange(Number(e.target.value))}
-              disabled={!controller}
+              disabled={!playerRef.current}
             />
           </div>
 
           <div style={STYLES.sliderContainer}>
             <label style={STYLES.label} htmlFor="volume-slider">
-              音量 ({Math.round(controller?.volume ?? 0)}%)
+              音量 ({Math.round(volume)}%)
             </label>
             <input
               id="volume-slider"
@@ -317,15 +330,15 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
               style={STYLES.slider}
               min="0"
               max="100"
-              value={controller?.volume ?? 100}
+              value={volume}
               onChange={(e) => handleVolumeChange(Number(e.target.value))}
-              disabled={!controller}
+              disabled={!playerRef.current}
             />
           </div>
 
           <div style={STYLES.sliderContainer}>
             <label style={STYLES.label} htmlFor="speed-slider">
-              速度 ({controller?.playbackRate ?? 1}x)
+              速度 ({playbackRate}x)
             </label>
             <input
               id="speed-slider"
@@ -334,9 +347,9 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
               min="0.25"
               max="2"
               step="0.05"
-              value={controller?.playbackRate ?? 1}
+              value={playbackRate}
               onChange={(e) => handleSpeedChange(Number(e.target.value))}
-              disabled={!controller}
+              disabled={!playerRef.current}
             />
           </div>
         </div>
@@ -345,19 +358,17 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
         <div style={STYLES.statusGrid}>
           <div style={STYLES.statusItem}>
             <span style={STYLES.statusLabel}>状態: </span>
-            <span style={STYLES.statusValue}>
-              {PLAYER_STATE_MAP[controller?.playerState ?? PlayerStates.UNSTARTED] || "不明"}
-            </span>
+            <span style={STYLES.statusValue}>{PLAYER_STATE_MAP[playerState] || "不明"}</span>
           </div>
 
           <div style={STYLES.statusItem}>
             <span style={STYLES.statusLabel}>速度: </span>
-            <span style={STYLES.statusValue}>{controller?.playbackRate ?? 1}x</span>
+            <span style={STYLES.statusValue}>{playbackRate}x</span>
           </div>
 
           <div style={STYLES.statusItem}>
             <span style={STYLES.statusLabel}>音量: </span>
-            <span style={STYLES.statusValue}>{Math.round(controller?.volume ?? 0)}%</span>
+            <span style={STYLES.statusValue}>{Math.round(volume)}%</span>
           </div>
 
           <div style={STYLES.statusItem}>
@@ -365,10 +376,10 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
             <span
               style={{
                 ...STYLES.statusValue,
-                color: controller?.isMuted ? "#f44336" : "#4CAF50",
+                color: isMuted ? "#f44336" : "#4CAF50",
               }}
             >
-              {controller?.isMuted ? "ON" : "OFF"}
+              {isMuted ? "ON" : "OFF"}
             </span>
           </div>
         </div>
