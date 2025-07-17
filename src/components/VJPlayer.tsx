@@ -68,14 +68,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           }
         }
 
-        // 再生状態同期
-        const currentState = await player.getPlayerState();
-        if (syncData.paused && currentState === PlayerStates.PLAYING) {
-          await player.pauseVideo();
-        } else if (!syncData.paused && currentState === PlayerStates.PAUSED) {
-          await player.playVideo();
-        }
-
         // 再生速度同期
         await player.setPlaybackRate(syncData.playbackRate);
       } catch (error) {
@@ -112,13 +104,27 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const handleSyncData = useCallback(
       (syncData: VJSyncData) => {
         console.log("syncData", syncData);
-        if (!playerRef.current) {
+        const player = playerRef.current;
+        if (!player) {
           return;
         }
+        const beforeSyncData = syncDataRef.current;
+        const changedTiming = syncData.lastUpdated !== beforeSyncData.lastUpdated;
+        const changedSpeed = syncData.playbackRate !== beforeSyncData.playbackRate;
+        const changedPaused = syncData.paused !== beforeSyncData.paused;
+        const needTimingSync = changedTiming || changedSpeed || changedPaused;
         syncDataRef.current = syncData;
 
-        // 即座に同期を実行（定期同期とは別に）
-        syncTiming();
+        if (changedPaused) {
+          if (syncData.paused) {
+            player.pauseVideo();
+          } else {
+            player.playVideo();
+          }
+        }
+        if (needTimingSync) {
+          syncTiming();
+        }
       },
       [syncTiming]
     );
