@@ -125,13 +125,6 @@ export class VJControllerManager extends EventEmitter {
       case "resumePreview":
         this.dispatchEvent("resumePreview", ...args);
         break;
-      case "forcePause":
-        // suspend中に再生が始まった場合の強制一時停止
-        console.log(`[Channel ${this.#channel}] Force pausing due to suspend state`);
-        if (this.#eventHandler.isSuspendPreview) {
-          this.#vjPlayer.YTPlayer.pauseVideo();
-        }
-        break;
       case "syncTiming":
         this.#vjPlayer.syncTiming();
         break;
@@ -284,39 +277,19 @@ export class VJControllerManager extends EventEmitter {
    * プレビューを一時停止
    */
   suspendPreview() {
-    console.log(`[Channel ${this.#channel}] suspendPreview called`);
-    console.log(`[Channel ${this.#channel}] Player state before pause:`, this.#vjPlayer.YTPlayer.getPlayerState());
-    
     if (!this.#eventHandler.isSuspendPreview) {
       this.dispatchEvent("suspendPreview", this.#channel);
       this.#eventHandler.setSuspendPreview(true);
     }
-    
-    // VJPlayerの同期処理を停止
-    this.#vjPlayer.setSuspended(true);
     this.#vjPlayer.stopSync();
     this.#vjPlayer.YTPlayer.pauseVideo();
-    
-    // pauseVideo後の状態を確認
-    setTimeout(() => {
-      console.log(`[Channel ${this.#channel}] Player state after pause:`, this.#vjPlayer.YTPlayer.getPlayerState());
-      console.log(`[Channel ${this.#channel}] isSuspendPreview:`, this.#eventHandler.isSuspendPreview);
-    }, 100);
   }
 
   /**
    * プレビューを再開
    */
   resumePreview() {
-    console.log(`[Channel ${this.#channel}] resumePreview called`);
     if (this.#eventHandler.isSuspendPreview) {
-      console.log(`[Channel ${this.#channel}] Resuming from suspend state`);
-      this.#eventHandler.setSuspendPreview(false);
-      
-      // VJPlayerの同期処理を再開
-      this.#vjPlayer.setSuspended(false);
-      
-      this.dispatchEvent("resumePreview", this.#channel);
       this.#vjPlayer.YTPlayer.playVideo();
     }
   }

@@ -50,17 +50,12 @@ export class VJPlayerEventHandler {
    * @param {Object} event - イベント
    */
   onYTPlayerStateChange(event) {
-    console.log(`[Channel ${this.#channel}] YTPlayer state changed to:`, event.data, `(isSuspendPreview: ${this.#isSuspendPreview})`);
-    
     switch (event.data) {
       case YT.PlayerState.PLAYING:
         // 再生されたらプレビューの一時停止は解除
-        // ただし、明示的にsuspendPreviewが設定されている場合は自動復帰しない
         if (this.#isSuspendPreview) {
-          console.log(`[Channel ${this.#channel}] PLAYING state detected but suspendPreview is active - forcing pause`);
-          // 強制的に一時停止を維持（外部に依頼）
-          this.#onDispatchEvent("forcePause", this.#channel);
-          return; // resumePreviewイベントを発火しない
+          this.#onDispatchEvent("resumePreview", this.#channel);
+          this.#isSuspendPreview = false;
         }
         if (this.#isChangeTiming) {
           this.#dataSyncService.setData(

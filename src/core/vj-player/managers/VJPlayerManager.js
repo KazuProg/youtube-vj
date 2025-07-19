@@ -11,7 +11,6 @@ export class VJPlayerManager extends EventEmitter {
   #options;
   #syncInterval;
   #isInitialized = false;
-  #isSuspended = false; // suspend状態を管理
 
   /**
    * @param {IYouTubePlayerWrapper} playerWrapper - プレイヤーラッパー
@@ -102,10 +101,6 @@ export class VJPlayerManager extends EventEmitter {
    * タイミング同期
    */
   syncTiming() {
-    if (this.#isSuspended) {
-      console.log(`VJPlayerManager: Skipping syncTiming during suspend`);
-      return;
-    }
     this.#timingSynchronizer.startSync(
       this.#playerWrapper,
       this.#dataManager,
@@ -123,23 +118,6 @@ export class VJPlayerManager extends EventEmitter {
   }
 
   /**
-   * suspend状態を設定
-   * @param {boolean} suspended - suspend状態
-   */
-  setSuspended(suspended) {
-    console.log(`VJPlayerManager setSuspended: ${suspended}`);
-    this.#isSuspended = suspended;
-  }
-
-  /**
-   * suspend状態を取得
-   * @returns {boolean} suspend状態
-   */
-  get isSuspended() {
-    return this.#isSuspended;
-  }
-
-  /**
    * プレイヤー準備完了時の処理
    * @param {Object} event - イベント
    */
@@ -154,10 +132,6 @@ export class VJPlayerManager extends EventEmitter {
     this.#dataManager.dispatchAll();
 
     setInterval(() => {
-      if (this.#isSuspended) {
-        // suspend中は同期処理をスキップ
-        return;
-      }
       if (this.#playerWrapper.getPlayerState() === YT.PlayerState.PLAYING) {
         this.syncTiming();
       }
@@ -181,12 +155,6 @@ export class VJPlayerManager extends EventEmitter {
    * @param {Object} data - データ全体
    */
   #onDataChanged(key, value, data) {
-    // suspend中は特定の処理をスキップ
-    if (this.#isSuspended && (key === "pause" || key === "timing" || key === "speed")) {
-      console.log(`VJPlayerManager: Skipping ${key} change during suspend`);
-      return;
-    }
-    
     switch (key) {
       case "videoId":
         this.#playerWrapper.loadVideo(value);
@@ -256,8 +224,7 @@ export class VJPlayerManager extends EventEmitter {
 
     if (state === YT.PlayerState.PAUSED && this.#dataManager.pause === false) {
       this.dispatchEvent("paused");
-      if (this.#dataManager.pause === false && !this.#isSuspended) {
-        // suspend中は自動再生しない
+      if (this.#dataManager.pause === false) {
         event.target.playVideo();
       }
       return;
@@ -281,8 +248,7 @@ export class VJPlayerManager extends EventEmitter {
         this.#playerWrapper.pause();
         return;
       }
-      if (this.#options.isProjection && !this.#isSuspended) {
-        // suspend中は同期しない
+      if (this.#options.isProjection) {
         this.syncTiming();
       }
     }

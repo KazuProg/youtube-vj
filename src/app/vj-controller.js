@@ -83,24 +83,6 @@ class VJControllerFacade extends EventEmitter {
   }
 
   /**
-   * YouTube Playerを取得
-   * @returns {Object} YouTube Player
-   */
-  get YTPlayer() {
-    // AudioManagerの#playerがYouTube Playerなので、
-    // 公開getterを追加する必要がある
-    return this.#controllerManager?.audioManager?.getPlayer?.() || null;
-  }
-
-  /**
-   * VJPlayerを取得
-   * @returns {Object} VJPlayer
-   */
-  get vjPlayer() {
-    return null; // 現在は使用しない
-  }
-
-  /**
    * ミュート状態を取得
    * @returns {boolean} ミュート状態
    */

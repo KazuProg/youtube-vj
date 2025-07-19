@@ -63,14 +63,6 @@ export class AudioManager extends IAudioManager {
   }
 
   /**
-   * プレイヤーを取得
-   * @returns {Object} プレイヤー
-   */
-  getPlayer() {
-    return this.#player;
-  }
-
-  /**
    * フェードアウト
    */
   fadeoutVolume() {
