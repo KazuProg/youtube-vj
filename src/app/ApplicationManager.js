@@ -8,7 +8,6 @@ import { UIEventHandlers } from "./ui/UIEventHandlers.js";
 import { KeyboardManager } from "./ui/KeyboardManager.js";
 import { SeekBarManager } from "./ui/SeekBarManager.js";
 import { VideoUtils } from "./utils/VideoUtils.js";
-import { StatusIndicator } from "./ui/StatusIndicator.js";
 
 /**
  * アプリケーション全体を管理するメインクラス
@@ -26,7 +25,6 @@ export class ApplicationManager {
     this.uiEventHandlers = null;
     this.keyboardManager = null;
     this.seekBarManager = null;
-    this.statusIndicator = null;
 
     // イベントリスナーのバインド
     this.boundHandlers = {
@@ -108,43 +106,6 @@ export class ApplicationManager {
 
     // シークバー管理
     this.seekBarManager = new SeekBarManager(this.channels);
-
-    // ステータスインジケーター管理
-    this.statusIndicator = new StatusIndicator({
-      indicators: [
-        {
-          id: 'show-config-editor',
-          label: 'Config',
-          hasIndicator: false,
-          clickHandler: this.handleConfigClick.bind(this)
-        },
-        {
-          id: 'library-status',
-          label: 'Library',
-          hasIndicator: true,
-          clickHandler: this.handleLibraryStatusClick.bind(this)
-        },
-        {
-          id: 'projection-status',
-          label: 'Projection',
-          hasIndicator: true,
-          clickHandler: this.handleProjectionStatusClick.bind(this),
-          contextMenuHandler: this.handleProjectionStatusContextMenu.bind(this)
-        },
-        {
-          id: 'midi-device-status',
-          label: 'MIDI Control',
-          hasIndicator: true,
-          clickHandler: this.handleMidiStatusClick.bind(this)
-        },
-        {
-          id: 'extension-status',
-          label: 'Extension',
-          hasIndicator: true,
-          clickHandler: this.handleExtensionStatusClick.bind(this)
-        }
-      ]
-    });
   }
 
   /**
@@ -187,7 +148,9 @@ export class ApplicationManager {
     const relayElement = document.querySelector("#videoId");
     if (relayElement) {
       new MutationObserver(() => {
-        this.statusIndicator.setIndicatorState('extension-status', true);
+        document
+          .querySelector("#extension-status .indicator")
+          ?.classList.add("active");
         this.changeVideo(relayElement.value);
       }).observe(relayElement, {
         attributes: true,
@@ -250,69 +213,44 @@ export class ApplicationManager {
 
   /**
    * ステータスボタンを設定
-   * 注意: この関数は StatusIndicator コンポーネントで置き換えられました
-   * 下のハンドラーメソッドを参照してください
    */
   setupStatusButtons() {
-    // StatusIndicator コンポーネントで処理されるため、この関数は空にします
-    // 実際のハンドラーは以下のメソッドで定義されています:
-    // - handleLibraryStatusClick
-    // - handleProjectionStatusClick
-    // - handleProjectionStatusContextMenu
-    // - handleMidiStatusClick
-    // - handleExtensionStatusClick
-  }
+    // ライブラリボタン
+    document.querySelector("#library-status")?.addEventListener("click", () => {
+      if (Library.isVisible) {
+        Library.hide();
+      } else {
+        Library.show();
+      }
+    });
 
-  /**
-   * Configクリックハンドラー
-   */
-  handleConfigClick() {
-    const configPopup = document.querySelector("#config");
-    configPopup?.classList.remove("hidden");
-  }
+    // プロジェクションボタン
+    const projectionStatus = document.querySelector("#projection-status");
+    projectionStatus?.addEventListener("click", () =>
+      this.openProjectionWindow()
+    );
+    projectionStatus?.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      this.openProjectionWindow(true);
+    });
 
-  /**
-   * ライブラリステータスクリックハンドラー
-   */
-  handleLibraryStatusClick() {
-    if (Library.isVisible) {
-      Library.hide();
-    } else {
-      Library.show();
-    }
-  }
+    // MIDIボタン
+    document
+      .querySelector("#midi-device-status")
+      ?.addEventListener("click", () => {
+        if (!this.midi) {
+          this.requestMidiAccess();
+        } else {
+          this.midi.openCustomScriptEditor(templates);
+        }
+      });
 
-  /**
-   * プロジェクションステータスクリックハンドラー
-   */
-  handleProjectionStatusClick() {
-    this.openProjectionWindow();
-  }
-
-  /**
-   * プロジェクションステータスコンテキストメニューハンドラー
-   */
-  handleProjectionStatusContextMenu(e) {
-    e.preventDefault();
-    this.openProjectionWindow(true);
-  }
-
-  /**
-   * MIDIステータスクリックハンドラー
-   */
-  handleMidiStatusClick() {
-    if (!this.midi) {
-      this.requestMidiAccess();
-    } else {
-      this.midi.openCustomScriptEditor(templates);
-    }
-  }
-
-  /**
-   * 拡張機能ステータスクリックハンドラー
-   */
-  handleExtensionStatusClick() {
-    window.open("./docs/chrome-extension.html");
+    // 拡張機能ボタン
+    document
+      .querySelector("#extension-status")
+      ?.addEventListener("click", () => {
+        window.open("./docs/chrome-extension.html");
+      });
   }
 
   /**
@@ -369,7 +307,12 @@ export class ApplicationManager {
     Library.init();
 
     Library.onVisibilityChanged = (isVisible) => {
-      this.statusIndicator.setIndicatorState('library-status', isVisible);
+      const indicator = document.querySelector("#library-status .indicator");
+      if (isVisible) {
+        indicator?.classList.add("active");
+      } else {
+        indicator?.classList.remove("active");
+      }
       Config.openLibrary = isVisible;
     };
 
@@ -467,11 +410,15 @@ export class ApplicationManager {
     );
 
     if (!preview && wnd) {
-      this.statusIndicator.setIndicatorState('projection-status', true);
+      document
+        .querySelector("#projection-status .indicator")
+        ?.classList.add("active");
       const checkInterval = setInterval(() => {
         if (wnd.closed) {
           clearInterval(checkInterval);
-          this.statusIndicator.setIndicatorState('projection-status', false);
+          document
+            .querySelector("#projection-status .indicator")
+            ?.classList.remove("active");
         }
       }, 500);
     }
@@ -495,7 +442,9 @@ export class ApplicationManager {
     try {
       await this.midi.requestAccess();
       this.updateSystemData({ midiAccess: true });
-      this.statusIndicator.setIndicatorState('midi-device-status', true);
+      document
+        .querySelector("#midi-device-status .indicator")
+        ?.classList.add("active");
     } catch (error) {
       this.updateSystemData({ midiAccess: false });
       this.midi = null;
@@ -613,7 +562,6 @@ export class ApplicationManager {
     // UI管理クラスの破棄
     this.keyboardManager?.destroy();
     this.seekBarManager?.destroy();
-    this.statusIndicator?.destroy();
   }
 }
 
