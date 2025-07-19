@@ -400,7 +400,7 @@ export class ApplicationManager {
 
     const selectedChannel = channel ?? this.selectedChannel?.channelNumber ?? 0;
     
-    if (selectedChannel === this.selectedChannel?.channelNumber) {
+    if (selectedChannel === this.selectedChannel) {
       return;
     }
     
@@ -421,16 +421,12 @@ export class ApplicationManager {
       };
 
       // 選択チャンネルを更新
-      this.selectedChannel = this.channels[selectedChannel];
-      window.selCh = this.selectedChannel;
-
-      // キーボード管理に選択チャンネルを通知
-      this.keyboardManager.setSelectedChannel(this.selectedChannel);
+      this.selectedChannel = selectedChannel;
 
       // 全チャンネルを非アクティブ化
       for (let cNum = 0; cNum < this.channels.length; cNum++) {
         const c = this.channels[cNum];
-        const deck = document.querySelector(`.deck.ch${cNum}`);
+        const deck = document.querySelector(`#deck${cNum}`);
         
         if (cNum !== selectedChannel) {
           deck?.classList.remove("selected");
@@ -447,7 +443,7 @@ export class ApplicationManager {
 
       // 選択チャンネルをアクティブ化
       const selectedController = this.channels[selectedChannel];
-      const selectedDeck = document.querySelector(`.deck.ch${selectedChannel}`);
+      const selectedDeck = document.querySelector(`#deck${selectedChannel}`);
       
       selectedDeck?.classList.add("selected");
       selectedController.unmute();
