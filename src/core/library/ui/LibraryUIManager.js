@@ -103,32 +103,13 @@ export class LibraryUIManager {
    * @param {Function} onSearch - 検索実行時のコールバック
    */
   setupSearchInput(onSearch) {
-    let searchInputTimeout = null;
-
     // Enterキーでの即座検索
     this.#UIElements.searchInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         const keyword = this.#UIElements.searchInput.value.trim();
         if (keyword.length > 0) {
-          if (searchInputTimeout) {
-            clearTimeout(searchInputTimeout);
-          }
           onSearch(keyword);
         }
-      }
-    });
-
-    // 入力変更での遅延検索
-    this.#UIElements.searchInput.addEventListener("input", (e) => {
-      if (searchInputTimeout) {
-        clearTimeout(searchInputTimeout);
-      }
-
-      const keyword = this.#UIElements.searchInput.value.trim();
-      if (keyword.length > 0) {
-        searchInputTimeout = setTimeout(() => {
-          onSearch(keyword);
-        }, 500);
       }
     });
   }
