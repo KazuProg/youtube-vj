@@ -51,11 +51,14 @@ export class VJPlayerEventHandler {
    * @param {Object} event - イベント
    */
   onYTPlayerStateChange(event) {
+    console.log(`[Channel ${this.#channel}] YTPlayer state changed to:`, event.data, `(isSuspendPreview: ${this.#isSuspendPreview})`);
+    
     switch (event.data) {
       case YT.PlayerState.PLAYING:
         // 再生されたらプレビューの一時停止は解除
         // ただし、明示的にsuspendPreviewが設定されている場合は自動復帰しない
         if (this.#isSuspendPreview) {
+          console.log(`[Channel ${this.#channel}] PLAYING state detected but suspendPreview is active - forcing pause`);
           // 強制的に一時停止を維持（外部に依頼）
           this.#onDispatchEvent("forcePause", this.#channel);
           return; // resumePreviewイベントを発火しない
@@ -63,8 +66,10 @@ export class VJPlayerEventHandler {
         
         // 動画変更中は同期処理を抑制
         if (this.#isVideoChanging) {
+          console.log(`[Channel ${this.#channel}] PLAYING state during video change - delaying sync`);
           setTimeout(() => {
             this.#isVideoChanging = false;
+            console.log(`[Channel ${this.#channel}] Video change stabilized - enabling sync`);
           }, 1000); // 1秒後に同期を許可
           return;
         }
@@ -92,6 +97,8 @@ export class VJPlayerEventHandler {
    * 動画変更イベント
    */
   onChanged() {
+    console.log(`[Channel ${this.#channel}] Video changed - setting up initial state`);
+    
     // 動画変更中フラグを設定（同期処理を一時的に抑制）
     this.#isVideoChanging = true;
     
