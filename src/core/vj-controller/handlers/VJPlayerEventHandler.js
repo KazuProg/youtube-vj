@@ -9,7 +9,6 @@ export class VJPlayerEventHandler {
   #isChangeTiming = false;
   #isChangeVideoId = false;
   #targetTime = null;
-  #isVideoChanging = false; // 動画変更中フラグ
 
   /**
    * @param {Object} dataSyncService - データ同期サービス
@@ -63,17 +62,6 @@ export class VJPlayerEventHandler {
           this.#onDispatchEvent("forcePause", this.#channel);
           return; // resumePreviewイベントを発火しない
         }
-        
-        // 動画変更中は同期処理を抑制
-        if (this.#isVideoChanging) {
-          console.log(`[Channel ${this.#channel}] PLAYING state during video change - delaying sync`);
-          setTimeout(() => {
-            this.#isVideoChanging = false;
-            console.log(`[Channel ${this.#channel}] Video change stabilized - enabling sync`);
-          }, 1000); // 1秒後に同期を許可
-          return;
-        }
-        
         if (this.#isChangeTiming) {
           this.#dataSyncService.setData(
             "timing",
@@ -97,11 +85,6 @@ export class VJPlayerEventHandler {
    * 動画変更イベント
    */
   onChanged() {
-    console.log(`[Channel ${this.#channel}] Video changed - setting up initial state`);
-    
-    // 動画変更中フラグを設定（同期処理を一時的に抑制）
-    this.#isVideoChanging = true;
-    
     // 動画変更時は自動再生、タイミング通知
     this.#dataSyncService.setData("pause", false);
     if (this.#targetTime) {

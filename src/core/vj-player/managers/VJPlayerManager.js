@@ -181,7 +181,7 @@ export class VJPlayerManager extends EventEmitter {
    * @param {Object} data - データ全体
    */
   #onDataChanged(key, value, data) {
-    // suspend中は特定の処理をスキップ（videoIdは除く）
+    // suspend中は特定の処理をスキップ
     if (this.#isSuspended && (key === "pause" || key === "timing" || key === "speed")) {
       console.log(`VJPlayerManager: Skipping ${key} change during suspend`);
       return;
