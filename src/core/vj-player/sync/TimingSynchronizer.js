@@ -90,18 +90,9 @@ export class TimingSynchronizer extends ITimingSynchronizer {
    */
   #jumpToSync() {
     const t = this.#getTimeInfo();
-    
-    // currentTimeが未定義の場合は同期をスキップ
-    if (typeof t.currentTime === 'undefined') {
-      return;
-    }
-
-    // 期待値がNaNの場合は同期をスキップ
-    if (isNaN(t.expectPlayerTime)) {
-      return;
-    }
 
     if (t.expectPlayerTime < 0 || t.duration < t.expectPlayerTime) {
+      // 計算上の再生位置がマイナス or 動画の長さよりも長ければ同期中止
       this.stopSync();
       return;
     }

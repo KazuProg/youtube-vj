@@ -12,8 +12,6 @@ export class VJPlayerManager extends EventEmitter {
   #syncInterval;
   #isInitialized = false;
   #isSuspended = false; // suspend状態を管理
-  #isVideoChanging = false;
-  #lastStateChangeTime = null;
 
   /**
    * @param {IYouTubePlayerWrapper} playerWrapper - プレイヤーラッパー
@@ -188,12 +186,7 @@ export class VJPlayerManager extends EventEmitter {
     
     switch (key) {
       case "videoId":
-        this.#isVideoChanging = true;
         this.#playerWrapper.loadVideo(value);
-        // 動画ロード完了を待つ
-        setTimeout(() => {
-          this.#isVideoChanging = false;
-        }, 2000);
         break;
       case "pause":
         if (value === true) {
@@ -208,13 +201,11 @@ export class VJPlayerManager extends EventEmitter {
       case "speed":
         if (this.#dataManager.pause) {
           if (this.#isInitialized === false) {
-            console.warn(`[VJPlayerManager] Player is not ready yet, cannot seek.`);
+            // プレイヤーが準備できていない場合は、シークしない
+            console.warn("YTVJ:P Player is not ready yet, cannot seek.");
             return;
           }
-          // currentTimeが有効な値の場合のみシーク
-          if (typeof this.currentTime === 'number' && !isNaN(this.currentTime)) {
-            this.#playerWrapper.seekTo(this.currentTime);
-          }
+          this.#playerWrapper.seekTo(this.currentTime);
           return;
         } else {
           this.syncTiming();
@@ -255,11 +246,6 @@ export class VJPlayerManager extends EventEmitter {
   #onPlayerStateChange(event) {
     const state = event.data;
 
-    // 動画ロード中は状態変更を無視
-    if (this.#isVideoChanging) {
-      return;
-    }
-
     if (state === YT.PlayerState.UNSTARTED) {
       this.dispatchEvent("changed");
       return;
@@ -268,6 +254,7 @@ export class VJPlayerManager extends EventEmitter {
     if (state === YT.PlayerState.PAUSED && this.#dataManager.pause === false) {
       this.dispatchEvent("paused");
       if (this.#dataManager.pause === false && !this.#isSuspended) {
+        // suspend中は自動再生しない
         event.target.playVideo();
       }
       return;
@@ -279,25 +266,24 @@ export class VJPlayerManager extends EventEmitter {
     }
 
     if (state === YT.PlayerState.ENDED) {
+      // event.target.playVideo()
       this.dispatchEvent("ended");
       return;
     }
 
     if (state === YT.PlayerState.PLAYING) {
+      // 新動画読み込み時は自動再生されるっぽい？
+      // 一時停止中にPreviewリロードで再生される対策
       if (this.#dataManager.pause) {
         this.#playerWrapper.pause();
         return;
       }
       if (this.#options.isProjection && !this.#isSuspended) {
-        // 再生開始直後は同期をスキップ
-        if (this.#lastStateChangeTime && Date.now() - this.#lastStateChangeTime < 1000) {
-          return;
-        }
+        // suspend中は同期しない
         this.syncTiming();
       }
     }
 
-    this.#lastStateChangeTime = Date.now();
     this.dispatchEvent("YTPlayerStateChange", event);
   }
 }
