@@ -35,7 +35,6 @@ export class VJPlayerEventHandler {
    * @param {boolean} value - 一時停止状態
    */
   setSuspendPreview(value) {
-    console.log(`[VJPlayerEventHandler] Setting suspend preview to ${value}`);
     this.#isSuspendPreview = value;
   }
 

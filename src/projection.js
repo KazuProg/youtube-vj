@@ -47,40 +47,15 @@ function init(fullscreen = false) {
   });
 
   window.addEventListener("storage", (event) => {
-    console.log("[Projection] Storage event received:", {
-      key: event.key,
-      oldValue: event.oldValue ? JSON.parse(event.oldValue) : null,
-      newValue: event.newValue ? JSON.parse(event.newValue) : null
-    });
-    
     if (event.key === AppConstants.LOCAL_STORAGE_KEYS.CTRL_MASTER) {
-      console.log("[Projection] Master control data changed");
       systemHandler();
       return;
     }
     if (event.key === AppConstants.LOCAL_STORAGE_KEYS.CTRL_CH_0) {
-      console.log("[Projection] Channel 0 data changed");
-      const newData = JSON.parse(event.newValue);
-      if (newData.timing) {
-        console.log("[Projection] Channel 0 timing changed:", {
-          timestamp: newData.timing.timestamp,
-          playerTime: newData.timing.playerTime,
-          formatted: new Date(newData.timing.timestamp * 1000).toISOString()
-        });
-      }
-      ch0_dataManager.applyData(newData);
+      ch0_dataManager.applyData(JSON.parse(event.newValue));
     }
     if (event.key === AppConstants.LOCAL_STORAGE_KEYS.CTRL_CH_1) {
-      console.log("[Projection] Channel 1 data changed");
-      const newData = JSON.parse(event.newValue);
-      if (newData.timing) {
-        console.log("[Projection] Channel 1 timing changed:", {
-          timestamp: newData.timing.timestamp,
-          playerTime: newData.timing.playerTime,
-          formatted: new Date(newData.timing.timestamp * 1000).toISOString()
-        });
-      }
-      ch1_dataManager.applyData(newData);
+      ch1_dataManager.applyData(JSON.parse(event.newValue));
     }
   });
 

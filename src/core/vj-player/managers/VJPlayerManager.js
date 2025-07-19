@@ -14,10 +14,6 @@ export class VJPlayerManager extends EventEmitter {
   #isSuspended = false; // suspend状態を管理
   #isVideoChanging = false;
   #lastStateChangeTime = null;
-  #currentTime = 0;
-  #eventHandler;
-  #dataSyncService;
-  #pendingTiming = null;
 
   /**
    * @param {IYouTubePlayerWrapper} playerWrapper - プレイヤーラッパー
@@ -26,8 +22,6 @@ export class VJPlayerManager extends EventEmitter {
    * @param {IFilterProcessor} filterProcessor - フィルター処理器
    * @param {Object} dataManager - データマネージャー
    * @param {Object} options - オプション
-   * @param {Object} eventHandler - イベントハンドラー
-   * @param {Object} dataSyncService - データ同期サービス
    */
   constructor(
     playerWrapper,
@@ -35,9 +29,7 @@ export class VJPlayerManager extends EventEmitter {
     timingSynchronizer,
     filterProcessor,
     dataManager,
-    options = {},
-    eventHandler,
-    dataSyncService
+    options = {}
   ) {
     super();
     this.#playerWrapper = playerWrapper;
@@ -49,13 +41,6 @@ export class VJPlayerManager extends EventEmitter {
       isProjection: false,
       ...options,
     };
-    this.#eventHandler = eventHandler;
-    this.#dataSyncService = dataSyncService;
-    this.#isInitialized = false;
-    this.#isSuspended = false;
-    this.#isVideoChanging = false;
-    this.#currentTime = 0;
-    this.#pendingTiming = null;
   }
 
   /**
@@ -154,33 +139,12 @@ export class VJPlayerManager extends EventEmitter {
     return this.#isSuspended;
   }
 
-
-
   /**
    * プレイヤー準備完了時の処理
    * @param {Object} event - イベント
    */
   #onPlayerReady(event) {
-    this.#isInitialized = true;
-    this.#isVideoChanging = false;
-    
-    // 投影ウィンドウの場合はミュート
-    if (this.#options.isProjection) {
-      this.#playerWrapper.mute();
-    }
-    
-    // 初期状態の設定
-    if (this.#dataManager.pause) {
-      this.#playerWrapper.pause();
-    }
-    
-    // 初期位置へのシーク
-    const timing = this.#pendingTiming || this.#dataManager.timing;
-    if (timing && typeof timing.playerTime === 'number') {
-      this.#playerWrapper.seekTo(timing.playerTime, true);
-      this.#currentTime = timing.playerTime;
-      this.#pendingTiming = null;
-    }
+    this.#playerWrapper.mute();
 
     this.#dataManager.addEventListener(
       "changed",
@@ -194,24 +158,10 @@ export class VJPlayerManager extends EventEmitter {
         // suspend中は同期処理をスキップ
         return;
       }
-      
-      // 投影画面でのみ定期同期を実行
-      if (this.#options.isProjection && this.#playerWrapper.getPlayerState() === YT.PlayerState.PLAYING) {
-        // 動画変更中は定期同期をスキップ
-        if (this.#isVideoChanging) {
-          return;
-        }
-        
-        // 同期オフセットが大きい場合のみ同期を実行
-        const currentPlayerTime = this.#playerWrapper.getCurrentTime();
-        const expectedTime = this.#timeCalculator.calculateCurrentTime(this.#dataManager);
-        const syncOffset = Math.abs(expectedTime - currentPlayerTime);
-        
-        if (syncOffset > 2.5) {
-          this.syncTiming();
-        }
+      if (this.#playerWrapper.getPlayerState() === YT.PlayerState.PLAYING) {
+        this.syncTiming();
       }
-    }, this.#syncInterval * 3); // 頻度を1/3に削減
+    }, this.#syncInterval);
 
     const loop = () => {
       // ループ処理を呼び出すため
@@ -221,6 +171,7 @@ export class VJPlayerManager extends EventEmitter {
     requestAnimationFrame(loop);
 
     this.dispatchEvent("YTPlayerReady", event);
+    this.#isInitialized = true;
   }
 
   /**
@@ -229,88 +180,46 @@ export class VJPlayerManager extends EventEmitter {
    * @param {*} value - 新しい値
    * @param {Object} data - データ全体
    */
-  #onDataChanged(key, value) {
-    if (this.#isSuspended && ["pause", "timing", "speed"].includes(key)) {
+  #onDataChanged(key, value, data) {
+    // suspend中は特定の処理をスキップ（videoIdは除く）
+    if (this.#isSuspended && (key === "pause" || key === "timing" || key === "speed")) {
       return;
     }
-
+    
     switch (key) {
       case "videoId":
-        this.#isInitialized = false;
-        this.#currentTime = 0;
-        this.loadVideo(value);
+        this.#isVideoChanging = true;
+        this.#playerWrapper.loadVideo(value);
+        // 動画ロード完了を待つ
+        setTimeout(() => {
+          this.#isVideoChanging = false;
+        }, 2000);
         break;
-
       case "pause":
-        if (value) {
+        if (value === true) {
+          this.#dataManager.timing.playerTime = this.currentTime;
           this.#playerWrapper.pause();
         } else {
+          this.#dataManager.timing.timestamp = new Date() / 1000;
           this.#playerWrapper.play();
         }
         break;
-
       case "timing":
-        // プレイヤーラッパーが利用可能かチェック
-        if (!this.#playerWrapper) {
-          this.#pendingTiming = value;
-          return;
-        }
-        
-        // 初期化されていない場合でも、プレイヤーが存在すれば基本的なシーク処理を実行
-        if (!this.#isInitialized) {
-          this.#pendingTiming = value;
-          
-          // 基本的なシーク処理のみ実行
-          try {
-            this.#playerWrapper.seekTo(value.playerTime, true);
-            this.#currentTime = value.playerTime;
-          } catch (error) {
-            console.error("[VJPlayerManager] Basic seek failed:", error);
-          }
-          return;
-        }
-
-        // 一時停止状態を保存
-        const wasPaused = this.isPaused;
-        
-        // シーク前に一時停止（コントローラー画面のみ）
-        if (!wasPaused && !this.#options.isProjection) {
-          this.#playerWrapper.pause();
-        }
-
-        // 再生位置を更新
-        this.#currentTime = value.playerTime;
-        
-        // YouTube プレイヤーにシーク実行
-        this.#playerWrapper.seekTo(value.playerTime, true);
-        
-        // コントローラー画面では同期処理を完全に無効化
-        if (this.#options.isProjection && !this.#isSuspended) {
-          // 投影画面では同期オフセットが大きい場合のみ同期処理を実行
-          const currentPlayerTime = this.#playerWrapper.getCurrentTime();
-          const expectedTime = this.#timeCalculator.calculateCurrentTime(this.#dataManager);
-          const syncOffset = Math.abs(expectedTime - currentPlayerTime);
-          
-          // 同期オフセットが2秒以上の場合のみ同期を実行（閾値を上げて安定性向上）
-          if (syncOffset > 2.0) {
-            this.syncTiming();
-          }
-        }
-        
-        // 元の再生状態に戻す（コントローラー画面のみ）
-        if (!wasPaused && !this.#options.isProjection) {
-          setTimeout(() => {
-            this.#playerWrapper.play();
-            // 一時停止状態を解除
-            this.#dataManager.pause = false;
-          }, 50);
-        }
-        break;
-
       case "speed":
-        this.setSpeed(value);
+        if (this.#dataManager.pause) {
+          if (this.#isInitialized === false) {
+            console.warn(`[VJPlayerManager] Player is not ready yet, cannot seek.`);
+            return;
+          }
+          // currentTimeが有効な値の場合のみシーク
+          if (typeof this.currentTime === 'number' && !isNaN(this.currentTime)) {
+            this.#playerWrapper.seekTo(this.currentTime);
+          }
+          return;
+        } else {
+          this.syncTiming();
+        }
         break;
-
       case "filter":
         if (this.#options.isProjection) {
           this.#filterProcessor.applyFilter(
@@ -319,7 +228,6 @@ export class VJPlayerManager extends EventEmitter {
           );
         }
         break;
-
       case "zIndex":
         if (this.#options.isProjection) {
           this.#filterProcessor.setZIndex(
@@ -328,10 +236,8 @@ export class VJPlayerManager extends EventEmitter {
           );
         }
         break;
-
       case "loop":
         break;
-
       default:
         console.warn(`YTVJ:P Unsupported ${key}`);
         return;
@@ -347,42 +253,19 @@ export class VJPlayerManager extends EventEmitter {
    * @param {Object} event - イベント
    */
   #onPlayerStateChange(event) {
-    switch (event.data) {
-      case YT.PlayerState.PLAYING:
-        this.#isVideoChanging = false;
-        // 再生開始時に現在の再生位置を確認
-        const currentTime = this.#playerWrapper.getCurrentTime();
-        if (Math.abs(this.#currentTime - currentTime) > 0.1) {
-          this.#currentTime = currentTime;
-        }
-        break;
-        
-      case YT.PlayerState.PAUSED:
-        // シークによる一時停止の場合は再生を再開
-        if (!this.#dataManager.pause) {
-          this.#playerWrapper.play();
-        }
-        break;
-        
-      case YT.PlayerState.ENDED:
-        break;
-        
-      case YT.PlayerState.BUFFERING:
-        // バッファリング中は位置維持を行わない（不安定の原因）
-        break;
-    }
+    const state = event.data;
 
     // 動画ロード中は状態変更を無視
     if (this.#isVideoChanging) {
       return;
     }
 
-    if (event.data === YT.PlayerState.UNSTARTED) {
+    if (state === YT.PlayerState.UNSTARTED) {
       this.dispatchEvent("changed");
       return;
     }
 
-    if (event.data === YT.PlayerState.PAUSED && this.#dataManager.pause === false) {
+    if (state === YT.PlayerState.PAUSED && this.#dataManager.pause === false) {
       this.dispatchEvent("paused");
       if (this.#dataManager.pause === false && !this.#isSuspended) {
         event.target.playVideo();
@@ -390,66 +273,31 @@ export class VJPlayerManager extends EventEmitter {
       return;
     }
 
-    if (event.data === YT.PlayerState.PLAYING && this.#dataManager.pause === true) {
+    if (state === YT.PlayerState.PLAYING && this.#dataManager.pause === true) {
       this.dispatchEvent("resumed");
       return;
     }
 
-    if (event.data === YT.PlayerState.PLAYING) {
+    if (state === YT.PlayerState.ENDED) {
+      this.dispatchEvent("ended");
+      return;
+    }
+
+    if (state === YT.PlayerState.PLAYING) {
       if (this.#dataManager.pause) {
         this.#playerWrapper.pause();
         return;
       }
-      
-      // コントローラー画面では同期処理を完全に無効化
-      if (!this.#options.isProjection) {
-        return;
-      }
-      
-      // 投影画面でのみ同期処理を実行
       if (this.#options.isProjection && !this.#isSuspended) {
         // 再生開始直後は同期をスキップ
         if (this.#lastStateChangeTime && Date.now() - this.#lastStateChangeTime < 1000) {
           return;
         }
-        
-        // 動画変更中は同期をスキップ
-        if (this.#isVideoChanging) {
-          return;
-        }
-        
-        // 同期オフセットが大きい場合のみ同期を実行
-        const currentPlayerTime = this.#playerWrapper.getCurrentTime();
-        const expectedTime = this.#timeCalculator.calculateCurrentTime(this.#dataManager);
-        const syncOffset = Math.abs(expectedTime - currentPlayerTime);
-        
-        if (syncOffset > 3.0) {
-          this.syncTiming();
-        }
+        this.syncTiming();
       }
     }
 
     this.#lastStateChangeTime = Date.now();
     this.dispatchEvent("YTPlayerStateChange", event);
-  }
-
-  loadVideo(videoId) {
-    this.#isVideoChanging = true;
-    this.#isInitialized = false;
-
-    try {
-      this.#playerWrapper.loadVideo(videoId);
-    } catch (error) {
-      console.error("[VJPlayerManager] Error loading video:", error);
-      this.#isVideoChanging = false;
-      return;
-    }
-
-    // 動画ロード完了を待つ
-    setTimeout(() => {
-      if (!this.#isInitialized) {
-        this.#isVideoChanging = false;
-      }
-    }, 5000);
   }
 }
