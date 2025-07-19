@@ -1,6 +1,4 @@
 ---
-layout: base.liquid
-title: YT.PlayerState に関するメモ
 permalink: "yt-plater-state.html"
 ---
 

@@ -1,6 +1,4 @@
 ---
-layout: base.liquid
-title: Chrome 拡張機能の紹介と導入手順
 permalink: "chrome-extension.html"
 ---
 

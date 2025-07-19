@@ -1,6 +1,4 @@
 ---
-layout: base.liquid
-title: 利用規約
 permalink: "terms.html"
 ---
 
