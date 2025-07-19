@@ -8,12 +8,10 @@ import { VJControllerManager } from "../core/vj-controller/index.js";
  */
 class VJControllerFacade extends EventEmitter {
   #controllerManager;
-  #channel;
-  #autoFocusEnabled = true; // 自動フォーカス機能
 
   constructor(channel, options = {}) {
     super();
-    this.#channel = channel;
+
     const dataManager = new VJPlayerData();
     const vjPlayer = new VJPlayer(channel, dataManager);
 
@@ -25,28 +23,6 @@ class VJControllerFacade extends EventEmitter {
     );
 
     // イベントの転送
-    this.#setupEventForwarding();
-
-    // 初期化処理
-    localStorage.removeItem(options.localStorageKey);
-    if (options.autoplay) {
-      this.#controllerManager.setData("pause", false);
-    }
-  }
-
-  /**
-   * 自動フォーカスを実行
-   */
-  #autoFocus() {
-    if (this.#autoFocusEnabled && window.appManager) {
-      window.appManager.selectChannel(this.#channel);
-    }
-  }
-
-  /**
-   * イベント転送を設定
-   */
-  #setupEventForwarding() {
     this.#controllerManager.addEventListener("timeSyncStart", (...args) => {
       this.dispatchEvent("timeSyncStart", ...args);
     });
@@ -74,6 +50,12 @@ class VJControllerFacade extends EventEmitter {
     this.#controllerManager.addEventListener("muteChange", (...args) => {
       this.dispatchEvent("muteChange", ...args);
     });
+
+    // 初期化処理
+    localStorage.removeItem(options.localStorageKey);
+    if (options.autoplay) {
+      this.#controllerManager.setData("pause", false);
+    }
   }
 
   /**
@@ -155,7 +137,6 @@ class VJControllerFacade extends EventEmitter {
    * @param {string} id - 動画ID
    */
   setVideo(id) {
-    this.#autoFocus();
     this.#controllerManager.setVideo(id);
   }
 
@@ -165,7 +146,6 @@ class VJControllerFacade extends EventEmitter {
    * @param {boolean} relative - 相対指定
    */
   setSpeed(val, relative = false) {
-    this.#autoFocus();
     this.#controllerManager.setSpeed(val, relative);
   }
 
@@ -174,7 +154,6 @@ class VJControllerFacade extends EventEmitter {
    * @param {number} sec - 時間（秒）
    */
   setTime(sec) {
-    this.#autoFocus();
     this.#controllerManager.setTime(sec);
   }
 
@@ -183,7 +162,6 @@ class VJControllerFacade extends EventEmitter {
    * @param {Object} val - フィルター値
    */
   setFilter(val) {
-    this.#autoFocus();
     this.#controllerManager.setFilter(val);
   }
 
@@ -192,8 +170,10 @@ class VJControllerFacade extends EventEmitter {
    * @param {number} index - ホットキューインデックス
    */
   hotcue(index) {
-    this.#autoFocus();
-    this.#controllerManager.hotcue(index);
+    this.#controllerManager.hotcueManager.hotcueWithTime(
+      index,
+      this.currentTime
+    );
   }
 
   /**
@@ -201,8 +181,7 @@ class VJControllerFacade extends EventEmitter {
    * @param {number} index - ホットキューインデックス
    */
   addHotcue(index) {
-    this.#autoFocus();
-    this.#controllerManager.addHotcue(index);
+    this.#controllerManager.hotcueManager.addHotcue(index, this.currentTime);
   }
 
   /**
@@ -210,8 +189,7 @@ class VJControllerFacade extends EventEmitter {
    * @param {number} index - ホットキューインデックス
    */
   playHotcue(index) {
-    this.#autoFocus();
-    this.#controllerManager.playHotcue(index);
+    this.#controllerManager.hotcueManager.playHotcue(index);
   }
 
   /**
@@ -219,15 +197,13 @@ class VJControllerFacade extends EventEmitter {
    * @param {number} index - ホットキューインデックス
    */
   removeHotcue(index) {
-    this.#autoFocus();
-    this.#controllerManager.removeHotcue(index);
+    this.#controllerManager.hotcueManager.removeHotcue(index);
   }
 
   /**
    * プレビューを一時停止
    */
   suspendPreview() {
-    this.#autoFocus();
     this.#controllerManager.suspendPreview();
   }
 
@@ -235,7 +211,6 @@ class VJControllerFacade extends EventEmitter {
    * プレビューを再開
    */
   resumePreview() {
-    this.#autoFocus();
     this.#controllerManager.resumePreview();
   }
 
@@ -244,7 +219,6 @@ class VJControllerFacade extends EventEmitter {
    * @param {number} sec - 調整秒数
    */
   adjustTiming(sec) {
-    this.#autoFocus();
     this.#controllerManager.adjustTiming(sec);
   }
 
@@ -252,7 +226,6 @@ class VJControllerFacade extends EventEmitter {
    * ループ開始点を設定
    */
   loopStart() {
-    this.#autoFocus();
     this.#controllerManager.loopManager.setLoopStart(this.currentTime);
   }
 
@@ -260,7 +233,6 @@ class VJControllerFacade extends EventEmitter {
    * ループ終了点を設定
    */
   loopEnd() {
-    this.#autoFocus();
     this.#controllerManager.loopManager.setLoopEnd(this.currentTime);
   }
 
@@ -268,7 +240,6 @@ class VJControllerFacade extends EventEmitter {
    * ループをクリア
    */
   loopClear() {
-    this.#autoFocus();
     this.#controllerManager.loopManager.clearLoop();
   }
 
@@ -276,7 +247,6 @@ class VJControllerFacade extends EventEmitter {
    * 再生
    */
   play() {
-    this.#autoFocus();
     this.#controllerManager.play();
   }
 
@@ -284,7 +254,6 @@ class VJControllerFacade extends EventEmitter {
    * 一時停止
    */
   pause() {
-    this.#autoFocus();
     this.#controllerManager.pause();
   }
 
@@ -292,7 +261,6 @@ class VJControllerFacade extends EventEmitter {
    * 再生/一時停止を切り替え
    */
   togglePlayPause() {
-    this.#autoFocus();
     this.#controllerManager.togglePlayPause();
   }
 
@@ -300,7 +268,6 @@ class VJControllerFacade extends EventEmitter {
    * ミュート
    */
   mute() {
-    this.#autoFocus();
     this.isMuted = true;
   }
 
@@ -308,7 +275,6 @@ class VJControllerFacade extends EventEmitter {
    * ミュート解除
    */
   unmute() {
-    this.#autoFocus();
     this.isMuted = false;
   }
 
@@ -316,7 +282,6 @@ class VJControllerFacade extends EventEmitter {
    * ミュート/ミュート解除を切り替え
    */
   toggleMuteUnmute() {
-    this.#autoFocus();
     this.isMuted = !this.isMuted;
   }
 
@@ -325,7 +290,6 @@ class VJControllerFacade extends EventEmitter {
    * @param {number} val - 音量
    */
   setVolume(val) {
-    this.#autoFocus();
     this.volume = val;
   }
 
