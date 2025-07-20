@@ -5,18 +5,19 @@ import { useXWinSync } from "../hooks/useXWinSync";
 import type {
   PlayerStatus,
   VJControllerRef,
-  VJPlayerProps,
+  VJPlayerForControllerProps,
   VJPlayerRef,
   VJSyncData,
 } from "../types/vj";
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "../types/vj";
 import VJPlayer from "./VJPlayer";
 
-const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
+const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerProps>(
   (
     {
       style,
       onStateChange,
+      onPlaybackRateChange,
       onStatusChange,
       syncKey = DEFAULT_VALUES.syncKey,
       videoId = DEFAULT_VALUES.videoId,
@@ -40,11 +41,16 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
     // syncDataRefを更新し、同時にwriteToXWinSyncを呼び出す
     const updateSyncData = useCallback(
       (partialSyncData: Partial<VJSyncData>) => {
-        const newSyncData = { ...syncDataRef.current, ...partialSyncData };
+        const previousSyncData = syncDataRef.current;
+        const newSyncData = { ...previousSyncData, ...partialSyncData };
         syncDataRef.current = newSyncData;
         writeToXWinSync(newSyncData);
+
+        if (previousSyncData.playbackRate !== newSyncData.playbackRate) {
+          onPlaybackRateChange?.(newSyncData.playbackRate);
+        }
       },
-      [writeToXWinSync]
+      [writeToXWinSync, onPlaybackRateChange]
     );
 
     // プレイヤー取得

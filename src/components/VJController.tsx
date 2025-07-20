@@ -165,7 +165,6 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
     const currentController = playerRef.current;
 
     // 個別の状態を更新（変更があった場合のみ自動的に更新される）
-    setPlaybackRate(currentController.playbackRate);
     setVolume(currentController.volume);
     setIsMuted(currentController.isMuted);
     setDuration(currentController.duration);
@@ -229,12 +228,9 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
   }, []);
 
   // 速度変更
-  const handleSpeedChange = useCallback(
-    (value: number) => {
-      writeToStorage({ playbackRate: value });
-    },
-    [writeToStorage]
-  );
+  const handleSpeedChange = useCallback((value: number) => {
+    playerRef.current?.setPlaybackRate(value);
+  }, []);
 
   // 時間のフォーマット
   const formatTime = useCallback((seconds: number) => {
@@ -270,6 +266,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
         ref={playerRef}
         syncKey={localStorageKey}
         onStateChange={(e) => setPlayerState(e.data)}
+        onPlaybackRateChange={setPlaybackRate}
         onStatusChange={handleStatusChange}
       />
 

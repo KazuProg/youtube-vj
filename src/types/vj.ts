@@ -65,6 +65,10 @@ export interface VJPlayerProps {
   videoId?: string;
 }
 
+export interface VJPlayerForControllerProps extends VJPlayerProps {
+  onPlaybackRateChange?: (rate: number) => void;
+}
+
 /** デフォルト値 */
 export const DEFAULT_VALUES = {
   videoId: "42jhMWfKY9Y",
