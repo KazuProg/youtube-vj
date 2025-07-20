@@ -134,7 +134,6 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
     const currentController = playerRef.current;
 
     // 個別の状態を更新（変更があった場合のみ自動的に更新される）
-    setVolume(currentController.volume);
     setIsMuted(currentController.isMuted);
     setDuration(currentController.duration);
   }, []);
@@ -159,6 +158,12 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
       setIsDestroyed(true);
     };
   }, []);
+
+  useEffect(() => {
+    if (playerRef.current) {
+      playerRef.current.setVolume(volume);
+    }
+  }, [volume]);
 
   // 再生/一時停止の切り替え
   const togglePlayPause = useCallback(() => {
@@ -194,7 +199,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
 
   // 音量変更
   const handleVolumeChange = useCallback((value: number) => {
-    playerRef.current?.setVolume(value);
+    setVolume(value);
   }, []);
 
   // 速度変更

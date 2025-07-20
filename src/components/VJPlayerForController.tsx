@@ -30,7 +30,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     const isInitializedRef = useRef(false);
 
     // プレイヤー状態
-    const [volume, setVolume] = useState<number>(DEFAULT_VALUES.volume);
     const [isMuted, setIsMuted] = useState<boolean>(true);
     const [duration, setDuration] = useState<number>(0);
     const [playerState, setPlayerState] = useState<number>(0);
@@ -169,10 +168,9 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
           await player.mute();
         } else {
           await player.unMute();
-          await player.setVolume(volume);
         }
       });
-    }, [volume, isMuted, safePlayerOperation, getPlayer]);
+    }, [isMuted, safePlayerOperation, getPlayer]);
 
     // 初期化完了フラグの設定
     useEffect(() => {
@@ -206,7 +204,9 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         },
         mute: () => setIsMuted(true),
         unMute: () => setIsMuted(false),
-        setVolume: (newVolume: number) => setVolume(Math.max(0, Math.min(100, newVolume))),
+        setVolume: (newVolume: number) => {
+          vjPlayerRef.current?.getPlayer()?.setVolume(Math.max(0, Math.min(100, newVolume)));
+        },
         setPlaybackRate: (rate: number) => {
           updateSyncData({
             playbackRate: rate,
@@ -225,10 +225,9 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         isMuted,
         playerState,
         playbackRate: syncDataRef.current.playbackRate,
-        volume,
         duration,
       }),
-      [isMuted, playerState, volume, duration, updateSyncData]
+      [isMuted, playerState, duration, updateSyncData]
     );
 
     return (

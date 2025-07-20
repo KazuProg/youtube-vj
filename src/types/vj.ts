@@ -52,7 +52,6 @@ export interface VJControllerRef {
   isMuted: boolean;
   playerState: number;
   playbackRate: number;
-  volume: number;
   duration: number;
 }
 
