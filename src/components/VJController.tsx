@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import PlayerStates from "youtube-player/dist/constants/PlayerStates";
-import { useXWinSync } from "../hooks/useXWinSync";
-import type { VJControllerRef, VJSyncData } from "../types/vj";
-import { DEFAULT_VALUES, PLAYER_STATE_MAP } from "../types/vj";
+import type { VJControllerRef } from "../types/vj";
+import { PLAYER_STATE_MAP } from "../types/vj";
 import VJPlayerForController from "./VJPlayerForController";
 
 interface VJControllerProps {
@@ -106,7 +105,6 @@ const STYLES = {
 
 const VJController = ({ localStorageKey }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [isDestroyed, setIsDestroyed] = useState(false);
 
@@ -117,8 +115,6 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0);
 
-  const { writeToStorage: writeToXWinSync } = useXWinSync(localStorageKey);
-
   const updateController = useCallback(() => {
     if (playerRef.current && !isDestroyed) {
       const currentTime = playerRef.current.getCurrentTime();
@@ -128,33 +124,6 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
       requestAnimationFrame(updateController);
     }
   }, [isDestroyed]);
-
-  // ストレージ書き込み
-  const writeToStorage = useCallback(
-    (updates: Partial<Omit<VJSyncData, "videoId" | "lastUpdated">> = {}) => {
-      if (!playerRef.current) {
-        return;
-      }
-
-      try {
-        const syncData: VJSyncData = {
-          videoId: DEFAULT_VALUES.videoId,
-          lastUpdated: Date.now(),
-          playbackRate: playbackRate,
-          currentTime: currentTime,
-          paused: playerState === PlayerStates.PAUSED,
-          ...updates,
-        };
-
-        writeToXWinSync(syncData);
-        setError(null);
-      } catch (error) {
-        console.error("Failed to write to storage:", error);
-        setError("同期エラーが発生しました");
-      }
-    },
-    [writeToXWinSync, playbackRate, currentTime, playerState]
-  );
 
   // コントローラー状態の更新（シンプル版）
   const handleStatusChange = useCallback(() => {
@@ -198,8 +167,12 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
     }
 
     const isPlaying = playerState === PlayerStates.PLAYING;
-    writeToStorage({ paused: isPlaying });
-  }, [playerState, writeToStorage]);
+    if (isPlaying) {
+      playerRef.current.pauseVideo();
+    } else {
+      playerRef.current.playVideo();
+    }
+  }, [playerState]);
 
   // ミュート/ミュート解除の切り替え
   const toggleMute = useCallback(() => {
@@ -236,28 +209,9 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   }, []);
 
-  // エラー表示
-  const ErrorMessage = error ? (
-    <div
-      style={{
-        padding: "10px",
-        backgroundColor: "#ffebee",
-        border: "1px solid #f44336",
-        borderRadius: "4px",
-        color: "#c62828",
-        marginBottom: "10px",
-      }}
-    >
-      {error}
-    </div>
-  ) : null;
-
   return (
     <div style={STYLES.container}>
       <h2 style={STYLES.title}>VJ Controller</h2>
-
-      {ErrorMessage}
-
       <VJPlayerForController
         style={STYLES.player}
         ref={playerRef}
