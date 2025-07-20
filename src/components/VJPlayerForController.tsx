@@ -1,4 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import type { YouTubeEvent } from "react-youtube";
 import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 import { useXWinSync } from "../hooks/useXWinSync";
 import type {
@@ -13,7 +14,13 @@ import VJPlayer from "./VJPlayer";
 
 const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
   (
-    { style, onStatusChange, syncKey = DEFAULT_VALUES.syncKey, videoId = DEFAULT_VALUES.videoId },
+    {
+      style,
+      onStateChange,
+      onStatusChange,
+      syncKey = DEFAULT_VALUES.syncKey,
+      videoId = DEFAULT_VALUES.videoId,
+    },
     ref
   ) => {
     const vjPlayerRef = useRef<VJPlayerRef | null>(null);
@@ -112,6 +119,14 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
         });
       },
       [updateSyncData]
+    );
+
+    const handleStateChange = useCallback(
+      (e: YouTubeEvent<number>) => {
+        setPlayerState(e.data);
+        onStateChange?.(e);
+      },
+      [onStateChange]
     );
 
     // 子プレイヤーの状態変更処理
@@ -214,6 +229,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerProps>(
       <VJPlayer
         style={style}
         ref={vjPlayerRef}
+        onStateChange={handleStateChange}
         onStatusChange={handleStatusChange}
         syncKey={syncKey}
         videoId={videoId}

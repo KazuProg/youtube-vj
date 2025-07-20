@@ -104,7 +104,6 @@ const STYLES = {
   },
 } as const;
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Refactoring planned for future iterations
 const VJController = ({ localStorageKey }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -166,7 +165,6 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
     const currentController = playerRef.current;
 
     // 個別の状態を更新（変更があった場合のみ自動的に更新される）
-    setPlayerState(currentController.playerState);
     setPlaybackRate(currentController.playbackRate);
     setVolume(currentController.volume);
     setIsMuted(currentController.isMuted);
@@ -271,6 +269,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
         style={STYLES.player}
         ref={playerRef}
         syncKey={localStorageKey}
+        onStateChange={(e) => setPlayerState(e.data)}
         onStatusChange={handleStatusChange}
       />
 

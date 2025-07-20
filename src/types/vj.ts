@@ -2,6 +2,7 @@
  * VJアプリケーション共通の型定義
  */
 
+import type { YouTubeEvent } from "react-youtube";
 import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 import type { YouTubePlayer } from "youtube-player/dist/types";
 
@@ -58,6 +59,7 @@ export interface VJControllerRef {
 /** 共通のプロパティ型 */
 export interface VJPlayerProps {
   style?: React.CSSProperties;
+  onStateChange?: (state: YouTubeEvent<number>) => void;
   onStatusChange?: (status: PlayerStatus) => void;
   syncKey?: string;
   videoId?: string;

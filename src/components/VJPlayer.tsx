@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import YouTube from "react-youtube";
+import YouTube, { type YouTubeEvent } from "react-youtube";
 import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 import type { YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
 import { YT_OPTIONS } from "../constants";
@@ -9,7 +9,13 @@ import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "../types/vj";
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   (
-    { style, onStatusChange, syncKey = DEFAULT_VALUES.syncKey, videoId = DEFAULT_VALUES.videoId },
+    {
+      style,
+      onStateChange,
+      onStatusChange,
+      syncKey = DEFAULT_VALUES.syncKey,
+      videoId = DEFAULT_VALUES.videoId,
+    },
     ref
   ) => {
     const playerRef = useRef<YTPlayerTypes | null>(null);
@@ -130,20 +136,25 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     // 状態変更処理
-    const handleStateChange = useCallback((e: { data: number }) => {
-      const newState = e.data;
-      setPlayerState(newState);
+    const handleStateChange = useCallback(
+      (e: YouTubeEvent<number>) => {
+        const newState = e.data;
+        setPlayerState(newState);
 
-      // 自動ループ処理
-      if (newState === PlayerStates.ENDED && playerRef.current) {
-        try {
-          playerRef.current.seekTo(0, true);
-          playerRef.current.playVideo();
-        } catch (error) {
-          console.error("Error during auto loop:", error);
+        // 自動ループ処理
+        if (newState === PlayerStates.ENDED && playerRef.current) {
+          try {
+            playerRef.current.seekTo(0, true);
+            playerRef.current.playVideo();
+          } catch (error) {
+            console.error("Error during auto loop:", error);
+          }
         }
-      }
-    }, []);
+
+        onStateChange?.(e);
+      },
+      [onStateChange]
+    );
 
     // ステータス更新の通知
     useEffect(() => {
