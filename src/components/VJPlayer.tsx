@@ -157,7 +157,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     // ステータス更新の通知
     useEffect(() => {
       const status: PlayerStatus = {
-        playbackRate: syncDataRef.current.playbackRate,
         duration,
       };
       notifyStatusChange(status);

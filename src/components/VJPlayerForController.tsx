@@ -25,7 +25,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     ref
   ) => {
     const vjPlayerRef = useRef<VJPlayerRef | null>(null);
-    const previousStatusRef = useRef<PlayerStatus | null>(null);
     const lastSeekTimeRef = useRef<number>(0);
     const isInitializedRef = useRef(false);
 
@@ -56,31 +55,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
       updateSyncData({ ...INITIAL_SYNC_DATA });
     }, [updateSyncData]);
 
-    // ストレージ保存
-    const saveToStorage = useCallback(
-      (status: PlayerStatus, forceSync = false) => {
-        const prev = previousStatusRef.current;
-
-        const shouldSync =
-          forceSync ||
-          !prev ||
-          Math.abs(prev.playbackRate - status.playbackRate) > 0.01 ||
-          Math.abs(prev.duration - status.duration) > 1;
-
-        if (!shouldSync) {
-          return;
-        }
-
-        updateSyncData({
-          playbackRate: status.playbackRate,
-          currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
-          lastUpdated: Date.now(),
-          paused: playerState === PlayerStates.PAUSED,
-        });
-      },
-      [updateSyncData, playerState]
-    );
-
     // シーク位置の保存（デバウンス付き）
     const saveSeekPosition = useCallback(
       (targetTime: number) => {
@@ -89,11 +63,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
           return;
         }
         lastSeekTimeRef.current = now;
-
-        const currentStatus = previousStatusRef.current;
-        if (!currentStatus) {
-          return;
-        }
 
         updateSyncData({
           currentTime: targetTime,
@@ -122,14 +91,10 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         // 状態の更新
         setDuration(status.duration);
 
-        // ストレージ保存
-        saveToStorage(status);
-        previousStatusRef.current = status;
-
         // 親への通知
         onStatusChange?.(status);
       },
-      [onStatusChange, saveToStorage, saveSeekPosition, playerState]
+      [onStatusChange, saveSeekPosition, playerState]
     );
 
     // 初期化完了フラグの設定
