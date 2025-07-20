@@ -49,7 +49,6 @@ export interface VJControllerRef {
   setVolume: (volume: number) => void;
   setPlaybackRate: (rate: number) => void;
   getCurrentTime: () => number | null;
-  isMuted: boolean;
   playerState: number;
   playbackRate: number;
   duration: number;

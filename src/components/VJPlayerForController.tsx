@@ -30,7 +30,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     const isInitializedRef = useRef(false);
 
     // プレイヤー状態
-    const [isMuted, setIsMuted] = useState<boolean>(true);
     const [duration, setDuration] = useState<number>(0);
     const [playerState, setPlayerState] = useState<number>(0);
 
@@ -52,31 +51,10 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
       [writeToXWinSync, onPlaybackRateChange]
     );
 
-    // プレイヤー取得
-    const getPlayer = useCallback(() => {
-      return vjPlayerRef.current?.getPlayer();
-    }, []);
-
     // 初期化時のみ実行
     useEffect(() => {
       updateSyncData({ ...INITIAL_SYNC_DATA });
     }, [updateSyncData]);
-
-    // 安全な非同期プレイヤー操作
-    const safePlayerOperation = useCallback(
-      async (operation: () => Promise<void> | void) => {
-        if (!isInitializedRef.current || !getPlayer()) {
-          return;
-        }
-
-        try {
-          await operation();
-        } catch (error) {
-          console.warn("Player operation failed:", error);
-        }
-      },
-      [getPlayer]
-    );
 
     // ストレージ保存
     const saveToStorage = useCallback(
@@ -156,22 +134,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
       [onStatusChange, saveToStorage, saveSeekPosition]
     );
 
-    // 音量・ミュート設定の適用
-    useEffect(() => {
-      safePlayerOperation(async () => {
-        const player = getPlayer();
-        if (!player) {
-          return;
-        }
-
-        if (isMuted) {
-          await player.mute();
-        } else {
-          await player.unMute();
-        }
-      });
-    }, [isMuted, safePlayerOperation, getPlayer]);
-
     // 初期化完了フラグの設定
     useEffect(() => {
       if (vjPlayerRef.current) {
@@ -202,8 +164,8 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
             lastUpdated: Date.now(),
           });
         },
-        mute: () => setIsMuted(true),
-        unMute: () => setIsMuted(false),
+        mute: () => vjPlayerRef.current?.getPlayer()?.mute(),
+        unMute: () => vjPlayerRef.current?.getPlayer()?.unMute(),
         setVolume: (newVolume: number) => {
           vjPlayerRef.current?.getPlayer()?.setVolume(Math.max(0, Math.min(100, newVolume)));
         },
@@ -221,13 +183,12 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
           }
         },
 
-        // 状態プロパティ
-        isMuted,
+        // 状態プロパティ,
         playerState,
         playbackRate: syncDataRef.current.playbackRate,
         duration,
       }),
-      [isMuted, playerState, duration, updateSyncData]
+      [playerState, duration, updateSyncData]
     );
 
     return (

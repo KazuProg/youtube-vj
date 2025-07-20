@@ -134,7 +134,6 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
     const currentController = playerRef.current;
 
     // 個別の状態を更新（変更があった場合のみ自動的に更新される）
-    setIsMuted(currentController.isMuted);
     setDuration(currentController.duration);
   }, []);
 
@@ -165,6 +164,16 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
     }
   }, [volume]);
 
+  useEffect(() => {
+    if (playerRef.current) {
+      if (isMuted) {
+        playerRef.current.unMute();
+      } else {
+        playerRef.current.mute();
+      }
+    }
+  }, [isMuted]);
+
   // 再生/一時停止の切り替え
   const togglePlayPause = useCallback(() => {
     if (!playerRef.current) {
@@ -178,19 +187,6 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
       playerRef.current.playVideo();
     }
   }, [playerState]);
-
-  // ミュート/ミュート解除の切り替え
-  const toggleMute = useCallback(() => {
-    if (!playerRef.current) {
-      return;
-    }
-
-    if (isMuted) {
-      playerRef.current.unMute();
-    } else {
-      playerRef.current.mute();
-    }
-  }, [isMuted]);
 
   // 進捗変更
   const handleProgressChange = useCallback((value: number) => {
@@ -247,7 +243,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
               ...STYLES.button,
               backgroundColor: isMuted ? "#2196F3" : "#ff9800",
             }}
-            onClick={toggleMute}
+            onClick={() => setIsMuted(!isMuted)}
             disabled={!playerRef.current}
           >
             {isMuted ? "ミュート解除" : "ミュート"}
