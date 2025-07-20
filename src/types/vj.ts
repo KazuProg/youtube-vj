@@ -34,7 +34,7 @@ export const PLAYER_STATE_MAP: Record<number, string> = {
 
 /** VJプレイヤーのRef型 */
 export interface VJPlayerRef {
-  originalPlayer: YouTubePlayer;
+  getPlayer: () => YouTubePlayer | null;
   duration: number;
   getCurrentTime: () => number | null;
 }

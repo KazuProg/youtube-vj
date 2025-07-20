@@ -55,7 +55,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
 
     // プレイヤー取得
     const getPlayer = useCallback(() => {
-      return vjPlayerRef.current?.originalPlayer;
+      return vjPlayerRef.current?.getPlayer();
     }, []);
 
     // 初期化時のみ実行

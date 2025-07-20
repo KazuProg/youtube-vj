@@ -183,7 +183,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     useImperativeHandle(
       ref,
       () => ({
-        originalPlayer: playerRef.current as YTPlayerTypes,
+        getPlayer: () => playerRef.current,
         duration,
         getCurrentTime,
       }),
