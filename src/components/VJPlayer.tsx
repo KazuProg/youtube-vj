@@ -21,7 +21,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const playerRef = useRef<YTPlayerTypes | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
 
-    const [playerState, setPlayerState] = useState<number>(PlayerStates.UNSTARTED);
     const [duration, setDuration] = useState<number>(0);
 
     const { onXWinSync, readFromStorage } = useXWinSync(syncKey);
@@ -139,7 +138,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const handleStateChange = useCallback(
       (e: YouTubeEvent<number>) => {
         const newState = e.data;
-        setPlayerState(newState);
 
         // 自動ループ処理
         if (newState === PlayerStates.ENDED && playerRef.current) {
@@ -159,12 +157,11 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     // ステータス更新の通知
     useEffect(() => {
       const status: PlayerStatus = {
-        playerState,
         playbackRate: syncDataRef.current.playbackRate,
         duration,
       };
       notifyStatusChange(status);
-    }, [playerState, duration, notifyStatusChange]);
+    }, [duration, notifyStatusChange]);
 
     // 外部同期リスナー
     useEffect(() => {

@@ -8,7 +8,6 @@ import type { YouTubePlayer } from "youtube-player/dist/types";
 
 /** YouTubeプレイヤーの状態 */
 export interface PlayerStatus {
-  playerState: number;
   playbackRate: number;
   duration: number;
 }

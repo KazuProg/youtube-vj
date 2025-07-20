@@ -64,7 +64,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         const shouldSync =
           forceSync ||
           !prev ||
-          prev.playerState !== status.playerState ||
           Math.abs(prev.playbackRate - status.playbackRate) > 0.01 ||
           Math.abs(prev.duration - status.duration) > 1;
 
@@ -76,10 +75,10 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
           playbackRate: status.playbackRate,
           currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
           lastUpdated: Date.now(),
-          paused: status.playerState === PlayerStates.PAUSED,
+          paused: playerState === PlayerStates.PAUSED,
         });
       },
-      [updateSyncData]
+      [updateSyncData, playerState]
     );
 
     // シーク位置の保存（デバウンス付き）
@@ -116,12 +115,11 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     const handleStatusChange = useCallback(
       (status: PlayerStatus) => {
         // 自動ループ処理
-        if (status.playerState === PlayerStates.ENDED) {
+        if (playerState === PlayerStates.ENDED) {
           saveSeekPosition(0);
         }
 
         // 状態の更新
-        setPlayerState(status.playerState);
         setDuration(status.duration);
 
         // ストレージ保存
@@ -131,7 +129,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         // 親への通知
         onStatusChange?.(status);
       },
-      [onStatusChange, saveToStorage, saveSeekPosition]
+      [onStatusChange, saveToStorage, saveSeekPosition, playerState]
     );
 
     // 初期化完了フラグの設定
