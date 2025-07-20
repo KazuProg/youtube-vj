@@ -215,12 +215,9 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
   }, [isMuted]);
 
   // 進捗変更
-  const handleProgressChange = useCallback(
-    (value: number) => {
-      writeToStorage({ currentTime: value });
-    },
-    [writeToStorage]
-  );
+  const handleProgressChange = useCallback((value: number) => {
+    playerRef.current?.seekTo(value, true);
+  }, []);
 
   // 音量変更
   const handleVolumeChange = useCallback((value: number) => {
