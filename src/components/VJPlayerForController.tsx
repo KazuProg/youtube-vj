@@ -75,9 +75,25 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     const handleStateChange = useCallback(
       (e: YouTubeEvent<number>) => {
         setPlayerState(e.data);
+
+        // プレイヤーを直接操作した場合の処理
+        if (e.data === PlayerStates.PAUSED && !syncDataRef.current.paused) {
+          updateSyncData({
+            currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
+            lastUpdated: Date.now(),
+            paused: true,
+          });
+        }
+        if (e.data !== PlayerStates.PAUSED && syncDataRef.current.paused) {
+          updateSyncData({
+            lastUpdated: Date.now(),
+            paused: false,
+          });
+        }
+
         onStateChange?.(e);
       },
-      [onStateChange]
+      [updateSyncData, onStateChange]
     );
 
     // 子プレイヤーの状態変更処理
