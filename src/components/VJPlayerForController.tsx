@@ -150,6 +150,8 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         },
         setPlaybackRate: (rate: number) => {
           updateSyncData({
+            currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
+            lastUpdated: Date.now(),
             playbackRate: rate,
           });
         },
