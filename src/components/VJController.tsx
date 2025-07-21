@@ -112,7 +112,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
   const [playerState, setPlayerState] = useState<number>(0);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [volume, setVolume] = useState<number>(100);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(true);
   const [duration, setDuration] = useState<number>(0);
 
   const updateController = useCallback(() => {
@@ -167,9 +167,9 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
   useEffect(() => {
     if (playerRef.current) {
       if (isMuted) {
-        playerRef.current.unMute();
-      } else {
         playerRef.current.mute();
+      } else {
+        playerRef.current.unMute();
       }
     }
   }, [isMuted]);
