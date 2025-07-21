@@ -188,21 +188,6 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
     }
   }, [playerState]);
 
-  // 進捗変更
-  const handleProgressChange = useCallback((value: number) => {
-    playerRef.current?.seekTo(value, true);
-  }, []);
-
-  // 音量変更
-  const handleVolumeChange = useCallback((value: number) => {
-    setVolume(value);
-  }, []);
-
-  // 速度変更
-  const handleSpeedChange = useCallback((value: number) => {
-    playerRef.current?.setPlaybackRate(value);
-  }, []);
-
   // 時間のフォーマット
   const formatTime = useCallback((seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -263,7 +248,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
               min="0"
               max={duration}
               value={currentTime >= 0 ? currentTime : 0}
-              onChange={(e) => handleProgressChange(Number(e.target.value))}
+              onChange={(e) => playerRef.current?.seekTo(Number(e.target.value), true)}
               disabled={!playerRef.current}
             />
           </div>
@@ -279,7 +264,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
               min="0"
               max="100"
               value={volume}
-              onChange={(e) => handleVolumeChange(Number(e.target.value))}
+              onChange={(e) => setVolume(Number(e.target.value))}
               disabled={!playerRef.current}
             />
           </div>
@@ -296,7 +281,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
               max="2"
               step="0.05"
               value={playbackRate}
-              onChange={(e) => handleSpeedChange(Number(e.target.value))}
+              onChange={(e) => playerRef.current?.setPlaybackRate(Number(e.target.value))}
               disabled={!playerRef.current}
             />
           </div>
