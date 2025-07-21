@@ -180,11 +180,10 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
       return;
     }
 
-    const isPlaying = playerState === PlayerStates.PLAYING;
-    if (isPlaying) {
-      playerRef.current.pauseVideo();
-    } else {
+    if (playerState === PlayerStates.PAUSED) {
       playerRef.current.playVideo();
+    } else {
+      playerRef.current.pauseVideo();
     }
   }, [playerState]);
 
@@ -214,12 +213,12 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
             type="button"
             style={{
               ...STYLES.button,
-              backgroundColor: playerState === PlayerStates.PLAYING ? "#f44336" : "#4CAF50",
+              backgroundColor: playerState !== PlayerStates.PAUSED ? "#f44336" : "#4CAF50",
             }}
             onClick={togglePlayPause}
             disabled={!playerRef.current}
           >
-            {playerState === PlayerStates.PLAYING ? "一時停止" : "再生"}
+            {playerState !== PlayerStates.PAUSED ? "一時停止" : "再生"}
           </button>
 
           <button
