@@ -1,6 +1,6 @@
+import YouTubeController from "@/components/VJController";
+import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useState } from "react";
-import YouTubeController from "../components/VJController";
-import { LOCAL_STORAGE_KEY } from "../constants";
 
 const ControllerPage = () => {
   const [projectionWindow, setProjectionWindow] = useState<Window | null>(null);

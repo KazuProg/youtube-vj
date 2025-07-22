@@ -1,16 +1,16 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import type { YouTubeEvent } from "react-youtube";
-import PlayerStates from "youtube-player/dist/constants/PlayerStates";
-import { useXWinSync } from "../hooks/useXWinSync";
+import VJPlayer from "@/components/VJPlayer";
+import { useXWinSync } from "@/hooks/useXWinSync";
 import type {
   PlayerStatus,
   VJControllerRef,
   VJPlayerForControllerProps,
   VJPlayerRef,
   VJSyncData,
-} from "../types/vj";
-import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "../types/vj";
-import VJPlayer from "./VJPlayer";
+} from "@/types/vj";
+import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/types/vj";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import type { YouTubeEvent } from "react-youtube";
+import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 
 const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerProps>(
   (

@@ -1,8 +1,8 @@
+import VJPlayerForController from "@/components/VJPlayerForController";
+import type { VJControllerRef } from "@/types/vj";
+import { PLAYER_STATE_MAP } from "@/types/vj";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PlayerStates from "youtube-player/dist/constants/PlayerStates";
-import type { VJControllerRef } from "../types/vj";
-import { PLAYER_STATE_MAP } from "../types/vj";
-import VJPlayerForController from "./VJPlayerForController";
 
 interface VJControllerProps {
   localStorageKey: string;

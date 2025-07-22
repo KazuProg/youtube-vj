@@ -1,11 +1,11 @@
+import { YT_OPTIONS } from "@/constants";
+import { useXWinSync } from "@/hooks/useXWinSync";
+import type { PlayerStatus, VJPlayerProps, VJPlayerRef, VJSyncData } from "@/types/vj";
+import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/types/vj";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import YouTube, { type YouTubeEvent } from "react-youtube";
 import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 import type { YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
-import { YT_OPTIONS } from "../constants";
-import { useXWinSync } from "../hooks/useXWinSync";
-import type { PlayerStatus, VJPlayerProps, VJPlayerRef, VJSyncData } from "../types/vj";
-import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "../types/vj";
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   (

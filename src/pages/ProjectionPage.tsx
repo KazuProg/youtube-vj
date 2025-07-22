@@ -1,6 +1,6 @@
+import YTPlayerForVJ from "@/components/VJPlayer";
+import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useEffect } from "react";
-import YTPlayerForVJ from "../components/VJPlayer";
-import { LOCAL_STORAGE_KEY } from "../constants";
 
 const ProjectionPage = () => {
   useEffect(() => {
