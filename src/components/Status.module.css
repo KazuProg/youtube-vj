@@ -1,0 +1,28 @@
+.status {
+  display: inline-block;
+  padding: 4px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+}
+
+.status.clickable:hover {
+  background: #555;
+}
+
+.status .indicator {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 1rem;
+  background: #f00;
+  margin-right: 4px;
+}
+
+.status .indicator.active {
+  background: #0f0;
+}

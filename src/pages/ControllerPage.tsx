@@ -1,3 +1,4 @@
+import Status from "@/components/Status";
 import YouTubeController from "@/components/VJController";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useState } from "react";
@@ -31,76 +32,32 @@ const ControllerPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>YouTube VJ Controller</h1>
-
-      {/* 投影画面開くボタン */}
-      <div
-        style={{
-          marginBottom: "20px",
-          padding: "15px",
-          backgroundColor: "#f5f5f5",
-          borderRadius: "8px",
-        }}
-      >
-        <button
-          type="button"
-          onClick={openProjectionWindow}
-          disabled={projectionWindow !== null}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: projectionWindow ? "#ccc" : "#4CAF50",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            cursor: projectionWindow ? "not-allowed" : "pointer",
-            fontSize: "16px",
-            fontWeight: "bold",
-            marginRight: "10px",
-          }}
-        >
-          {projectionWindow ? "📺 投影画面開いています" : "🚀 投影画面を開く"}
-        </button>
-
-        {projectionWindow && (
-          <>
-            <button
-              type="button"
-              onClick={() => projectionWindow.focus()}
-              style={{
-                padding: "8px 12px",
-                backgroundColor: "#2196F3",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                marginRight: "5px",
-              }}
-            >
-              フォーカス
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                projectionWindow.close();
-                setProjectionWindow(null);
-              }}
-              style={{
-                padding: "8px 12px",
-                backgroundColor: "#f44336",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              閉じる
-            </button>
-          </>
-        )}
-      </div>
-
       {/* コントローラー */}
       <YouTubeController localStorageKey={LOCAL_STORAGE_KEY.player} />
+      <div
+        id="status-bar"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "30px",
+          backgroundColor: "black",
+          color: "white",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: "10px",
+          textAlign: "right",
+          padding: "0 10px",
+        }}
+      >
+        <Status
+          text="Projection"
+          status={projectionWindow !== null}
+          onClick={openProjectionWindow}
+        />
+      </div>
     </div>
   );
 };
