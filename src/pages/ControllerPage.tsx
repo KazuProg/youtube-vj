@@ -41,15 +41,13 @@ const ControllerPage = () => {
           bottom: 0,
           left: 0,
           right: 0,
-          height: "30px",
-          backgroundColor: "black",
+          height: "1.5em",
+          backgroundColor: "#333",
           color: "white",
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-end",
-          gap: "10px",
-          textAlign: "right",
-          padding: "0 10px",
+          borderTop: "1px solid #555",
         }}
       >
         <Status
