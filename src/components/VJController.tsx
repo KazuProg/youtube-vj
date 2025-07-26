@@ -3,105 +3,11 @@ import type { VJControllerRef } from "@/types/vj";
 import { PLAYER_STATE_MAP } from "@/types/vj";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PlayerStates from "youtube-player/dist/constants/PlayerStates";
+import styles from "./VJController.module.css";
 
 interface VJControllerProps {
   localStorageKey: string;
 }
-
-// スタイル定数
-const STYLES = {
-  container: {
-    fontFamily: "Arial, sans-serif",
-    maxWidth: "800px",
-    margin: "0 auto",
-    padding: "20px",
-  },
-  title: {
-    fontSize: "24px",
-    fontWeight: "bold",
-    marginBottom: "20px",
-    color: "#333",
-  },
-  player: {
-    width: "100%",
-    maxWidth: "640px",
-    height: "360px",
-    borderRadius: "8px",
-    overflow: "hidden",
-    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-  },
-  controlPanel: {
-    marginTop: "20px",
-    padding: "20px",
-    border: "2px solid #e0e0e0",
-    borderRadius: "8px",
-    backgroundColor: "#f9f9f9",
-  },
-  buttonGroup: {
-    display: "flex",
-    gap: "10px",
-    flexWrap: "wrap" as const,
-    marginBottom: "20px",
-  },
-  button: {
-    padding: "10px 20px",
-    border: "none",
-    borderRadius: "6px",
-    color: "white",
-    fontSize: "14px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    minWidth: "80px",
-  },
-  sliderGroup: {
-    display: "flex",
-    gap: "20px",
-    alignItems: "center",
-    marginBottom: "20px",
-    flexWrap: "wrap" as const,
-  },
-  sliderContainer: {
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "5px",
-    minWidth: "150px",
-  },
-  label: {
-    fontSize: "14px",
-    fontWeight: "bold",
-    color: "#555",
-  },
-  slider: {
-    width: "100%",
-    height: "8px",
-    borderRadius: "4px",
-    background: "#ddd",
-    outline: "none",
-    cursor: "pointer",
-  },
-  statusGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "15px",
-    marginTop: "10px",
-  },
-  statusItem: {
-    padding: "10px",
-    backgroundColor: "#fff",
-    borderRadius: "6px",
-    border: "1px solid #e0e0e0",
-    fontSize: "14px",
-  },
-  statusLabel: {
-    fontWeight: "bold",
-    color: "#666",
-  },
-  statusValue: {
-    fontWeight: "bold",
-    color: "#333",
-  },
-} as const;
 
 const VJController = ({ localStorageKey }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
@@ -195,10 +101,17 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
   }, []);
 
   return (
-    <div style={STYLES.container}>
-      <h2 style={STYLES.title}>VJ Controller</h2>
+    <div className={styles.container}>
+      <h2 className={styles.title}>VJ Controller</h2>
       <VJPlayerForController
-        style={STYLES.player}
+        style={{
+          width: "100%",
+          maxWidth: "640px",
+          height: "360px",
+          borderRadius: "8px",
+          overflow: "hidden",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        }}
         ref={playerRef}
         syncKey={localStorageKey}
         onStateChange={(e) => setPlayerState(e.data)}
@@ -206,15 +119,14 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
         onStatusChange={handleStatusChange}
       />
 
-      <div style={STYLES.controlPanel}>
+      <div className={styles.controlPanel}>
         {/* 制御ボタン */}
-        <div style={STYLES.buttonGroup}>
+        <div className={styles.buttonGroup}>
           <button
             type="button"
-            style={{
-              ...STYLES.button,
-              backgroundColor: playerState !== PlayerStates.PAUSED ? "#f44336" : "#4CAF50",
-            }}
+            className={`${styles.button} ${
+              playerState !== PlayerStates.PAUSED ? styles.buttonPause : styles.buttonPlay
+            }`}
             onClick={togglePlayPause}
             disabled={!playerRef.current}
           >
@@ -223,10 +135,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
 
           <button
             type="button"
-            style={{
-              ...STYLES.button,
-              backgroundColor: isMuted ? "#2196F3" : "#ff9800",
-            }}
+            className={`${styles.button} ${isMuted ? styles.buttonUnmute : styles.buttonMute}`}
             onClick={() => setIsMuted(!isMuted)}
             disabled={!playerRef.current}
           >
@@ -235,15 +144,15 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
         </div>
 
         {/* スライダー */}
-        <div style={STYLES.sliderGroup}>
-          <div style={STYLES.sliderContainer}>
-            <label style={STYLES.label} htmlFor="progress-slider">
+        <div className={styles.sliderGroup}>
+          <div className={styles.sliderContainer}>
+            <label className={styles.label} htmlFor="progress-slider">
               進捗 ({formatTime(currentTime)} / {formatTime(duration)})
             </label>
             <input
               id="progress-slider"
               type="range"
-              style={STYLES.slider}
+              className={styles.slider}
               min="0"
               max={duration}
               value={currentTime >= 0 ? currentTime : 0}
@@ -252,14 +161,14 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
             />
           </div>
 
-          <div style={STYLES.sliderContainer}>
-            <label style={STYLES.label} htmlFor="volume-slider">
+          <div className={styles.sliderContainer}>
+            <label className={styles.label} htmlFor="volume-slider">
               音量 ({Math.round(volume)}%)
             </label>
             <input
               id="volume-slider"
               type="range"
-              style={STYLES.slider}
+              className={styles.slider}
               min="0"
               max="100"
               value={volume}
@@ -268,14 +177,14 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
             />
           </div>
 
-          <div style={STYLES.sliderContainer}>
-            <label style={STYLES.label} htmlFor="speed-slider">
+          <div className={styles.sliderContainer}>
+            <label className={styles.label} htmlFor="speed-slider">
               速度 ({playbackRate}x)
             </label>
             <input
               id="speed-slider"
               type="range"
-              style={STYLES.slider}
+              className={styles.slider}
               min="0.25"
               max="2"
               step="0.05"
@@ -287,29 +196,28 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
         </div>
 
         {/* 状態表示 */}
-        <div style={STYLES.statusGrid}>
-          <div style={STYLES.statusItem}>
-            <span style={STYLES.statusLabel}>状態: </span>
-            <span style={STYLES.statusValue}>{PLAYER_STATE_MAP[playerState] || "不明"}</span>
+        <div className={styles.statusGrid}>
+          <div className={styles.statusItem}>
+            <span className={styles.statusLabel}>状態: </span>
+            <span className={styles.statusValue}>{PLAYER_STATE_MAP[playerState] || "不明"}</span>
           </div>
 
-          <div style={STYLES.statusItem}>
-            <span style={STYLES.statusLabel}>速度: </span>
-            <span style={STYLES.statusValue}>{playbackRate}x</span>
+          <div className={styles.statusItem}>
+            <span className={styles.statusLabel}>速度: </span>
+            <span className={styles.statusValue}>{playbackRate}x</span>
           </div>
 
-          <div style={STYLES.statusItem}>
-            <span style={STYLES.statusLabel}>音量: </span>
-            <span style={STYLES.statusValue}>{Math.round(volume)}%</span>
+          <div className={styles.statusItem}>
+            <span className={styles.statusLabel}>音量: </span>
+            <span className={styles.statusValue}>{Math.round(volume)}%</span>
           </div>
 
-          <div style={STYLES.statusItem}>
-            <span style={STYLES.statusLabel}>ミュート: </span>
+          <div className={styles.statusItem}>
+            <span className={styles.statusLabel}>ミュート: </span>
             <span
-              style={{
-                ...STYLES.statusValue,
-                color: isMuted ? "#f44336" : "#4CAF50",
-              }}
+              className={`${styles.statusValue} ${
+                isMuted ? styles.statusValueMuted : styles.statusValueUnmuted
+              }`}
             >
               {isMuted ? "ON" : "OFF"}
             </span>

@@ -2,6 +2,7 @@ import Status from "@/components/Status";
 import YouTubeController from "@/components/VJController";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useState } from "react";
+import styles from "./ControllerPage.module.css";
 
 const ControllerPage = () => {
   const [projectionWindow, setProjectionWindow] = useState<Window | null>(null);
@@ -32,24 +33,8 @@ const ControllerPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      {/* コントローラー */}
       <YouTubeController localStorageKey={LOCAL_STORAGE_KEY.player} />
-      <div
-        id="status-bar"
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: "1.5em",
-          backgroundColor: "#333",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          borderTop: "1px solid #555",
-        }}
-      >
+      <div className={styles.statusBar}>
         <Status
           text="Projection"
           status={projectionWindow !== null}
