@@ -1,5 +1,5 @@
 import Status from "@/components/Status";
-import YouTubeController from "@/components/VJController";
+import VJController from "@/components/VJController";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useState } from "react";
 import styles from "./ControllerPage.module.css";
@@ -33,7 +33,7 @@ const ControllerPage = () => {
 
   return (
     <div className={styles.controllerWindow}>
-      <YouTubeController className={styles.controller} localStorageKey={LOCAL_STORAGE_KEY.player} />
+      <VJController className={styles.controller} localStorageKey={LOCAL_STORAGE_KEY.player} />
       <div className={styles.statusBar}>
         <Status
           text="Projection"
