@@ -1,6 +1,5 @@
 import ControllerPage from "@/pages/ControllerPage";
 import ProjectionPage from "@/pages/ProjectionPage";
-import "@/App.css";
 
 function App() {
   // URLパラメータをチェックして投影モードかどうかを判定
