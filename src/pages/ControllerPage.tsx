@@ -32,8 +32,8 @@ const ControllerPage = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <YouTubeController localStorageKey={LOCAL_STORAGE_KEY.player} />
+    <div className={styles.controllerWindow}>
+      <YouTubeController className={styles.controller} localStorageKey={LOCAL_STORAGE_KEY.player} />
       <div className={styles.statusBar}>
         <Status
           text="Projection"

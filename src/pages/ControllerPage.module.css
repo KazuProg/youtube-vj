@@ -1,13 +1,27 @@
+.controllerWindow {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.controller {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+}
+
 .statusBar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  flex: 0;
+
   height: 1.5em;
   background-color: #333;
   color: white;
+  border-top: 1px solid #555;
+
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  border-top: 1px solid #555;
 }

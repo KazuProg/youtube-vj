@@ -7,9 +7,10 @@ import styles from "./VJController.module.css";
 
 interface VJControllerProps {
   localStorageKey: string;
+  className?: string;
 }
 
-const VJController = ({ localStorageKey }: VJControllerProps) => {
+const VJController = ({ localStorageKey, className }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [isDestroyed, setIsDestroyed] = useState(false);
@@ -101,7 +102,7 @@ const VJController = ({ localStorageKey }: VJControllerProps) => {
   }, []);
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${className}`}>
       <h2 className={styles.title}>VJ Controller</h2>
       <VJPlayerForController
         style={{
