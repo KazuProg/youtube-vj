@@ -33,7 +33,11 @@ const ControllerPage = () => {
 
   return (
     <div className={styles.controllerWindow}>
-      <VJController className={styles.controller} localStorageKey={LOCAL_STORAGE_KEY.player} />
+      <div className={styles.controller}>
+        <VJController className={styles.deck} localStorageKey={LOCAL_STORAGE_KEY.player} />
+        <div className={styles.mixer}>(Mixer)</div>
+        <div className={styles.deck}>(RightDeck)</div>
+      </div>
       <div className={styles.statusBar}>
         <Status
           text="Projection"
