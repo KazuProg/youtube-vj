@@ -36,7 +36,14 @@ const ControllerPage = () => {
       <div className={styles.controller}>
         <VJController className={styles.deck} localStorageKey={LOCAL_STORAGE_KEY.player} />
         <div className={styles.mixer}>(Mixer)</div>
-        <div className={styles.deck}>(RightDeck)</div>
+        <div
+          className={styles.deck}
+          style={{
+            width: "40vw" /* Dummy Deck */,
+          }}
+        >
+          (RightDeck)
+        </div>
       </div>
       <div className={styles.statusBar}>
         <Status
