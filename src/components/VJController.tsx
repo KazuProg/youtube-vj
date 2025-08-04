@@ -103,23 +103,24 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
 
   return (
     <div className={`${styles.container} ${className}`}>
-      <h2 className={styles.title}>VJ Controller</h2>
-      <VJPlayerForController
-        style={{
-          width: "100%",
-          maxWidth: "640px",
-          height: "360px",
-          borderRadius: "8px",
-          overflow: "hidden",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-        }}
-        ref={playerRef}
-        syncKey={localStorageKey}
-        onStateChange={(e) => setPlayerState(e.data)}
-        onPlaybackRateChange={setPlaybackRate}
-        onStatusChange={handleStatusChange}
-      />
-
+      <fieldset>
+        <legend>Preview</legend>
+        <VJPlayerForController
+          style={{
+            width: "100%",
+            maxWidth: "640px",
+            height: "360px",
+            borderRadius: "8px",
+            overflow: "hidden",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          }}
+          ref={playerRef}
+          syncKey={localStorageKey}
+          onStateChange={(e) => setPlayerState(e.data)}
+          onPlaybackRateChange={setPlaybackRate}
+          onStatusChange={handleStatusChange}
+        />
+      </fieldset>
       <div className={styles.controlPanel}>
         {/* 制御ボタン */}
         <div className={styles.buttonGroup}>
