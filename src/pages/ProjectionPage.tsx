@@ -1,6 +1,7 @@
 import YTPlayerForVJ from "@/components/VJPlayer";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useEffect } from "react";
+import styles from "./ProjectionPage.module.css";
 
 const ProjectionPage = () => {
   useEffect(() => {
@@ -18,9 +19,7 @@ const ProjectionPage = () => {
     };
   }, []);
 
-  return (
-    <YTPlayerForVJ style={{ position: "fixed", inset: 0 }} syncKey={LOCAL_STORAGE_KEY.player} />
-  );
+  return <YTPlayerForVJ className={styles.player} syncKey={LOCAL_STORAGE_KEY.player} />;
 };
 
 export default ProjectionPage;

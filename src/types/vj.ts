@@ -54,7 +54,7 @@ export interface VJControllerRef {
 
 /** 共通のプロパティ型 */
 export interface VJPlayerProps {
-  style?: React.CSSProperties;
+  className?: string;
   onStateChange?: (state: YouTubeEvent<number>) => void;
   onStatusChange?: (status: PlayerStatus) => void;
   syncKey?: string;

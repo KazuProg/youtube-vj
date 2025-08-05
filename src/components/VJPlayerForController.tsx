@@ -15,7 +15,7 @@ import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerProps>(
   (
     {
-      style,
+      className,
       onStateChange,
       onPlaybackRateChange,
       onStatusChange,
@@ -174,7 +174,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
 
     return (
       <VJPlayer
-        style={style}
+        className={className}
         ref={vjPlayerRef}
         onStateChange={handleStateChange}
         onStatusChange={handleStatusChange}

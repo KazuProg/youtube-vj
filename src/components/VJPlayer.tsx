@@ -10,7 +10,7 @@ import type { YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   (
     {
-      style,
+      className,
       onStateChange,
       onStatusChange,
       syncKey = DEFAULT_VALUES.syncKey,
@@ -188,7 +188,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
     return (
       <YouTube
-        style={style}
+        className={className}
         videoId={videoId}
         opts={YT_OPTIONS}
         onReady={handleReady}

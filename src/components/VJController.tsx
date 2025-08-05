@@ -107,11 +107,7 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
       <fieldset>
         <legend>Preview</legend>
         <VJPlayerForController
-          style={{
-            width: "100%",
-            height: "auto",
-            aspectRatio: "16/9",
-          }}
+          className={styles.player}
           ref={playerRef}
           syncKey={localStorageKey}
           onStateChange={(e) => setPlayerState(e.data)}
