@@ -95,11 +95,10 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
     }
   }, [playerState]);
 
-  // 時間のフォーマット
-  const formatTime = useCallback((seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  const handleSeek = useCallback((time: number) => {
+    if (playerRef.current) {
+      playerRef.current.seekTo(time, true);
+    }
   }, []);
 
   return (
@@ -114,7 +113,7 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
           onPlaybackRateChange={setPlaybackRate}
           onStatusChange={handleStatusChange}
         />
-        <SeekBar currentTime={currentTime} duration={duration} />
+        <SeekBar currentTime={currentTime} duration={duration} onSeek={handleSeek} />
       </fieldset>
       <div className={styles.controlPanel}>
         {/* 制御ボタン */}
@@ -142,22 +141,6 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
 
         {/* スライダー */}
         <div className={styles.sliderGroup}>
-          <div className={styles.sliderContainer}>
-            <label className={styles.label} htmlFor="progress-slider">
-              進捗 ({formatTime(currentTime)} / {formatTime(duration)})
-            </label>
-            <input
-              id="progress-slider"
-              type="range"
-              className={styles.slider}
-              min="0"
-              max={duration}
-              value={currentTime >= 0 ? currentTime : 0}
-              onChange={(e) => playerRef.current?.seekTo(Number(e.target.value), true)}
-              disabled={!playerRef.current}
-            />
-          </div>
-
           <div className={styles.sliderContainer}>
             <label className={styles.label} htmlFor="volume-slider">
               音量 ({Math.round(volume)}%)
