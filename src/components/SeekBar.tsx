@@ -33,6 +33,11 @@ const SeekBar = ({ currentTime, duration, onSeek }: SeekBarProps) => {
       onClick={() => onSeek(cursorPosition * duration)}
       onMouseLeave={() => setIsHovering(false)}
       onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="slider"
+      aria-valuemin={0}
+      aria-valuemax={duration}
+      aria-valuenow={currentTime}
     >
       <div className={styles.bar} style={{ width: `${position}%` }} />
       <div
