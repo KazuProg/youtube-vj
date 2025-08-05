@@ -108,11 +108,8 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
         <VJPlayerForController
           style={{
             width: "100%",
-            maxWidth: "640px",
-            height: "360px",
-            borderRadius: "8px",
-            overflow: "hidden",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            height: "auto",
+            aspectRatio: "16/9",
           }}
           ref={playerRef}
           syncKey={localStorageKey}
