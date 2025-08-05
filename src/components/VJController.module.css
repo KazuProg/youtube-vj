@@ -15,6 +15,12 @@ fieldset {
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
+  position: relative;
+}
+
+.player iframe {
+  position: absolute;
+  inset: 0;
 }
 
 .controlPanel {
