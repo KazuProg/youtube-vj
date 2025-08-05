@@ -1,0 +1,37 @@
+.seekBar {
+  position: relative;
+  height: 2em;
+  line-height: 1em;
+  background: linear-gradient(to bottom, #fff2, transparent);
+}
+
+.bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(to bottom, #f006, transparent);
+  box-sizing: border-box;
+  animation: none;
+}
+
+.indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: #f008;
+}
+
+.time {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.2em;
+}

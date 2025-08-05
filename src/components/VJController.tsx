@@ -3,6 +3,7 @@ import type { VJControllerRef } from "@/types/vj";
 import { PLAYER_STATE_MAP } from "@/types/vj";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PlayerStates from "youtube-player/dist/constants/PlayerStates";
+import SeekBar from "./SeekBar";
 import styles from "./VJController.module.css";
 
 interface VJControllerProps {
@@ -117,6 +118,7 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
           onPlaybackRateChange={setPlaybackRate}
           onStatusChange={handleStatusChange}
         />
+        <SeekBar currentTime={currentTime} duration={duration} />
       </fieldset>
       <div className={styles.controlPanel}>
         {/* 制御ボタン */}
