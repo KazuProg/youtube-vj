@@ -74,6 +74,12 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
 
   useEffect(() => {
     if (playerRef.current) {
+      playerRef.current.setPlaybackRate(playbackRate);
+    }
+  }, [playbackRate]);
+
+  useEffect(() => {
+    if (playerRef.current) {
       if (isMuted) {
         playerRef.current.mute();
       } else {
