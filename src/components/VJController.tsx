@@ -3,6 +3,7 @@ import type { VJControllerRef } from "@/types/vj";
 import { PLAYER_STATE_MAP } from "@/types/vj";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PlayerStates from "youtube-player/dist/constants/PlayerStates";
+import Fader from "./Fader";
 import SeekBar from "./SeekBar";
 import styles from "./VJController.module.css";
 
@@ -121,6 +122,16 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
         />
         <SeekBar currentTime={currentTime} duration={duration} onSeek={handleSeek} />
       </fieldset>
+      <fieldset>
+        <legend>Speed({playbackRate}x)</legend>
+        <Fader
+          min={0.5}
+          max={1.5}
+          value={playbackRate}
+          step={0.01}
+          onChange={(e) => setPlaybackRate(e)}
+        />
+      </fieldset>
       <div className={styles.controlPanel}>
         {/* 制御ボタン */}
         <div className={styles.buttonGroup}>
@@ -159,23 +170,6 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
               max="100"
               value={volume}
               onChange={(e) => setVolume(Number(e.target.value))}
-              disabled={!playerRef.current}
-            />
-          </div>
-
-          <div className={styles.sliderContainer}>
-            <label className={styles.label} htmlFor="speed-slider">
-              速度 ({playbackRate}x)
-            </label>
-            <input
-              id="speed-slider"
-              type="range"
-              className={styles.slider}
-              min="0.25"
-              max="2"
-              step="0.05"
-              value={playbackRate}
-              onChange={(e) => playerRef.current?.setPlaybackRate(Number(e.target.value))}
               disabled={!playerRef.current}
             />
           </div>
