@@ -9,6 +9,7 @@ html {
   justify-content: center;
   align-items: center;
   height: var(--fader-thumb-width);
+  margin: auto;
 }
 
 .faderContainer > input {
