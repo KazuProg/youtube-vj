@@ -122,16 +122,49 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
         />
         <SeekBar currentTime={currentTime} duration={duration} onSeek={handleSeek} />
       </fieldset>
-      <fieldset>
-        <legend>Speed({playbackRate}x)</legend>
-        <Fader
-          min={0.5}
-          max={1.5}
-          value={playbackRate}
-          step={0.01}
-          onChange={(e) => setPlaybackRate(e)}
-        />
-      </fieldset>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          gap: "20px",
+        }}
+      >
+        <fieldset style={{ flex: 1 }}>
+          <legend>Speed</legend>
+          <Fader
+            min={0.5}
+            max={1.5}
+            value={playbackRate}
+            step={0.01}
+            vertical={true}
+            style={{
+              width: "50px",
+              height: "150px",
+            }}
+            onChange={(e) => setPlaybackRate(e)}
+          />
+          <span>{playbackRate}x</span>
+        </fieldset>
+        <fieldset style={{ flex: 1 }}>
+          <legend>Volume</legend>
+          <Fader
+            min={0}
+            max={100}
+            value={volume}
+            step={1}
+            vertical={true}
+            style={{
+              width: "50px",
+              height: "150px",
+            }}
+            onChange={(e) => setVolume(e)}
+          />
+          <span>{volume}%</span>
+        </fieldset>
+      </div>
       <div className={styles.controlPanel}>
         {/* 制御ボタン */}
         <div className={styles.buttonGroup}>
