@@ -52,8 +52,8 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
 
     // 初期化時のみ実行
     useEffect(() => {
-      updateSyncData({ ...INITIAL_SYNC_DATA });
-    }, [updateSyncData]);
+      updateSyncData({ ...INITIAL_SYNC_DATA, videoId });
+    }, [updateSyncData, videoId]);
 
     // シーク位置の保存（デバウンス付き）
     const saveSeekPosition = useCallback(
@@ -75,6 +75,13 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     const handleStateChange = useCallback(
       (e: YouTubeEvent<number>) => {
         setPlayerState(e.data);
+
+        if (e.data === PlayerStates.UNSTARTED) {
+          updateSyncData({
+            currentTime: 0,
+            lastUpdated: Date.now(),
+          });
+        }
 
         // プレイヤーを直接操作した場合の処理
         if (e.data === PlayerStates.PAUSED && !syncDataRef.current.paused) {

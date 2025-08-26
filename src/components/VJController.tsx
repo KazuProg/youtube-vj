@@ -1,5 +1,5 @@
 import VJPlayerForController from "@/components/VJPlayerForController";
-import type { VJControllerRef } from "@/types/vj";
+import type { PlayerStatus, VJControllerRef } from "@/types/vj";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Fader from "./Fader";
 import SeekBar from "./SeekBar";
@@ -7,10 +7,11 @@ import styles from "./VJController.module.css";
 
 interface VJControllerProps {
   localStorageKey: string;
+  videoId: string;
   className?: string;
 }
 
-const VJController = ({ localStorageKey, className }: VJControllerProps) => {
+const VJController = ({ localStorageKey, videoId, className }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [isDestroyed, setIsDestroyed] = useState(false);
@@ -32,22 +33,20 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
   }, [isDestroyed]);
 
   // コントローラー状態の更新（シンプル版）
-  const handleStatusChange = useCallback(() => {
+  const handleStatusChange = useCallback((status: PlayerStatus) => {
     if (!playerRef.current) {
       return;
     }
 
-    const currentController = playerRef.current;
-
     // 個別の状態を更新（変更があった場合のみ自動的に更新される）
-    setDuration(currentController.duration);
+    setDuration(status.duration);
   }, []);
 
   // 初期化
   useEffect(() => {
     if (playerRef.current) {
       // 初期状態を設定（変更検知ロジックを通して）
-      handleStatusChange();
+      handleStatusChange({ duration: 0 });
 
       const frameId = requestAnimationFrame(updateController);
 
@@ -100,6 +99,7 @@ const VJController = ({ localStorageKey, className }: VJControllerProps) => {
           className={styles.player}
           ref={playerRef}
           syncKey={localStorageKey}
+          videoId={videoId}
           onPlaybackRateChange={setPlaybackRate}
           onStatusChange={handleStatusChange}
         />

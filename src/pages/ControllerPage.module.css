@@ -14,12 +14,15 @@
 }
 
 .mixer {
-  width: 100px;
+  width: 20%;
+  min-width: 120px;
+  padding: 8px;
   border-left: 1px solid #555;
   border-right: 1px solid #555;
 }
 
 .deck {
+  padding: 8px;
   flex-grow: 1;
 }
 
@@ -34,4 +37,40 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+}
+
+.loadButtons {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+.loadButton {
+  color: white;
+  padding: 4px 12px;
+  background: rgb(34, 34, 34);
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(85, 85, 85);
+  border-image: initial;
+  border-radius: 4px;
+}
+
+.loadTrack {
+  margin-bottom: 10px;
+}
+
+.ytThumbnail {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.loadTrack input {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: solid 1px #555;
+  outline: none;
+  color: white;
 }

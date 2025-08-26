@@ -114,11 +114,16 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           return;
         }
         const beforeSyncData = syncDataRef.current;
+        const changedVideoId = syncData.videoId !== beforeSyncData.videoId;
         const changedTiming = syncData.lastUpdated !== beforeSyncData.lastUpdated;
         const changedSpeed = syncData.playbackRate !== beforeSyncData.playbackRate;
         const changedPaused = syncData.paused !== beforeSyncData.paused;
-        const needTimingSync = changedTiming || changedSpeed || changedPaused;
+        const needTimingSync = changedVideoId || changedTiming || changedSpeed || changedPaused;
         syncDataRef.current = syncData;
+
+        if (changedVideoId) {
+          player.loadVideoById(syncData.videoId);
+        }
 
         if (changedPaused) {
           if (syncData.paused) {
@@ -136,8 +141,19 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
     // 状態変更処理
     const handleStateChange = useCallback(
-      (e: YouTubeEvent<number>) => {
+      async (e: YouTubeEvent<number>) => {
         const newState = e.data;
+
+        if (newState === PlayerStates.UNSTARTED) {
+          setDuration(0);
+        }
+
+        if (newState === PlayerStates.PLAYING) {
+          const duration = await playerRef.current?.getDuration();
+          if (duration) {
+            setDuration(duration);
+          }
+        }
 
         // 自動ループ処理
         if (newState === PlayerStates.ENDED && playerRef.current) {
