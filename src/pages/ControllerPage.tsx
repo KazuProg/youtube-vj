@@ -43,7 +43,8 @@ const ControllerPage = () => {
 
   const handleVideoIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const parsed = parseYouTubeURL(e.target.value);
-    if (parsed) {
+    if (parsed && inputRef.current) {
+      inputRef.current.value = parsed.id;
       setPreparedVideoId(parsed.id);
       const thumbnailUrl = `https://img.youtube.com/vi/${parsed.id}/default.jpg`;
       setThumbnailUrl(thumbnailUrl);
