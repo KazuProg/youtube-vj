@@ -191,6 +191,43 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
           </span>
         </fieldset>
       </div>
+      <fieldset>
+        <legend>Seek</legend>
+        <div className={styles.seekButtons}>
+          <button
+            type="button"
+            onClick={() => {
+              playerRef.current?.seekTo(currentTime - 1, true);
+            }}
+          >
+            -1
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              playerRef.current?.seekTo(currentTime + 1, true);
+            }}
+          >
+            +1
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              playerRef.current?.seekTo(currentTime - 0.1, true);
+            }}
+          >
+            -0.1
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              playerRef.current?.seekTo(currentTime + 0.1, true);
+            }}
+          >
+            +0.1
+          </button>
+        </div>
+      </fieldset>
     </div>
   );
 };

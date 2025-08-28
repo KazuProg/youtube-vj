@@ -21,3 +21,13 @@ fieldset {
   position: absolute;
   inset: 0;
 }
+
+.seekButtons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+
+.seekButtons button {
+  padding: 8px 0;
+}
