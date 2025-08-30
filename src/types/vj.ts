@@ -67,7 +67,7 @@ export interface VJPlayerForControllerProps extends VJPlayerProps {
 
 /** デフォルト値 */
 export const DEFAULT_VALUES = {
-  videoId: "42jhMWfKY9Y",
+  videoId: "BLeUas72Mzk",
   syncKey: "vj-player-default",
   playbackRate: 1,
   volume: 100,
