@@ -58,10 +58,10 @@ export interface VJPlayerProps {
   onStateChange?: (state: YouTubeEvent<number>) => void;
   onStatusChange?: (status: PlayerStatus) => void;
   syncKey?: string;
-  videoId?: string;
 }
 
 export interface VJPlayerForControllerProps extends VJPlayerProps {
+  videoId?: string;
   onPlaybackRateChange?: (rate: number) => void;
 }
 

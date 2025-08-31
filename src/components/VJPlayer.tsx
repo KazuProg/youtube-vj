@@ -8,16 +8,7 @@ import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 import type { YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
-  (
-    {
-      className,
-      onStateChange,
-      onStatusChange,
-      syncKey = DEFAULT_VALUES.syncKey,
-      videoId = DEFAULT_VALUES.videoId,
-    },
-    ref
-  ) => {
+  ({ className, onStateChange, onStatusChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
     const playerRef = useRef<YTPlayerTypes | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
 
@@ -96,7 +87,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
           const syncData = await readFromStorage();
           if (syncData) {
-            handleSyncData(syncData);
+            // これを入れないとうまく動かない？
+            setTimeout(() => {
+              handleSyncData(syncData);
+            }, 1000);
           }
         } catch (error) {
           console.error("Error initializing YouTube player:", error);
@@ -122,7 +116,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         syncDataRef.current = syncData;
 
         if (changedVideoId) {
-          player.loadVideoById(syncData.videoId);
+          playerRef.current?.loadVideoById(syncData.videoId);
         }
 
         if (changedPaused) {
@@ -205,7 +199,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     return (
       <YouTube
         className={className}
-        videoId={videoId}
+        videoId={DEFAULT_VALUES.videoId}
         opts={YT_OPTIONS}
         onReady={handleReady}
         onStateChange={handleStateChange}

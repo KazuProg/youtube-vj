@@ -186,7 +186,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         onStateChange={handleStateChange}
         onStatusChange={handleStatusChange}
         syncKey={syncKey}
-        videoId={videoId}
       />
     );
   }
