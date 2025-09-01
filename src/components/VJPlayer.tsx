@@ -87,10 +87,8 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
           const syncData = await readFromStorage();
           if (syncData) {
-            // これを入れないとうまく動かない？
-            setTimeout(() => {
-              handleSyncData(syncData);
-            }, 1000);
+            player.loadVideoById(syncData.videoId);
+            handleSyncData(syncData);
           }
         } catch (error) {
           console.error("Error initializing YouTube player:", error);
