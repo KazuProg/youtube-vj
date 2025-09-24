@@ -20,10 +20,8 @@
     "qa:fix": "npm run format:write && npm run lint:fix && npm run type-check"
   },
   "dependencies": {
-    "@types/youtube-player": "^5.5.11",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-youtube": "^10.1.0"
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

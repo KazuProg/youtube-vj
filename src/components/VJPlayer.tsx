@@ -1,16 +1,16 @@
-import { YT_OPTIONS } from "@/constants";
 import { useXWinSync } from "@/hooks/useXWinSync";
 import type { PlayerStatus, VJPlayerProps, VJPlayerRef, VJSyncData } from "@/types/vj";
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/types/vj";
+import { type YTPlayer, type YTPlayerEvent, YT_PLAYER_STATE } from "@/types/youtube";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import YouTube, { type YouTubeEvent } from "react-youtube";
-import PlayerStates from "youtube-player/dist/constants/PlayerStates";
-import type { YouTubePlayer as YTPlayerTypes } from "youtube-player/dist/types";
+import YouTubePlayer from "./YouTubePlayer";
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ({ className, onStateChange, onStatusChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
-    const playerRef = useRef<YTPlayerTypes | null>(null);
+    // console.log("VJPlayer component rendered");
+    const playerRef = useRef<YTPlayer | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
+    const isPlayerReadyRef = useRef(false);
 
     const [duration, setDuration] = useState<number>(0);
 
@@ -46,65 +46,188 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       }
     }, []);
 
-    const syncTiming = useCallback(async () => {
+    // プレイヤーの準備状態をチェック
+    const isPlayerReady = useCallback((player: YTPlayer) => {
+      try {
+        const playerState = player.getPlayerState();
+        // UNSTARTED (0) も準備完了とみなす
+        return playerState !== null && playerState !== undefined;
+      } catch {
+        return false;
+      }
+    }, []);
+
+    // 時間同期の処理
+    const syncTime = useCallback(
+      (player: YTPlayer) => {
+        const expectedCurrentTime = getCurrentTime();
+        if (expectedCurrentTime === null) {
+          return;
+        }
+
+        if (!isPlayerReady(player)) {
+          return;
+        }
+
+        if (typeof player.getCurrentTime !== "function" || typeof player.seekTo !== "function") {
+          return;
+        }
+
+        try {
+          const currentPlayerTime = player.getCurrentTime();
+          const timeDiff = Math.abs(currentPlayerTime - expectedCurrentTime);
+          if (timeDiff > DEFAULT_VALUES.seekThreshold) {
+            player.seekTo(expectedCurrentTime, true);
+          }
+        } catch (seekError) {
+          console.warn("Failed to seek video:", seekError);
+        }
+      },
+      [getCurrentTime, isPlayerReady]
+    );
+
+    // 再生速度同期の処理
+    const syncPlaybackRate = useCallback(
+      (player: YTPlayer, syncData: VJSyncData) => {
+        if (typeof player.setPlaybackRate === "function") {
+          try {
+            if (isPlayerReady(player)) {
+              player.setPlaybackRate(syncData.playbackRate);
+            }
+          } catch (playbackRateError) {
+            console.warn("Failed to set playback rate:", playbackRateError);
+          }
+        }
+      },
+      [isPlayerReady]
+    );
+
+    const syncTiming = useCallback(() => {
       const player = playerRef.current;
-      if (!player) {
+      if (!player || !isPlayerReadyRef.current) {
         return;
       }
+
+      if (!isPlayerReady(player)) {
+        return;
+      }
+
       const syncData = syncDataRef.current;
 
       try {
-        // 時間同期
-        const expectedCurrentTime = getCurrentTime();
-        if (expectedCurrentTime !== null) {
-          const currentPlayerTime = await player.getCurrentTime();
-          const timeDiff = Math.abs(currentPlayerTime - expectedCurrentTime);
-          if (timeDiff > DEFAULT_VALUES.seekThreshold) {
-            await player.seekTo(expectedCurrentTime, true);
-          }
-        }
-
-        // 再生速度同期
-        await player.setPlaybackRate(syncData.playbackRate);
-      } catch (error) {
-        console.error("Error during sync:", error);
+        syncTime(player);
+        syncPlaybackRate(player, syncData);
+      } catch {
+        // エラーは無視して処理を継続
       }
-    }, [getCurrentTime]);
+    }, [syncTime, syncPlaybackRate, isPlayerReady]);
 
     // プレイヤー初期化
     const handleReady = useCallback(
-      async (event: { target: YTPlayerTypes }) => {
+      (event: YTPlayerEvent) => {
         const player = event.target;
         try {
           // 初期設定
-          await player.mute();
-          await player.playVideo();
+          if (
+            player &&
+            typeof player.mute === "function" &&
+            typeof player.playVideo === "function"
+          ) {
+            player.mute();
+            player.playVideo();
+          }
 
-          const playerDuration = await player.getDuration();
-          setDuration(playerDuration);
+          if (player && typeof player.getDuration === "function") {
+            const playerDuration = player.getDuration();
+            setDuration(playerDuration);
+          }
 
           playerRef.current = player;
+          isPlayerReadyRef.current = true;
 
-          const syncData = await readFromStorage();
-          if (syncData) {
+          const syncData = readFromStorage();
+          if (syncData && player && typeof player.loadVideoById === "function") {
             player.loadVideoById(syncData.videoId);
             handleSyncData(syncData);
           }
-        } catch (error) {
-          console.error("Error initializing YouTube player:", error);
+        } catch {
+          // エラーは無視して処理を継続
         }
       },
       [readFromStorage]
     );
 
+    // 動画切り替えの処理
+    const handleVideoChange = useCallback((player: YTPlayer, syncData: VJSyncData) => {
+      if (typeof player.loadVideoById === "function") {
+        try {
+          isPlayerReadyRef.current = false;
+
+          // 動画切り替え時に currentTime を 0 にリセット
+          // これにより UI が適切に更新される
+          const currentSyncData = syncDataRef.current;
+          syncDataRef.current = {
+            ...currentSyncData,
+            currentTime: 0,
+            lastUpdated: Date.now(),
+          };
+
+          player.loadVideoById(syncData.videoId);
+
+          // 動画読み込み完了を待つために、より短い間隔でチェック
+          const checkReady = () => {
+            try {
+              const playerState = player.getPlayerState();
+              // UNSTARTED (0) も準備完了とみなす
+              if (playerState !== null && playerState !== undefined) {
+                isPlayerReadyRef.current = true;
+              } else {
+                setTimeout(checkReady, 100); // 100ms間隔でチェック
+              }
+            } catch {
+              // エラーが発生した場合は再試行
+              setTimeout(checkReady, 100);
+            }
+          };
+          setTimeout(checkReady, 200); // 200ms後にチェック開始
+        } catch {
+          isPlayerReadyRef.current = true;
+        }
+      }
+    }, []);
+
+    // 再生/一時停止の処理
+    const handlePlayPause = useCallback(
+      (player: YTPlayer, syncData: VJSyncData) => {
+        if (typeof player.pauseVideo === "function" && typeof player.playVideo === "function") {
+          try {
+            if (isPlayerReady(player)) {
+              if (syncData.paused) {
+                player.pauseVideo();
+              } else {
+                player.playVideo();
+              }
+            }
+          } catch {
+            // エラーは無視して処理を継続
+          }
+        }
+      },
+      [isPlayerReady]
+    );
+
     // 同期データの処理
     const handleSyncData = useCallback(
       (syncData: VJSyncData) => {
-        console.log("syncData", syncData);
         const player = playerRef.current;
-        if (!player) {
+        if (!player || !isPlayerReadyRef.current) {
           return;
         }
+
+        if (!isPlayerReady(player)) {
+          return;
+        }
+
         const beforeSyncData = syncDataRef.current;
         const changedVideoId = syncData.videoId !== beforeSyncData.videoId;
         const changedTiming = syncData.lastUpdated !== beforeSyncData.lastUpdated;
@@ -114,46 +237,43 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         syncDataRef.current = syncData;
 
         if (changedVideoId) {
-          player.loadVideoById(syncData.videoId);
+          handleVideoChange(player, syncData);
         }
 
         if (changedPaused) {
-          if (syncData.paused) {
-            player.pauseVideo();
-          } else {
-            player.playVideo();
-          }
+          handlePlayPause(player, syncData);
         }
+
         if (needTimingSync) {
           syncTiming();
         }
       },
-      [syncTiming]
+      [syncTiming, handleVideoChange, handlePlayPause, isPlayerReady]
     );
 
     // 状態変更処理
     const handleStateChange = useCallback(
-      async (e: YouTubeEvent<number>) => {
+      (e: YTPlayerEvent) => {
         const newState = e.data;
 
-        if (newState === PlayerStates.UNSTARTED) {
+        if (newState === YT_PLAYER_STATE.UNSTARTED) {
           setDuration(0);
         }
 
-        if (newState === PlayerStates.PLAYING) {
-          const duration = await playerRef.current?.getDuration();
+        if (newState === YT_PLAYER_STATE.PLAYING) {
+          const duration = playerRef.current?.getDuration();
           if (duration) {
             setDuration(duration);
           }
         }
 
         // 自動ループ処理
-        if (newState === PlayerStates.ENDED && playerRef.current) {
+        if (newState === YT_PLAYER_STATE.ENDED && playerRef.current) {
           try {
             playerRef.current.seekTo(0, true);
             playerRef.current.playVideo();
-          } catch (error) {
-            console.error("Error during auto loop:", error);
+          } catch {
+            // エラーは無視して処理を継続
           }
         }
 
@@ -183,6 +303,16 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       };
     }, [syncTiming]);
 
+    // 動画切り替えは同期データの変更で処理するため、ここでは処理しない
+
+    // コンポーネントのクリーンアップ
+    useEffect(() => {
+      return () => {
+        isPlayerReadyRef.current = false;
+        playerRef.current = null;
+      };
+    }, []);
+
     // Ref API
     useImperativeHandle(
       ref,
@@ -195,10 +325,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     return (
-      <YouTube
+      <YouTubePlayer
         className={className}
         videoId={DEFAULT_VALUES.videoId}
-        opts={YT_OPTIONS}
         onReady={handleReady}
         onStateChange={handleStateChange}
       />

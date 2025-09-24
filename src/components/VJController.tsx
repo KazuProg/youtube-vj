@@ -23,13 +23,32 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
   const [duration, setDuration] = useState<number>(0);
 
   const updateController = useCallback(() => {
-    if (playerRef.current && !isDestroyed) {
+    if (isDestroyed) {
+      return;
+    }
+
+    if (!playerRef.current) {
+      requestAnimationFrame(updateController);
+      return;
+    }
+
+    try {
+      // プレイヤーの状態をチェック
+      const playerState = playerRef.current.playerState;
       const currentTime = playerRef.current.getCurrentTime();
-      if (currentTime !== null) {
+
+      // UNSTARTED (0) の場合は currentTime を更新しない
+      // currentTime が null の場合は更新しない（動画切り替え中など）
+      if (playerState !== 0 && currentTime !== null) {
         setCurrentTime(currentTime);
       }
-      requestAnimationFrame(updateController);
+    } catch {
+      // プレイヤーが一時的に利用できない場合（動画切り替え時など）
+      // エラーは無視して requestAnimationFrame を継続
     }
+
+    // プレイヤーが利用できない場合でも requestAnimationFrame を継続
+    requestAnimationFrame(updateController);
   }, [isDestroyed]);
 
   // コントローラー状態の更新（シンプル版）
@@ -44,16 +63,23 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
 
   // 初期化
   useEffect(() => {
-    if (playerRef.current) {
-      // 初期状態を設定（変更検知ロジックを通して）
-      handleStatusChange({ duration: 0 });
+    // プレイヤーが利用可能になるまで待機
+    const startUpdateLoop = () => {
+      if (playerRef.current) {
+        // 初期状態を設定（変更検知ロジックを通して）
+        handleStatusChange({ duration: 0 });
+        requestAnimationFrame(updateController);
+      } else {
+        // プレイヤーがまだ利用できない場合は再試行
+        setTimeout(startUpdateLoop, 100);
+      }
+    };
 
-      const frameId = requestAnimationFrame(updateController);
+    startUpdateLoop();
 
-      return () => {
-        cancelAnimationFrame(frameId);
-      };
-    }
+    return () => {
+      // クリーンアップは updateController 内で処理される
+    };
   }, [updateController, handleStatusChange]);
 
   // コンポーネント破棄時のクリーンアップ
@@ -84,6 +110,13 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
       }
     }
   }, [isMuted]);
+
+  // videoIdの変更を監視して動画を切り替え
+  useEffect(() => {
+    if (playerRef.current && videoId) {
+      playerRef.current.loadVideoById(videoId);
+    }
+  }, [videoId]);
 
   const handleSeek = useCallback((time: number) => {
     if (playerRef.current) {

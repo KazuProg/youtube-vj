@@ -8,9 +8,9 @@ import type {
   VJSyncData,
 } from "@/types/vj";
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/types/vj";
+import type { YTPlayerEvent } from "@/types/youtube";
+import { YT_PLAYER_STATE } from "@/types/youtube";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import type { YouTubeEvent } from "react-youtube";
-import PlayerStates from "youtube-player/dist/constants/PlayerStates";
 
 const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerProps>(
   (
@@ -73,10 +73,10 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     );
 
     const handleStateChange = useCallback(
-      (e: YouTubeEvent<number>) => {
+      (e: YTPlayerEvent) => {
         setPlayerState(e.data);
 
-        if (e.data === PlayerStates.UNSTARTED) {
+        if (e.data === YT_PLAYER_STATE.UNSTARTED) {
           updateSyncData({
             currentTime: 0,
             lastUpdated: Date.now(),
@@ -84,14 +84,14 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         }
 
         // プレイヤーを直接操作した場合の処理
-        if (e.data === PlayerStates.PAUSED && !syncDataRef.current.paused) {
+        if (e.data === YT_PLAYER_STATE.PAUSED && !syncDataRef.current.paused) {
           updateSyncData({
             currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
             lastUpdated: Date.now(),
             paused: true,
           });
         }
-        if (e.data !== PlayerStates.PAUSED && syncDataRef.current.paused) {
+        if (e.data !== YT_PLAYER_STATE.PAUSED && syncDataRef.current.paused) {
           updateSyncData({
             lastUpdated: Date.now(),
             paused: false,
@@ -107,7 +107,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     const handleStatusChange = useCallback(
       (status: PlayerStatus) => {
         // 自動ループ処理
-        if (playerState === PlayerStates.ENDED) {
+        if (playerState === YT_PLAYER_STATE.ENDED) {
           saveSeekPosition(0);
         }
 
@@ -162,6 +162,14 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
             playbackRate: rate,
           });
         },
+        loadVideoById: (newVideoId: string) => {
+          updateSyncData({
+            videoId: newVideoId,
+            currentTime: 0,
+            lastUpdated: Date.now(),
+            paused: false,
+          });
+        },
         getCurrentTime: () => {
           try {
             return vjPlayerRef.current?.getCurrentTime() ?? null;
@@ -186,6 +194,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         onStateChange={handleStateChange}
         onStatusChange={handleStatusChange}
         syncKey={syncKey}
+        videoId={videoId}
       />
     );
   }

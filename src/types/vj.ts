@@ -2,9 +2,8 @@
  * VJアプリケーション共通の型定義
  */
 
-import type { YouTubeEvent } from "react-youtube";
-import PlayerStates from "youtube-player/dist/constants/PlayerStates";
-import type { YouTubePlayer } from "youtube-player/dist/types";
+import type { YTPlayer, YTPlayerEvent, YTPlayerState } from "./youtube";
+import { YT_PLAYER_STATE } from "./youtube";
 
 /** YouTubeプレイヤーの状態 */
 export interface PlayerStatus {
@@ -21,18 +20,18 @@ export interface VJSyncData {
 }
 
 /** プレイヤー状態の日本語表示マップ */
-export const PLAYER_STATE_MAP: Record<number, string> = {
-  [PlayerStates.UNSTARTED]: "再生前",
-  [PlayerStates.ENDED]: "終了",
-  [PlayerStates.PLAYING]: "再生中",
-  [PlayerStates.PAUSED]: "一時停止",
-  [PlayerStates.BUFFERING]: "バッファリング",
-  [PlayerStates.VIDEO_CUED]: "頭出し済み",
+export const PLAYER_STATE_MAP: Record<YTPlayerState, string> = {
+  [YT_PLAYER_STATE.UNSTARTED]: "再生前",
+  [YT_PLAYER_STATE.ENDED]: "終了",
+  [YT_PLAYER_STATE.PLAYING]: "再生中",
+  [YT_PLAYER_STATE.PAUSED]: "一時停止",
+  [YT_PLAYER_STATE.BUFFERING]: "バッファリング",
+  [YT_PLAYER_STATE.CUED]: "頭出し済み",
 } as const;
 
 /** VJプレイヤーのRef型 */
 export interface VJPlayerRef {
-  getPlayer: () => YouTubePlayer | null;
+  getPlayer: () => YTPlayer | null;
   duration: number;
   getCurrentTime: () => number | null;
 }
@@ -47,6 +46,7 @@ export interface VJControllerRef {
   setVolume: (volume: number) => void;
   setPlaybackRate: (rate: number) => void;
   getCurrentTime: () => number | null;
+  loadVideoById: (videoId: string) => void;
   playerState: number;
   playbackRate: number;
   duration: number;
@@ -55,9 +55,10 @@ export interface VJControllerRef {
 /** 共通のプロパティ型 */
 export interface VJPlayerProps {
   className?: string;
-  onStateChange?: (state: YouTubeEvent<number>) => void;
+  onStateChange?: (state: YTPlayerEvent) => void;
   onStatusChange?: (status: PlayerStatus) => void;
   syncKey?: string;
+  videoId?: string;
 }
 
 export interface VJPlayerForControllerProps extends VJPlayerProps {
