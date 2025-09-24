@@ -14,8 +14,7 @@
       "*.config.js",
       "*.config.ts",
       "tsconfig.json",
-      "tsconfig.*.json",
-      "src/types/youtube.ts"
+      "tsconfig.*.json"
     ]
   },
   "formatter": {

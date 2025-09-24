@@ -3,11 +3,10 @@
  * @types/youtube-player を参考に、Promise を排除した独自実装
  */
 
-/* biome-ignore lint/style/useNamingConvention: YouTube iFrame API の公式命名規則に従うため */
-
 // YouTube iFrame API のグローバル型
 declare global {
   interface Window {
+    // biome-ignore lint/style/useNamingConvention: YouTube API naming
     YT: YT;
     onYouTubeIframeAPIReady: (() => void) | undefined;
   }
@@ -15,16 +14,21 @@ declare global {
 
 // プレイヤー状態定数
 export const YT_PLAYER_STATE = {
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   UNSTARTED: -1,
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   ENDED: 0,
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   PLAYING: 1,
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   PAUSED: 2,
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   BUFFERING: 3,
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   CUED: 5,
 } as const;
 
-export type YTPlayerState =
-  (typeof YT_PLAYER_STATE)[keyof typeof YT_PLAYER_STATE];
+export type YTPlayerState = (typeof YT_PLAYER_STATE)[keyof typeof YT_PLAYER_STATE];
 
 // プレイヤーイベント型
 export interface YTPlayerEvent {
@@ -41,12 +45,14 @@ export interface YTPlayerOptions {
     autoplay?: 0 | 1;
     controls?: 0 | 1 | 2;
     disablekb?: 0 | 1;
+    // biome-ignore lint/style/useNamingConvention: YouTube API parameter
     iv_load_policy?: 1 | 3;
     start?: number;
     end?: number;
     loop?: 0 | 1;
     playlist?: string;
     fs?: 0 | 1;
+    // biome-ignore lint/style/useNamingConvention: YouTube API parameter
     cc_load_policy?: 0 | 1;
     modestbranding?: 0 | 1;
     rel?: 0 | 1;
@@ -89,26 +95,10 @@ export interface YTPlayer {
   getAvailablePlaybackRates(): number[];
 
   // 動画制御
-  loadVideoById(
-    videoId: string,
-    startSeconds?: number,
-    suggestedQuality?: string
-  ): void;
-  cueVideoById(
-    videoId: string,
-    startSeconds?: number,
-    suggestedQuality?: string
-  ): void;
-  loadVideoByUrl(
-    mediaContentUrl: string,
-    startSeconds?: number,
-    suggestedQuality?: string
-  ): void;
-  cueVideoByUrl(
-    mediaContentUrl: string,
-    startSeconds?: number,
-    suggestedQuality?: string
-  ): void;
+  loadVideoById(videoId: string, startSeconds?: number, suggestedQuality?: string): void;
+  cueVideoById(videoId: string, startSeconds?: number, suggestedQuality?: string): void;
+  loadVideoByUrl(mediaContentUrl: string, startSeconds?: number, suggestedQuality?: string): void;
+  cueVideoByUrl(mediaContentUrl: string, startSeconds?: number, suggestedQuality?: string): void;
 
   // プレイリスト制御
   loadPlaylist(
@@ -130,74 +120,63 @@ export interface YTPlayer {
   // その他
   destroy(): void;
   getIframe(): HTMLIFrameElement;
-  addEventListener(
-    event: string,
-    listener: (event: YTPlayerEvent) => void
-  ): void;
-  removeEventListener(
-    event: string,
-    listener: (event: YTPlayerEvent) => void
-  ): void;
+  addEventListener(event: string, listener: (event: YTPlayerEvent) => void): void;
+  removeEventListener(event: string, listener: (event: YTPlayerEvent) => void): void;
 }
 
 // YouTube iFrame API のメイン型
+// biome-ignore lint/style/useNamingConvention: YouTube API interface
 export interface YT {
+  // biome-ignore lint/style/useNamingConvention: YouTube API properties
   Player: new (
     elementId: string | HTMLElement,
     config: YTPlayerOptions
   ) => YTPlayer;
+  // biome-ignore lint/style/useNamingConvention: YouTube API properties
   PlayerState: typeof YT_PLAYER_STATE;
-  PlayerError: {
-    INVALID_PARAMETER: 2;
-    HTML5_PLAYER: 5;
-    VIDEO_NOT_FOUND: 100;
-    VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER1: 101;
-    VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER2: 150;
-  };
-  PlayerReadyState: {
-    UNSTARTED: -1;
-    ENDED: 0;
-    PLAYING: 1;
-    PAUSED: 2;
-    BUFFERING: 3;
-    CUED: 5;
-  };
-  PlayerPlaybackQuality: {
-    SMALL: "small";
-    MEDIUM: "medium";
-    LARGE: "large";
-    HD720: "hd720";
-    HD1080: "hd1080";
-    HIGH_RES: "highres";
-    DEFAULT: "default";
-  };
+  // biome-ignore lint/style/useNamingConvention: YouTube API properties
+  PlayerError: typeof YT_PLAYER_ERROR;
+  // biome-ignore lint/style/useNamingConvention: YouTube API properties
+  PlayerReadyState: typeof YT_PLAYER_STATE;
+  // biome-ignore lint/style/useNamingConvention: YouTube API properties
+  PlayerPlaybackQuality: typeof YT_PLAYER_QUALITY;
 }
 
 // エラー定数
 export const YT_PLAYER_ERROR = {
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   INVALID_PARAMETER: 2,
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   HTML5_PLAYER: 5,
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   VIDEO_NOT_FOUND: 100,
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER1: 101,
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER2: 150,
 } as const;
 
-export type YTPlayerError =
-  (typeof YT_PLAYER_ERROR)[keyof typeof YT_PLAYER_ERROR];
+export type YTPlayerError = (typeof YT_PLAYER_ERROR)[keyof typeof YT_PLAYER_ERROR];
 
 // 再生品質定数
 export const YT_PLAYER_QUALITY = {
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   SMALL: "small",
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   MEDIUM: "medium",
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   LARGE: "large",
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   HD720: "hd720",
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   HD1080: "hd1080",
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   HIGH_RES: "highres",
+  // biome-ignore lint/style/useNamingConvention: YouTube API constants
   DEFAULT: "default",
 } as const;
 
-export type YTPlayerQuality =
-  (typeof YT_PLAYER_QUALITY)[keyof typeof YT_PLAYER_QUALITY];
+export type YTPlayerQuality = (typeof YT_PLAYER_QUALITY)[keyof typeof YT_PLAYER_QUALITY];
 
 // デフォルト値
 export const DEFAULT_VIDEO_ID = "BLeUas72Mzk";
@@ -208,6 +187,7 @@ export const DEFAULT_PLAYER_OPTIONS: YTPlayerOptions = {
     autoplay: 1,
     controls: 0,
     disablekb: 1,
+    // biome-ignore lint/style/useNamingConvention: YouTube API parameter
     iv_load_policy: 3,
   },
 };
@@ -227,8 +207,6 @@ export const YT_PLAYER_ERROR_MAP: Record<YTPlayerError, string> = {
   [YT_PLAYER_ERROR.INVALID_PARAMETER]: "無効なパラメータ",
   [YT_PLAYER_ERROR.HTML5_PLAYER]: "HTML5プレイヤーエラー",
   [YT_PLAYER_ERROR.VIDEO_NOT_FOUND]: "動画が見つかりません",
-  [YT_PLAYER_ERROR.VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER1]:
-    "埋め込みプレイヤーで再生できません",
-  [YT_PLAYER_ERROR.VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER2]:
-    "埋め込みプレイヤーで再生できません",
+  [YT_PLAYER_ERROR.VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER1]: "埋め込みプレイヤーで再生できません",
+  [YT_PLAYER_ERROR.VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER2]: "埋め込みプレイヤーで再生できません",
 } as const;
