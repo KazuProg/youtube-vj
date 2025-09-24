@@ -13,10 +13,7 @@ interface VJControllerProps {
 
 const VJController = ({ localStorageKey, videoId, className }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
-  const seekBarRef = useRef<HTMLDivElement | null>(null);
   const currentTimeRef = useRef<number>(0);
-  const durationRef = useRef<number>(0);
-  const lastTimeUpdateRef = useRef<number>(0);
   const [isDestroyed, setIsDestroyed] = useState(false);
 
   // 個別の状態管理（必要な値のみ）
@@ -24,74 +21,6 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
   const [volume, setVolume] = useState<number>(100);
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const [duration, setDuration] = useState<number>(0);
-
-  // 時間フォーマット関数
-  const formatTime = useCallback((seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${minutes}:${secs.toString().padStart(2, "0")}`;
-  }, []);
-
-  // SeekBarのプログレス更新
-  const updateSeekBarProgress = useCallback((newCurrentTime: number) => {
-    if (!seekBarRef.current) {
-      return;
-    }
-
-    const position = durationRef.current > 0 ? (newCurrentTime / durationRef.current) * 100 : 0;
-    const barElement = seekBarRef.current.querySelector("[data-seek-bar]") as HTMLElement;
-    const indicatorElement = seekBarRef.current.querySelector(
-      "[data-seek-indicator]"
-    ) as HTMLElement;
-
-    // 直接的なDOM更新
-    if (barElement) {
-      barElement.style.width = `${position}%`;
-    }
-    if (indicatorElement) {
-      indicatorElement.style.left = `${position}%`;
-    }
-  }, []);
-
-  // SeekBarの時間表示更新
-  const updateSeekBarTime = useCallback(
-    (newCurrentTime: number, currentDuration?: number) => {
-      if (!seekBarRef.current) {
-        return;
-      }
-
-      const durationToUse = currentDuration ?? duration;
-
-      const timeElement = seekBarRef.current.querySelector("[data-seek-time]") as HTMLElement;
-      if (timeElement) {
-        const currentTimeSpan = timeElement.querySelector("span:first-child");
-        const durationSpan = timeElement.querySelector("span:last-child");
-
-        // 時間表示の更新頻度を制限（0.1秒ごと）
-        const now = Date.now();
-        if (now - lastTimeUpdateRef.current > 100) {
-          if (currentTimeSpan) {
-            currentTimeSpan.textContent = formatTime(newCurrentTime);
-          }
-          lastTimeUpdateRef.current = now;
-        }
-
-        if (durationSpan) {
-          durationSpan.textContent = formatTime(durationToUse);
-        }
-      }
-    },
-    [duration, formatTime]
-  );
-
-  // SeekBarの直接更新関数
-  const updateSeekBar = useCallback(
-    (newCurrentTime: number) => {
-      updateSeekBarProgress(newCurrentTime);
-      updateSeekBarTime(newCurrentTime, durationRef.current);
-    },
-    [updateSeekBarProgress, updateSeekBarTime]
-  );
 
   const updateController = useCallback(() => {
     if (isDestroyed) {
@@ -111,9 +40,8 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
       // UNSTARTED (0) の場合は currentTime を更新しない
       // currentTime が null の場合は更新しない（動画切り替え中など）
       if (playerState !== 0 && newCurrentTime !== null) {
-        // シンプルな更新（フレームレート制御なし）
+        // currentTimeRefのみ更新（再レンダリングなし）
         currentTimeRef.current = newCurrentTime;
-        updateSeekBar(newCurrentTime);
       }
     } catch {
       // プレイヤーが一時的に利用できない場合（動画切り替え時など）
@@ -122,23 +50,15 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
 
     // プレイヤーが利用できない場合でも requestAnimationFrame を継続
     requestAnimationFrame(updateController);
-  }, [isDestroyed, updateSeekBar]);
+  }, [isDestroyed]);
 
   // コントローラー状態の更新（シンプル版）
-  const handleStatusChange = useCallback(
-    (status: PlayerStatus) => {
-      // durationが有効な値の場合のみ更新
-      if (status.duration > 0) {
-        setDuration(status.duration);
-        durationRef.current = status.duration; // refも更新
-        // SeekBarの時間表示も更新（最新のduration値を渡す）
-        if (seekBarRef.current) {
-          updateSeekBarTime(currentTimeRef.current, status.duration);
-        }
-      }
-    },
-    [updateSeekBarTime]
-  );
+  const handleStatusChange = useCallback((status: PlayerStatus) => {
+    // durationが有効な値の場合のみ更新
+    if (status.duration > 0) {
+      setDuration(status.duration);
+    }
+  }, []);
 
   // 初期化
   useEffect(() => {
@@ -159,21 +79,6 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
       // クリーンアップは updateController 内で処理される
     };
   }, [updateController]);
-
-  // SeekBarの初期化
-  useEffect(() => {
-    if (seekBarRef.current && currentTimeRef.current > 0) {
-      updateSeekBar(currentTimeRef.current);
-    }
-  }, [updateSeekBar]);
-
-  // durationが変更された時にSeekBarを更新
-  useEffect(() => {
-    if (seekBarRef.current && duration > 0) {
-      // durationが変更された時は時間表示を更新
-      updateSeekBarTime(currentTimeRef.current, duration);
-    }
-  }, [duration, updateSeekBarTime]);
 
   // コンポーネント破棄時のクリーンアップ
   useEffect(() => {
@@ -211,16 +116,11 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
     }
   }, [videoId]);
 
-  const handleSeek = useCallback(
-    (time: number) => {
-      if (playerRef.current) {
-        playerRef.current.seekTo(time, true);
-        currentTimeRef.current = time; // refも更新
-        updateSeekBar(time); // SeekBarを直接更新
-      }
-    },
-    [updateSeekBar]
-  );
+  const handleSeek = useCallback((time: number) => {
+    if (playerRef.current) {
+      playerRef.current.seekTo(time, true);
+    }
+  }, []);
 
   return (
     <div className={`${styles.container} ${className}`}>
@@ -234,7 +134,7 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
           onPlaybackRateChange={setPlaybackRate}
           onStatusChange={handleStatusChange}
         />
-        <SeekBar ref={seekBarRef} currentTime={0} duration={duration} onSeek={handleSeek} />
+        <SeekBar currentTimeRef={currentTimeRef} duration={duration} onSeek={handleSeek} />
       </fieldset>
       <div
         style={{
@@ -331,7 +231,6 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
               const newTime = currentTimeRef.current - 1;
               playerRef.current?.seekTo(newTime, true);
               currentTimeRef.current = newTime;
-              updateSeekBar(newTime);
             }}
           >
             -1
@@ -342,7 +241,6 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
               const newTime = currentTimeRef.current + 1;
               playerRef.current?.seekTo(newTime, true);
               currentTimeRef.current = newTime;
-              updateSeekBar(newTime);
             }}
           >
             +1
@@ -353,7 +251,6 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
               const newTime = currentTimeRef.current - 0.1;
               playerRef.current?.seekTo(newTime, true);
               currentTimeRef.current = newTime;
-              updateSeekBar(newTime);
             }}
           >
             -0.1
@@ -364,7 +261,6 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
               const newTime = currentTimeRef.current + 0.1;
               playerRef.current?.seekTo(newTime, true);
               currentTimeRef.current = newTime;
-              updateSeekBar(newTime);
             }}
           >
             +0.1
