@@ -13,8 +13,6 @@ interface VJControllerProps {
 
 const VJController = ({ localStorageKey, videoId, className }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
-  const currentTimeRef = useRef<number>(0);
-  const [isDestroyed, setIsDestroyed] = useState(false);
 
   // 個別の状態管理（必要な値のみ）
   const [playbackRate, setPlaybackRate] = useState<number>(1);
@@ -22,35 +20,9 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const [duration, setDuration] = useState<number>(0);
 
-  const updateController = useCallback(() => {
-    if (isDestroyed) {
-      return;
-    }
-
-    if (!playerRef.current) {
-      requestAnimationFrame(updateController);
-      return;
-    }
-
-    try {
-      // プレイヤーの状態をチェック
-      const playerState = playerRef.current.playerState;
-      const newCurrentTime = playerRef.current.getCurrentTime();
-
-      // UNSTARTED (0) の場合は currentTime を更新しない
-      // currentTime が null の場合は更新しない（動画切り替え中など）
-      if (playerState !== 0 && newCurrentTime !== null) {
-        // currentTimeRefのみ更新（再レンダリングなし）
-        currentTimeRef.current = newCurrentTime;
-      }
-    } catch {
-      // プレイヤーが一時的に利用できない場合（動画切り替え時など）
-      // エラーは無視して requestAnimationFrame を継続
-    }
-
-    // プレイヤーが利用できない場合でも requestAnimationFrame を継続
-    requestAnimationFrame(updateController);
-  }, [isDestroyed]);
+  const getCurrentTime = (): number => {
+    return playerRef.current?.getCurrentTime() ?? 0;
+  };
 
   // コントローラー状態の更新（シンプル版）
   const handleStatusChange = useCallback((status: PlayerStatus) => {
@@ -58,33 +30,6 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
     if (status.duration > 0) {
       setDuration(status.duration);
     }
-  }, []);
-
-  // 初期化
-  useEffect(() => {
-    // プレイヤーが利用可能になるまで待機
-    const startUpdateLoop = () => {
-      if (playerRef.current) {
-        // 初期化時はdurationをリセットしない
-        requestAnimationFrame(updateController);
-      } else {
-        // プレイヤーがまだ利用できない場合は再試行
-        setTimeout(startUpdateLoop, 100);
-      }
-    };
-
-    startUpdateLoop();
-
-    return () => {
-      // クリーンアップは updateController 内で処理される
-    };
-  }, [updateController]);
-
-  // コンポーネント破棄時のクリーンアップ
-  useEffect(() => {
-    return () => {
-      setIsDestroyed(true);
-    };
   }, []);
 
   useEffect(() => {
@@ -134,7 +79,7 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
           onPlaybackRateChange={setPlaybackRate}
           onStatusChange={handleStatusChange}
         />
-        <SeekBar currentTimeRef={currentTimeRef} duration={duration} onSeek={handleSeek} />
+        <SeekBar currentTimeFunc={getCurrentTime} duration={duration} onSeek={handleSeek} />
       </fieldset>
       <div
         style={{
@@ -228,9 +173,8 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
           <button
             type="button"
             onClick={() => {
-              const newTime = currentTimeRef.current - 1;
+              const newTime = getCurrentTime() - 1;
               playerRef.current?.seekTo(newTime, true);
-              currentTimeRef.current = newTime;
             }}
           >
             -1
@@ -238,9 +182,8 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
           <button
             type="button"
             onClick={() => {
-              const newTime = currentTimeRef.current + 1;
+              const newTime = getCurrentTime() + 1;
               playerRef.current?.seekTo(newTime, true);
-              currentTimeRef.current = newTime;
             }}
           >
             +1
@@ -248,9 +191,8 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
           <button
             type="button"
             onClick={() => {
-              const newTime = currentTimeRef.current - 0.1;
+              const newTime = getCurrentTime() - 0.1;
               playerRef.current?.seekTo(newTime, true);
-              currentTimeRef.current = newTime;
             }}
           >
             -0.1
@@ -258,9 +200,8 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
           <button
             type="button"
             onClick={() => {
-              const newTime = currentTimeRef.current + 0.1;
+              const newTime = getCurrentTime() + 0.1;
               playerRef.current?.seekTo(newTime, true);
-              currentTimeRef.current = newTime;
             }}
           >
             +0.1

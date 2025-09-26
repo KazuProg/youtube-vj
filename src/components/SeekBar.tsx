@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import styles from "./SeekBar.module.css";
 
 interface SeekBarProps {
-  currentTimeRef: React.MutableRefObject<number>;
+  currentTimeFunc: () => number;
   duration: number;
   onSeek: (time: number) => void;
 }
 
-const SeekBar = ({ currentTimeRef, duration, onSeek }: SeekBarProps) => {
+const SeekBar = ({ currentTimeFunc, duration, onSeek }: SeekBarProps) => {
   const [isHovering, setIsHovering] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
-  const [displayTime, setDisplayTime] = useState(currentTimeRef.current);
+  const [displayTime, setDisplayTime] = useState(currentTimeFunc());
   const position = duration > 0 ? (displayTime / duration) * 100 : 0;
 
   // currentTimeRefの値を監視してdisplayTimeを更新（毎フレーム）
@@ -19,7 +19,7 @@ const SeekBar = ({ currentTimeRef, duration, onSeek }: SeekBarProps) => {
     let animationId: number;
 
     const update = () => {
-      setDisplayTime(currentTimeRef.current);
+      setDisplayTime(currentTimeFunc());
       animationId = requestAnimationFrame(update);
     };
 
@@ -27,7 +27,7 @@ const SeekBar = ({ currentTimeRef, duration, onSeek }: SeekBarProps) => {
     return () => {
       cancelAnimationFrame(animationId);
     };
-  }, [currentTimeRef]);
+  }, [currentTimeFunc]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { width, left } = e.currentTarget.getBoundingClientRect();
