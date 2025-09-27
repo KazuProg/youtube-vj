@@ -9,6 +9,7 @@ import {
   type YTPlayerOptions,
 } from "@/types/youtube";
 import loadYouTubeIFrameAPI from "@/utils/loadYouTubeIFrameAPI";
+import waitForElementRendered from "@/utils/waitForElementRendered";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 // コンポーネントの Props 型
@@ -57,28 +58,29 @@ const YouTubePlayer = ({
 
       setIsLoading(false); // iframe 要素を読み込むために false にする
       isInitializedRef.current = true; // 初期化開始をマーク
-      setTimeout(() => {
-        new window.YT.Player(playerElementId, {
-          videoId,
-          playerVars: {
-            ...DEFAULT_PLAYER_OPTIONS.playerVars,
-            ...playerVars,
+
+      await waitForElementRendered(playerElementId);
+
+      new window.YT.Player(playerElementId, {
+        videoId,
+        playerVars: {
+          ...DEFAULT_PLAYER_OPTIONS.playerVars,
+          ...playerVars,
+        },
+        events: {
+          onReady: (event: YTPlayerEvent) => {
+            playerRef.current = event.target;
+            isInitializedRef.current = true;
+            setIsLoading(false);
+            onReady?.(event);
           },
-          events: {
-            onReady: (event: YTPlayerEvent) => {
-              playerRef.current = event.target;
-              isInitializedRef.current = true;
-              setIsLoading(false);
-              onReady?.(event);
-            },
-            onStateChange: onStateChange,
-            onPlaybackQualityChange: onPlaybackQualityChange,
-            onPlaybackRateChange: onPlaybackRateChange,
-            onError: onError,
-            onApiChange: onApiChange,
-          },
-        });
-      }, 100);
+          onStateChange: onStateChange,
+          onPlaybackQualityChange: onPlaybackQualityChange,
+          onPlaybackRateChange: onPlaybackRateChange,
+          onError: onError,
+          onApiChange: onApiChange,
+        },
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
       setIsLoading(false);
