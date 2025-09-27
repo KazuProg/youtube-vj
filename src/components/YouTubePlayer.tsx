@@ -8,6 +8,7 @@ import {
   type YTPlayerEvent,
   type YTPlayerOptions,
 } from "@/types/youtube";
+import loadYouTubeIFrameAPI from "@/utils/loadYouTubeIFrameAPI";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 // コンポーネントの Props 型
@@ -42,82 +43,48 @@ const YouTubePlayer = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // YouTube iFrame API の動的読み込み
-  const loadYouTubeAPI = useCallback((): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      if (window.YT?.Player) {
-        setIsLoading(false);
-        resolve();
-        return;
-      }
-
-      if (window.onYouTubeIframeAPIReady) {
-        const originalCallback = window.onYouTubeIframeAPIReady;
-        window.onYouTubeIframeAPIReady = () => {
-          originalCallback();
-          setIsLoading(false);
-          resolve();
-        };
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = "https://www.youtube.com/iframe_api";
-      script.async = true;
-      script.onerror = () => {
-        setError("Failed to load YouTube iFrame API");
-        reject(new Error("Failed to load YouTube iFrame API"));
-      };
-
-      window.onYouTubeIframeAPIReady = () => {
-        setIsLoading(false);
-        resolve();
-      };
-
-      document.head.appendChild(script);
-    });
-  }, []);
-
   // プレイヤー初期化
   const initializePlayer = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      await loadYouTubeAPI();
+      await loadYouTubeIFrameAPI();
 
       if (isInitializedRef.current) {
         return;
       }
 
+      setIsLoading(false); // iframe 要素を読み込むために false にする
       isInitializedRef.current = true; // 初期化開始をマーク
-      new window.YT.Player(playerElementId, {
-        videoId,
-        playerVars: {
-          ...DEFAULT_PLAYER_OPTIONS.playerVars,
-          ...playerVars,
-        },
-        events: {
-          onReady: (event: YTPlayerEvent) => {
-            playerRef.current = event.target;
-            isInitializedRef.current = true;
-            setIsLoading(false);
-            onReady?.(event);
+      setTimeout(() => {
+        new window.YT.Player(playerElementId, {
+          videoId,
+          playerVars: {
+            ...DEFAULT_PLAYER_OPTIONS.playerVars,
+            ...playerVars,
           },
-          onStateChange: onStateChange,
-          onPlaybackQualityChange: onPlaybackQualityChange,
-          onPlaybackRateChange: onPlaybackRateChange,
-          onError: onError,
-          onApiChange: onApiChange,
-        },
-      });
+          events: {
+            onReady: (event: YTPlayerEvent) => {
+              playerRef.current = event.target;
+              isInitializedRef.current = true;
+              setIsLoading(false);
+              onReady?.(event);
+            },
+            onStateChange: onStateChange,
+            onPlaybackQualityChange: onPlaybackQualityChange,
+            onPlaybackRateChange: onPlaybackRateChange,
+            onError: onError,
+            onApiChange: onApiChange,
+          },
+        });
+      }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
       setIsLoading(false);
       isInitializedRef.current = false; // エラー時は初期化状態をリセット
     }
   }, [
-    loadYouTubeAPI,
     onError,
     onReady,
     onStateChange,
@@ -139,22 +106,13 @@ const YouTubePlayer = ({
 
   // 初期化（YouTube API の読み込みとプレイヤーの初期化）
   useEffect(() => {
-    // YouTube API の読み込みを開始
-    loadYouTubeAPI();
-
-    // iframe がマウントされるまで待機
-    const timer = setTimeout(() => {
-      if (!isInitializedRef.current) {
-        initializePlayer();
-      }
-    }, 500); // タイムアウトを500msに延長
+    initializePlayer();
 
     // クリーンアップ
     return () => {
-      clearTimeout(timer);
       destroy();
     };
-  }, [loadYouTubeAPI, initializePlayer, destroy]);
+  }, [initializePlayer, destroy]);
 
   // エラー表示
   if (error) {
