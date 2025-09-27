@@ -96,23 +96,19 @@ const YouTubePlayer = ({
     playerElementId,
   ]); // 必要な依存関係のみ
 
-  const destroy = useCallback(() => {
-    if (playerRef.current) {
-      playerRef.current.destroy();
-      playerRef.current = null;
-      isInitializedRef.current = false;
-    }
-  }, []);
-
   // 初期化（YouTube API の読み込みとプレイヤーの初期化）
   useEffect(() => {
     initializePlayer();
 
     // クリーンアップ
     return () => {
-      destroy();
+      if (playerRef.current) {
+        playerRef.current.destroy();
+        playerRef.current = null;
+        isInitializedRef.current = false;
+      }
     };
-  }, [initializePlayer, destroy]);
+  }, [initializePlayer]);
 
   // エラー表示
   if (error) {
