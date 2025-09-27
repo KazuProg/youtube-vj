@@ -8,7 +8,7 @@ interface VJSyncData {
   videoId: string;
   playbackRate: number;
   currentTime: number;
-  lastUpdated: number;
+  baseTime: number;
   paused: boolean;
 }
 

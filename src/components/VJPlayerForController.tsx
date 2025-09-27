@@ -66,7 +66,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
 
         updateSyncData({
           currentTime: targetTime,
-          lastUpdated: now,
+          baseTime: now,
         });
       },
       [updateSyncData]
@@ -79,7 +79,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         if (e.data === YT_PLAYER_STATE.UNSTARTED) {
           updateSyncData({
             currentTime: 0,
-            lastUpdated: Date.now(),
+            baseTime: Date.now(),
           });
         }
 
@@ -87,13 +87,13 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         if (e.data === YT_PLAYER_STATE.PAUSED && !syncDataRef.current.paused) {
           updateSyncData({
             currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
-            lastUpdated: Date.now(),
+            baseTime: Date.now(),
             paused: true,
           });
         }
         if (e.data !== YT_PLAYER_STATE.PAUSED && syncDataRef.current.paused) {
           updateSyncData({
-            lastUpdated: Date.now(),
+            baseTime: Date.now(),
             paused: false,
           });
         }
@@ -134,7 +134,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         // 制御メソッド
         playVideo: () => {
           updateSyncData({
-            lastUpdated: Date.now(), // 再生開始時間の記録
+            baseTime: Date.now(), // 再生開始時間の記録
             paused: false,
           });
         },
@@ -147,7 +147,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         seekTo: (seconds: number) => {
           updateSyncData({
             currentTime: seconds,
-            lastUpdated: Date.now(),
+            baseTime: Date.now(),
           });
         },
         mute: () => vjPlayerRef.current?.getPlayer()?.mute(),
@@ -158,7 +158,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         setPlaybackRate: (rate: number) => {
           updateSyncData({
             currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
-            lastUpdated: Date.now(),
+            baseTime: Date.now(),
             playbackRate: rate,
           });
         },
@@ -166,7 +166,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
           updateSyncData({
             videoId: newVideoId,
             currentTime: 0,
-            lastUpdated: Date.now(),
+            baseTime: Date.now(),
             paused: false,
           });
         },

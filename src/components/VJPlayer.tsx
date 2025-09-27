@@ -27,7 +27,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const getCurrentTime = useCallback(() => {
       const syncData = syncDataRef.current;
 
-      if (!playerRef.current || syncData.lastUpdated === 0) {
+      if (!playerRef.current || syncData.baseTime === 0) {
         return null;
       }
 
@@ -36,7 +36,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       }
 
       try {
-        const timeSinceUpdate = (Date.now() - syncData.lastUpdated) / 1000;
+        const timeSinceUpdate = (Date.now() - syncData.baseTime) / 1000;
         const adjustedTime = syncData.currentTime + timeSinceUpdate * syncData.playbackRate;
 
         return adjustedTime;
@@ -169,7 +169,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           syncDataRef.current = {
             ...currentSyncData,
             currentTime: 0,
-            lastUpdated: Date.now(),
+            baseTime: Date.now(),
           };
 
           player.loadVideoById(syncData.videoId);

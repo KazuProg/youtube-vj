@@ -15,7 +15,7 @@ export interface VJSyncData {
   videoId: string;
   playbackRate: number;
   currentTime: number;
-  lastUpdated: number;
+  baseTime: number;
   paused: boolean;
 }
 
@@ -80,6 +80,6 @@ export const INITIAL_SYNC_DATA = {
   videoId: DEFAULT_VALUES.videoId,
   playbackRate: DEFAULT_VALUES.playbackRate,
   currentTime: 0,
-  lastUpdated: 0,
+  baseTime: 0,
   paused: false,
 } as const;
