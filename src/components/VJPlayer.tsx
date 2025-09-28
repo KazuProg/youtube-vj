@@ -39,12 +39,20 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         const timeSinceUpdate = (Date.now() - syncData.baseTime) / 1000;
         const adjustedTime = syncData.currentTime + timeSinceUpdate * syncData.playbackRate;
 
+        if (adjustedTime < 0) {
+          return 0;
+        }
+
+        if (adjustedTime > duration) {
+          return duration;
+        }
+
         return adjustedTime;
       } catch (error) {
         console.warn("Failed to calculate current time:", error);
         return null;
       }
-    }, []);
+    }, [duration]);
 
     // プレイヤーの準備状態をチェック
     const isPlayerReady = useCallback((player: YTPlayer) => {
