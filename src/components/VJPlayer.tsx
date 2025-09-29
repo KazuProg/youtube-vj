@@ -165,45 +165,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [readFromStorage]
     );
 
-    // 動画切り替えの処理
-    const handleVideoChange = useCallback((player: YTPlayer, syncData: VJSyncData) => {
-      if (typeof player.loadVideoById === "function") {
-        try {
-          isPlayerReadyRef.current = false;
-
-          // 動画切り替え時に currentTime を 0 にリセット
-          // これにより UI が適切に更新される
-          const currentSyncData = syncDataRef.current;
-          syncDataRef.current = {
-            ...currentSyncData,
-            currentTime: 0,
-            baseTime: Date.now(),
-          };
-
-          player.loadVideoById(syncData.videoId);
-
-          // 動画読み込み完了を待つために、より短い間隔でチェック
-          const checkReady = () => {
-            try {
-              const playerState = player.getPlayerState();
-              // UNSTARTED (0) も準備完了とみなす
-              if (playerState !== null && playerState !== undefined) {
-                isPlayerReadyRef.current = true;
-              } else {
-                setTimeout(checkReady, 100); // 100ms間隔でチェック
-              }
-            } catch {
-              // エラーが発生した場合は再試行
-              setTimeout(checkReady, 100);
-            }
-          };
-          setTimeout(checkReady, 200); // 200ms後にチェック開始
-        } catch {
-          isPlayerReadyRef.current = true;
-        }
-      }
-    }, []);
-
     // 再生/一時停止の処理
     const handlePlayPause = useCallback(
       (player: YTPlayer, syncData: VJSyncData) => {
@@ -245,7 +206,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         syncDataRef.current = syncData;
 
         if (changedVideoId) {
-          handleVideoChange(player, syncData);
+          player.loadVideoById(syncData.videoId);
         }
 
         if (changedPaused) {
@@ -256,7 +217,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           syncTiming();
         }
       },
-      [syncTiming, handleVideoChange, handlePlayPause, isPlayerReady]
+      [syncTiming, handlePlayPause, isPlayerReady]
     );
 
     // 状態変更処理
