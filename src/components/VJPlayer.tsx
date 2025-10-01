@@ -165,26 +165,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [readFromStorage]
     );
 
-    // 再生/一時停止の処理
-    const handlePlayPause = useCallback(
-      (player: YTPlayer, syncData: VJSyncData) => {
-        if (typeof player.pauseVideo === "function" && typeof player.playVideo === "function") {
-          try {
-            if (isPlayerReady(player)) {
-              if (syncData.paused) {
-                player.pauseVideo();
-              } else {
-                player.playVideo();
-              }
-            }
-          } catch {
-            // エラーは無視して処理を継続
-          }
-        }
-      },
-      [isPlayerReady]
-    );
-
     // 同期データの処理
     const handleSyncData = useCallback(
       (syncData: VJSyncData) => {
@@ -210,14 +190,18 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         }
 
         if (changedPaused) {
-          handlePlayPause(player, syncData);
+          if (syncData.paused) {
+            player.pauseVideo();
+          } else {
+            player.playVideo();
+          }
         }
 
         if (needTimingSync) {
           syncTiming();
         }
       },
-      [syncTiming, handlePlayPause, isPlayerReady]
+      [syncTiming, isPlayerReady]
     );
 
     // 状態変更処理
