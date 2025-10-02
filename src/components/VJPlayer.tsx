@@ -10,7 +10,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     // console.log("VJPlayer component rendered");
     const playerRef = useRef<YTPlayer | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
-    const isPlayerReadyRef = useRef(false);
 
     const [duration, setDuration] = useState<number>(0);
 
@@ -112,7 +111,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
     const syncTiming = useCallback(() => {
       const player = playerRef.current;
-      if (!player || !isPlayerReadyRef.current) {
+      if (!player) {
         return;
       }
 
@@ -138,7 +137,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           player.mute();
 
           playerRef.current = player;
-          isPlayerReadyRef.current = true;
 
           const syncData = readFromStorage();
           if (syncData) {
@@ -156,7 +154,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const handleSyncData = useCallback(
       (syncData: VJSyncData) => {
         const player = playerRef.current;
-        if (!player || !isPlayerReadyRef.current) {
+        if (!player) {
           return;
         }
 
@@ -248,7 +246,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     // コンポーネントのクリーンアップ
     useEffect(() => {
       return () => {
-        isPlayerReadyRef.current = false;
         playerRef.current = null;
       };
     }, []);
