@@ -135,26 +135,13 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       (event: YTPlayerEvent) => {
         const player = event.target;
         try {
-          // 初期設定
-          if (
-            player &&
-            typeof player.mute === "function" &&
-            typeof player.playVideo === "function"
-          ) {
-            player.mute();
-            player.playVideo();
-          }
-
-          if (player && typeof player.getDuration === "function") {
-            const playerDuration = player.getDuration();
-            setDuration(playerDuration);
-          }
+          player.mute();
 
           playerRef.current = player;
           isPlayerReadyRef.current = true;
 
           const syncData = readFromStorage();
-          if (syncData && player && typeof player.loadVideoById === "function") {
+          if (syncData) {
             player.loadVideoById(syncData.videoId);
             handleSyncData(syncData);
           }
