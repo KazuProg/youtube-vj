@@ -12,7 +12,6 @@ import loadYouTubeIFrameAPI from "@/utils/loadYouTubeIFrameAPI";
 import waitForElementRendered from "@/utils/waitForElementRendered";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
-// コンポーネントの Props 型
 interface YouTubePlayerProps {
   className?: string;
   videoId: string;
@@ -40,11 +39,9 @@ const YouTubePlayer = ({
   const playerRef = useRef<YTPlayer | null>(null);
   const isInitializedRef = useRef(false);
 
-  // State
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // プレイヤー初期化
   const initializePlayer = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -56,8 +53,8 @@ const YouTubePlayer = ({
         return;
       }
 
-      setIsLoading(false); // iframe 要素を読み込むために false にする
-      isInitializedRef.current = true; // 初期化開始をマーク
+      setIsLoading(false);
+      isInitializedRef.current = true;
 
       await waitForElementRendered(playerElementId);
 
@@ -84,7 +81,7 @@ const YouTubePlayer = ({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
       setIsLoading(false);
-      isInitializedRef.current = false; // エラー時は初期化状態をリセット
+      isInitializedRef.current = false;
     }
   }, [
     onError,
@@ -96,13 +93,11 @@ const YouTubePlayer = ({
     videoId,
     playerVars,
     playerElementId,
-  ]); // 必要な依存関係のみ
+  ]);
 
-  // 初期化（YouTube API の読み込みとプレイヤーの初期化）
   useEffect(() => {
     initializePlayer();
 
-    // クリーンアップ
     return () => {
       if (playerRef.current) {
         playerRef.current.destroy();
@@ -112,7 +107,6 @@ const YouTubePlayer = ({
     };
   }, [initializePlayer]);
 
-  // エラー表示
   if (error) {
     return (
       <div
@@ -132,7 +126,6 @@ const YouTubePlayer = ({
     );
   }
 
-  // ローディング表示
   if (isLoading) {
     return (
       <div

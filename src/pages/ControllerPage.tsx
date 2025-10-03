@@ -17,7 +17,6 @@ const ControllerPage = () => {
       inputRef.current.focus();
     }
   }, []);
-  // 別ウィンドウで投影画面を開く
   const openProjectionWindow = () => {
     const projectionUrl = `${window.location.origin}${window.location.pathname}?mode=projection`;
 
@@ -29,7 +28,6 @@ const ControllerPage = () => {
 
     if (newWindow) {
       setProjectionWindow(newWindow);
-      // ウィンドウが閉じられたときの処理
       const checkClosed = setInterval(() => {
         if (newWindow.closed) {
           setProjectionWindow(null);

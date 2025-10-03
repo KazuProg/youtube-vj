@@ -14,7 +14,6 @@ const SeekBar = ({ currentTimeFunc, duration, onSeek }: SeekBarProps) => {
   const [displayTime, setDisplayTime] = useState(currentTimeFunc());
   const position = duration > 0 ? (displayTime / duration) * 100 : 0;
 
-  // currentTimeRefの値を監視してdisplayTimeを更新（毎フレーム）
   useEffect(() => {
     let animationId: number;
 

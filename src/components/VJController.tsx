@@ -14,7 +14,6 @@ interface VJControllerProps {
 const VJController = ({ localStorageKey, videoId, className }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
 
-  // 個別の状態管理（必要な値のみ）
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [volume, setVolume] = useState<number>(100);
   const [isMuted, setIsMuted] = useState<boolean>(true);
@@ -24,9 +23,7 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
     return playerRef.current?.getCurrentTime() ?? 0;
   };
 
-  // コントローラー状態の更新（シンプル版）
   const handleStatusChange = useCallback((status: PlayerStatus) => {
-    // durationが有効な値の場合のみ更新
     if (status.duration > 0) {
       setDuration(status.duration);
     }
@@ -54,7 +51,6 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
     }
   }, [isMuted]);
 
-  // videoIdの変更を監視して動画を切り替え
   useEffect(() => {
     if (playerRef.current && videoId) {
       playerRef.current.loadVideoById(videoId);

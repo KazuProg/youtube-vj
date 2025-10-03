@@ -7,7 +7,6 @@ import YouTubePlayer from "./YouTubePlayer";
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ({ className, onStateChange, onStatusChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
-    // console.log("VJPlayer component rendered");
     const playerRef = useRef<YTPlayer | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
 
@@ -15,7 +14,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
     const { onXWinSync, readFromStorage } = useXWinSync(syncKey);
 
-    // プレイヤー状態の通知
     const notifyStatusChange = useCallback(
       (status: PlayerStatus) => {
         onStatusChange?.(status);
@@ -53,18 +51,15 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       }
     }, [duration]);
 
-    // プレイヤーの準備状態をチェック
     const isPlayerReady = useCallback((player: YTPlayer) => {
       try {
         const playerState = player.getPlayerState();
-        // UNSTARTED (0) も準備完了とみなす
         return playerState !== null && playerState !== undefined;
       } catch {
         return false;
       }
     }, []);
 
-    // 時間同期の処理
     const syncTime = useCallback(
       (player: YTPlayer) => {
         const expectedCurrentTime = getCurrentTime();
@@ -93,7 +88,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [getCurrentTime, isPlayerReady]
     );
 
-    // 再生速度同期の処理
     const syncPlaybackRate = useCallback(
       (player: YTPlayer, syncData: VJSyncData) => {
         if (typeof player.setPlaybackRate === "function") {
@@ -124,12 +118,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       try {
         syncTime(player);
         syncPlaybackRate(player, syncData);
-      } catch {
-        // エラーは無視して処理を継続
-      }
+      } catch {}
     }, [syncTime, syncPlaybackRate, isPlayerReady]);
 
-    // プレイヤー初期化
     const handleReady = useCallback(
       (event: YTPlayerEvent) => {
         const player = event.target;
@@ -143,14 +134,11 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
             player.loadVideoById(syncData.videoId);
             handleSyncData(syncData);
           }
-        } catch {
-          // エラーは無視して処理を継続
-        }
+        } catch {}
       },
       [readFromStorage]
     );
 
-    // 同期データの処理
     const handleSyncData = useCallback(
       (syncData: VJSyncData) => {
         const player = playerRef.current;
@@ -189,7 +177,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [syncTiming, isPlayerReady]
     );
 
-    // 状態変更処理
     const handleStateChange = useCallback(
       (e: YTPlayerEvent) => {
         const newState = e.data;
@@ -205,14 +192,11 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           }
         }
 
-        // 自動ループ処理
         if (newState === YT_PLAYER_STATE.ENDED && playerRef.current) {
           try {
             playerRef.current.seekTo(0, true);
             playerRef.current.playVideo();
-          } catch {
-            // エラーは無視して処理を継続
-          }
+          } catch {}
         }
 
         onStateChange?.(e);
@@ -220,7 +204,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [onStateChange]
     );
 
-    // ステータス更新の通知
     useEffect(() => {
       const status: PlayerStatus = {
         duration,
@@ -228,12 +211,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       notifyStatusChange(status);
     }, [duration, notifyStatusChange]);
 
-    // 外部同期リスナー
     useEffect(() => {
       return onXWinSync(handleSyncData);
     }, [onXWinSync, handleSyncData]);
 
-    // 定期同期の開始
     useEffect(() => {
       const interval = setInterval(syncTiming, 1000);
       return () => {
@@ -241,16 +222,12 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       };
     }, [syncTiming]);
 
-    // 動画切り替えは同期データの変更で処理するため、ここでは処理しない
-
-    // コンポーネントのクリーンアップ
     useEffect(() => {
       return () => {
         playerRef.current = null;
       };
     }, []);
 
-    // Ref API
     useImperativeHandle(
       ref,
       () => ({

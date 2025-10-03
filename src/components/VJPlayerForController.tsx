@@ -28,14 +28,12 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     const lastSeekTimeRef = useRef<number>(0);
     const isInitializedRef = useRef(false);
 
-    // プレイヤー状態
     const [duration, setDuration] = useState<number>(0);
     const [playerState, setPlayerState] = useState<number>(0);
 
     const { writeToStorage: writeToXWinSync } = useXWinSync(syncKey);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
 
-    // syncDataRefを更新し、同時にwriteToXWinSyncを呼び出す
     const updateSyncData = useCallback(
       (partialSyncData: Partial<VJSyncData>) => {
         const previousSyncData = syncDataRef.current;
@@ -50,12 +48,10 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
       [writeToXWinSync, onPlaybackRateChange]
     );
 
-    // 初期化時のみ実行
     useEffect(() => {
       updateSyncData({ ...INITIAL_SYNC_DATA, videoId });
     }, [updateSyncData, videoId]);
 
-    // シーク位置の保存（デバウンス付き）
     const saveSeekPosition = useCallback(
       (targetTime: number) => {
         const now = Date.now();
@@ -83,7 +79,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
           });
         }
 
-        // プレイヤーを直接操作した場合の処理
         if (e.data === YT_PLAYER_STATE.PAUSED && !syncDataRef.current.paused) {
           updateSyncData({
             currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
@@ -103,45 +98,37 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
       [updateSyncData, onStateChange]
     );
 
-    // 子プレイヤーの状態変更処理
     const handleStatusChange = useCallback(
       (status: PlayerStatus) => {
-        // 自動ループ処理
         if (playerState === YT_PLAYER_STATE.ENDED) {
           saveSeekPosition(0);
         }
 
-        // 状態の更新
         setDuration(status.duration);
-
-        // 親への通知
         onStatusChange?.(status);
       },
       [onStatusChange, saveSeekPosition, playerState]
     );
 
-    // 初期化完了フラグの設定
     useEffect(() => {
       if (vjPlayerRef.current) {
         isInitializedRef.current = true;
       }
     }, []);
 
-    // 外部API（useImperativeHandle）
     useImperativeHandle(
       ref,
       () => ({
-        // 制御メソッド
         playVideo: () => {
           updateSyncData({
-            baseTime: Date.now(), // 再生開始時間の記録
+            baseTime: Date.now(),
             paused: false,
           });
         },
         pauseVideo: () => {
           updateSyncData({
             baseTime: Date.now(),
-            currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0, // 一時停止位置の記録
+            currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
             paused: true,
           });
         },
@@ -180,7 +167,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
           }
         },
 
-        // 状態プロパティ,
         playerState,
         playbackRate: syncDataRef.current.playbackRate,
         duration,
