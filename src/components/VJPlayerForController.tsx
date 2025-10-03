@@ -140,6 +140,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         },
         pauseVideo: () => {
           updateSyncData({
+            baseTime: Date.now(),
             currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0, // 一時停止位置の記録
             paused: true,
           });
