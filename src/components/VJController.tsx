@@ -1,5 +1,5 @@
 import VJPlayerForController from "@/components/VJPlayerForController";
-import type { PlayerStatus, VJControllerRef } from "@/types/vj";
+import type { VJControllerRef } from "@/types/vj";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Fader from "./Fader";
 import SeekBar from "./SeekBar";
@@ -17,17 +17,10 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [volume, setVolume] = useState<number>(100);
   const [isMuted, setIsMuted] = useState<boolean>(true);
-  const [duration, setDuration] = useState<number>(0);
 
   const getCurrentTime = (): number => {
     return playerRef.current?.getCurrentTime() ?? 0;
   };
-
-  const handleStatusChange = useCallback((status: PlayerStatus) => {
-    if (status.duration > 0) {
-      setDuration(status.duration);
-    }
-  }, []);
 
   useEffect(() => {
     if (playerRef.current) {
@@ -73,9 +66,12 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
           syncKey={localStorageKey}
           videoId={videoId}
           onPlaybackRateChange={setPlaybackRate}
-          onStatusChange={handleStatusChange}
         />
-        <SeekBar currentTimeFunc={getCurrentTime} duration={duration} onSeek={handleSeek} />
+        <SeekBar
+          currentTimeFunc={getCurrentTime}
+          durationFunc={() => playerRef.current?.getDuration() ?? 0}
+          onSeek={handleSeek}
+        />
       </fieldset>
       <div
         style={{

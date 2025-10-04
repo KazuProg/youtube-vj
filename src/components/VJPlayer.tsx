@@ -1,25 +1,16 @@
 import { useXWinSync } from "@/hooks/useXWinSync";
-import type { PlayerStatus, VJPlayerProps, VJPlayerRef, VJSyncData } from "@/types/vj";
+import type { VJPlayerProps, VJPlayerRef, VJSyncData } from "@/types/vj";
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/types/vj";
 import { type YTPlayer, type YTPlayerEvent, YT_PLAYER_STATE } from "@/types/youtube";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
 import YouTubePlayer from "./YouTubePlayer";
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
-  ({ className, onStateChange, onStatusChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
+  ({ className, onStateChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
     const playerRef = useRef<YTPlayer | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
 
-    const [duration, setDuration] = useState<number>(0);
-
     const { onXWinSync, readFromStorage } = useXWinSync(syncKey);
-
-    const notifyStatusChange = useCallback(
-      (status: PlayerStatus) => {
-        onStatusChange?.(status);
-      },
-      [onStatusChange]
-    );
 
     const getCurrentTime = useCallback(() => {
       const syncData = syncDataRef.current;
@@ -40,8 +31,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           return 0;
         }
 
-        if (adjustedTime > duration) {
-          return duration;
+        const playerDuration = playerRef.current?.getDuration();
+        if (playerDuration && adjustedTime > playerDuration) {
+          return playerDuration;
         }
 
         return adjustedTime;
@@ -49,7 +41,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         console.warn("Failed to calculate current time:", error);
         return null;
       }
-    }, [duration]);
+    }, []);
 
     const isPlayerReady = useCallback((player: YTPlayer) => {
       try {
@@ -181,17 +173,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       (e: YTPlayerEvent) => {
         const newState = e.data;
 
-        if (newState === YT_PLAYER_STATE.UNSTARTED) {
-          setDuration(0);
-        }
-
-        if (newState === YT_PLAYER_STATE.PLAYING) {
-          const duration = playerRef.current?.getDuration();
-          if (duration) {
-            setDuration(duration);
-          }
-        }
-
         if (newState === YT_PLAYER_STATE.ENDED && playerRef.current) {
           try {
             playerRef.current.seekTo(0, true);
@@ -203,13 +184,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       },
       [onStateChange]
     );
-
-    useEffect(() => {
-      const status: PlayerStatus = {
-        duration,
-      };
-      notifyStatusChange(status);
-    }, [duration, notifyStatusChange]);
 
     useEffect(() => {
       return onXWinSync(handleSyncData);
@@ -232,10 +206,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       ref,
       () => ({
         getPlayer: () => playerRef.current,
-        duration,
         getCurrentTime,
       }),
-      [duration, getCurrentTime]
+      [getCurrentTime]
     );
 
     return (

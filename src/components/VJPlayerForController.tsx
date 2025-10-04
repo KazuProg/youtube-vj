@@ -1,7 +1,6 @@
 import VJPlayer from "@/components/VJPlayer";
 import { useXWinSync } from "@/hooks/useXWinSync";
 import type {
-  PlayerStatus,
   VJControllerRef,
   VJPlayerForControllerProps,
   VJPlayerRef,
@@ -18,17 +17,14 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
       className,
       onStateChange,
       onPlaybackRateChange,
-      onStatusChange,
       syncKey = DEFAULT_VALUES.syncKey,
       videoId = DEFAULT_VALUES.videoId,
     },
     ref
   ) => {
     const vjPlayerRef = useRef<VJPlayerRef | null>(null);
-    const lastSeekTimeRef = useRef<number>(0);
     const isInitializedRef = useRef(false);
 
-    const [duration, setDuration] = useState<number>(0);
     const [playerState, setPlayerState] = useState<number>(0);
 
     const { writeToStorage: writeToXWinSync } = useXWinSync(syncKey);
@@ -51,22 +47,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     useEffect(() => {
       updateSyncData({ ...INITIAL_SYNC_DATA, videoId });
     }, [updateSyncData, videoId]);
-
-    const saveSeekPosition = useCallback(
-      (targetTime: number) => {
-        const now = Date.now();
-        if (now - lastSeekTimeRef.current < DEFAULT_VALUES.seekDebounce) {
-          return;
-        }
-        lastSeekTimeRef.current = now;
-
-        updateSyncData({
-          currentTime: targetTime,
-          baseTime: now,
-        });
-      },
-      [updateSyncData]
-    );
 
     const handleStateChange = useCallback(
       (e: YTPlayerEvent) => {
@@ -93,21 +73,16 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
           });
         }
 
+        if (e.data === YT_PLAYER_STATE.ENDED) {
+          updateSyncData({
+            currentTime: 0,
+            baseTime: Date.now(),
+          });
+        }
+
         onStateChange?.(e);
       },
       [updateSyncData, onStateChange]
-    );
-
-    const handleStatusChange = useCallback(
-      (status: PlayerStatus) => {
-        if (playerState === YT_PLAYER_STATE.ENDED) {
-          saveSeekPosition(0);
-        }
-
-        setDuration(status.duration);
-        onStatusChange?.(status);
-      },
-      [onStatusChange, saveSeekPosition, playerState]
     );
 
     useEffect(() => {
@@ -166,12 +141,19 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
             return null;
           }
         },
+        getDuration: () => {
+          try {
+            return vjPlayerRef.current?.getPlayer()?.getDuration() ?? null;
+          } catch (error) {
+            console.warn("Failed to get duration:", error);
+            return null;
+          }
+        },
 
         playerState,
         playbackRate: syncDataRef.current.playbackRate,
-        duration,
       }),
-      [playerState, duration, updateSyncData]
+      [playerState, updateSyncData]
     );
 
     return (
@@ -179,7 +161,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         className={className}
         ref={vjPlayerRef}
         onStateChange={handleStateChange}
-        onStatusChange={handleStatusChange}
         syncKey={syncKey}
         videoId={videoId}
       />

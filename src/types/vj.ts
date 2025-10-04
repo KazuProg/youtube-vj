@@ -5,11 +5,6 @@
 import type { YTPlayer, YTPlayerEvent, YTPlayerState } from "./youtube";
 import { YT_PLAYER_STATE } from "./youtube";
 
-/** YouTubeプレイヤーの状態 */
-export interface PlayerStatus {
-  duration: number;
-}
-
 /** 複数プレイヤー間の同期データ */
 export interface VJSyncData {
   videoId: string;
@@ -32,7 +27,6 @@ export const PLAYER_STATE_MAP: Record<YTPlayerState, string> = {
 /** VJプレイヤーのRef型 */
 export interface VJPlayerRef {
   getPlayer: () => YTPlayer | null;
-  duration: number;
   getCurrentTime: () => number | null;
 }
 
@@ -47,16 +41,15 @@ export interface VJControllerRef {
   setPlaybackRate: (rate: number) => void;
   getCurrentTime: () => number | null;
   loadVideoById: (videoId: string) => void;
+  getDuration: () => number | null;
   playerState: number;
   playbackRate: number;
-  duration: number;
 }
 
 /** 共通のプロパティ型 */
 export interface VJPlayerProps {
   className?: string;
   onStateChange?: (state: YTPlayerEvent) => void;
-  onStatusChange?: (status: PlayerStatus) => void;
   syncKey?: string;
   videoId?: string;
 }

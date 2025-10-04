@@ -4,14 +4,15 @@ import styles from "./SeekBar.module.css";
 
 interface SeekBarProps {
   currentTimeFunc: () => number;
-  duration: number;
+  durationFunc: () => number;
   onSeek: (time: number) => void;
 }
 
-const SeekBar = ({ currentTimeFunc, duration, onSeek }: SeekBarProps) => {
+const SeekBar = ({ currentTimeFunc, durationFunc, onSeek }: SeekBarProps) => {
   const [isHovering, setIsHovering] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
   const [displayTime, setDisplayTime] = useState(currentTimeFunc());
+  const duration = durationFunc();
   const position = duration > 0 ? (displayTime / duration) * 100 : 0;
 
   useEffect(() => {
