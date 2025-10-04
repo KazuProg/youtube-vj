@@ -1,7 +1,3 @@
-/**
- * YouTube iFrame API を直接使用する独自実装のプレイヤーコンポーネント
- */
-
 import {
   DEFAULT_PLAYER_OPTIONS,
   type YTPlayer,
@@ -9,7 +5,6 @@ import {
   type YTPlayerOptions,
 } from "@/types/youtube";
 import loadYouTubeIFrameAPI from "@/utils/loadYouTubeIFrameAPI";
-import waitForElementRendered from "@/utils/waitForElementRendered";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 interface YouTubePlayerProps {
@@ -39,12 +34,10 @@ const YouTubePlayer = ({
   const playerRef = useRef<YTPlayer | null>(null);
   const isInitializedRef = useRef(false);
 
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const initializePlayer = useCallback(async () => {
     try {
-      setIsLoading(true);
       setError(null);
 
       await loadYouTubeIFrameAPI();
@@ -53,10 +46,7 @@ const YouTubePlayer = ({
         return;
       }
 
-      setIsLoading(false);
       isInitializedRef.current = true;
-
-      await waitForElementRendered(playerElementId);
 
       new window.YT.Player(playerElementId, {
         videoId,
@@ -68,7 +58,6 @@ const YouTubePlayer = ({
           onReady: (event: YTPlayerEvent) => {
             playerRef.current = event.target;
             isInitializedRef.current = true;
-            setIsLoading(false);
             onReady?.(event);
           },
           onStateChange: onStateChange,
@@ -80,7 +69,6 @@ const YouTubePlayer = ({
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
-      setIsLoading(false);
       isInitializedRef.current = false;
     }
   }, [
@@ -107,44 +95,32 @@ const YouTubePlayer = ({
     };
   }, [initializePlayer]);
 
-  if (error) {
-    return (
+  return (
+    <div id={playerElementId} className={className} style={{ border: "none" }}>
       <div
-        className={className}
         style={{
+          width: "100%",
+          height: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#f0f0f0",
+          border: "1px solid #666",
+          boxSizing: "border-box",
         }}
       >
         <div style={{ textAlign: "center", color: "#666" }}>
-          <p>YouTube Player Error</p>
-          <p style={{ fontSize: "0.9em" }}>{error}</p>
+          {error ? (
+            <>
+              <p>YouTube Player Error</p>
+              <p style={{ fontSize: "0.9em" }}>{error}</p>
+            </>
+          ) : (
+            <p>Loading YouTube Player...</p>
+          )}
         </div>
       </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div
-        className={className}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#f0f0f0",
-        }}
-      >
-        <div style={{ textAlign: "center", color: "#666" }}>
-          <p>Loading YouTube Player...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return <div id={playerElementId} className={className} style={{ border: "none" }} />;
+    </div>
+  );
 };
 
 YouTubePlayer.displayName = "YouTubePlayer";
