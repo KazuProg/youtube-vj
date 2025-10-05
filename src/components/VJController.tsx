@@ -8,10 +8,16 @@ import styles from "./VJController.module.css";
 interface VJControllerProps {
   localStorageKey: string;
   videoId: string;
+  setGlobalPlayer: (player: VJControllerRef | null) => void;
   className?: string;
 }
 
-const VJController = ({ localStorageKey, videoId, className }: VJControllerProps) => {
+const VJController = ({
+  localStorageKey,
+  videoId,
+  setGlobalPlayer,
+  className,
+}: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
 
   const [playbackRate, setPlaybackRate] = useState<number>(1);
@@ -21,6 +27,10 @@ const VJController = ({ localStorageKey, videoId, className }: VJControllerProps
   const getCurrentTime = (): number => {
     return playerRef.current?.getCurrentTime() ?? 0;
   };
+
+  useEffect(() => {
+    setGlobalPlayer(playerRef.current ?? null);
+  }, [setGlobalPlayer]);
 
   useEffect(() => {
     if (playerRef.current) {

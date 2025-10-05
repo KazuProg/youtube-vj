@@ -36,7 +36,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": ["biome check --write", "biome lint --write"],
-    "*.{json,md,css,html}": ["biome format --write"],
+    "*.{json,md,css}": ["biome format --write"],
     "*.{ts,tsx}": [
       "bash -c 'echo \"🔍 TypeScript型チェック中...\"'",
       "bash -c 'cd \"$INIT_CWD\" && npx tsc --noEmit --skipLibCheck --project tsconfig.app.json'"

@@ -5,6 +5,11 @@
 import type { YTPlayer, YTPlayerEvent, YTPlayerState } from "./youtube";
 import { YT_PLAYER_STATE } from "./youtube";
 
+declare global {
+  interface Window {
+    ch0: VJControllerRef | null;
+  }
+}
 /** 複数プレイヤー間の同期データ */
 export interface VJSyncData {
   videoId: string;

@@ -1,12 +1,14 @@
 import Status from "@/components/Status";
 import VJController from "@/components/VJController";
 import { LOCAL_STORAGE_KEY } from "@/constants";
+import type { MIDIScriptManager } from "@/types/midi-script-manager";
 import { parseYouTubeURL } from "@/utils/YouTubeURLParser";
 import { useEffect, useRef, useState } from "react";
 import styles from "./ControllerPage.module.css";
 
 const ControllerPage = () => {
   const [projectionWindow, setProjectionWindow] = useState<Window | null>(null);
+  const [midi, setMidi] = useState<MIDIScriptManager | null>(null);
   const [preparedVideoId, setPreparedVideoId] = useState<string>("");
   const [thumbnailUrl, setThumbnailUrl] = useState<string>("https://img.youtube.com/vi/");
   const [leftDeckVideoId, setLeftDeckVideoId] = useState<string>("BLeUas72Mzk");
@@ -16,7 +18,32 @@ const ControllerPage = () => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
+    handleMIDI(true);
   }, []);
+
+  const handleMIDI = (startup = false) => {
+    if (startup && localStorage.getItem("midi") === null) {
+      return;
+    }
+
+    if (!midi) {
+      const _midi = new window.MIDIScriptManager("YouTube-VJ", {
+        executeScript: true,
+      });
+      setMidi(_midi);
+      _midi
+        .requestAccess()
+        .then(() => {
+          localStorage.setItem("midi", "true");
+        })
+        .catch(() => {
+          setMidi(null);
+        });
+    } else {
+      midi.openCustomScriptEditor();
+    }
+  };
+
   const openProjectionWindow = () => {
     const projectionUrl = `${window.location.origin}${window.location.pathname}?mode=projection`;
 
@@ -56,6 +83,9 @@ const ControllerPage = () => {
           className={styles.deck}
           localStorageKey={LOCAL_STORAGE_KEY.player}
           videoId={leftDeckVideoId}
+          setGlobalPlayer={(player) => {
+            window.ch0 = player;
+          }}
         />
         <div className={styles.mixer}>
           <div className={styles.loadButtons}>
@@ -89,6 +119,7 @@ const ControllerPage = () => {
         </div>
       </div>
       <div className={styles.statusBar}>
+        <Status text="MIDI" status={midi !== null} onClick={() => handleMIDI()} />
         <Status
           text="Projection"
           status={projectionWindow !== null}
