@@ -121,7 +121,7 @@ const VJController = ({
             }}
             onChange={(e) => setPlaybackRate(e)}
           />
-          <span>{playbackRate}x</span>
+          <span>{playbackRate.toFixed(2)}x</span>
         </fieldset>
         <fieldset style={{ flex: 1 }}>
           <legend>

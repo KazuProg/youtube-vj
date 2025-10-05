@@ -122,7 +122,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
           updateSyncData({
             currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
             baseTime: Date.now(),
-            playbackRate: rate,
+            playbackRate: Number.parseFloat(rate.toFixed(2)),
           });
         },
         loadVideoById: (newVideoId: string) => {
