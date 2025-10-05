@@ -114,6 +114,7 @@ const VJController = ({
             value={playbackRate}
             step={0.01}
             vertical={true}
+            reverse={true}
             style={{
               width: "50px",
               height: "150px",
