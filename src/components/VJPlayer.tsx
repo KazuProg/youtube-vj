@@ -1,3 +1,4 @@
+import { type PlayerSyncInterface, usePlayerSync } from "@/hooks/usePlayerSync";
 import { useXWinSync } from "@/hooks/useXWinSync";
 import type { VJPlayerProps, VJPlayerRef, VJSyncData } from "@/types/vj";
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/types/vj";
@@ -9,116 +10,81 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ({ className, onStateChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
     const playerRef = useRef<YTPlayer | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
-
     const { onXWinSync, readFromStorage } = useXWinSync(syncKey);
 
-    const getCurrentTime = useCallback(() => {
-      const syncData = syncDataRef.current;
-
-      if (!playerRef.current || syncData.baseTime === 0) {
-        return null;
-      }
-
-      if (syncData.paused) {
-        return syncData.currentTime;
-      }
-
-      try {
-        const timeSinceUpdate = (Date.now() - syncData.baseTime) / 1000;
-        const adjustedTime = syncData.currentTime + timeSinceUpdate * syncData.playbackRate;
-
-        if (adjustedTime < 0) {
-          return 0;
-        }
-
-        const playerDuration = playerRef.current?.getDuration();
-        if (playerDuration && adjustedTime > playerDuration) {
-          return playerDuration;
-        }
-
-        return adjustedTime;
-      } catch (error) {
-        console.warn("Failed to calculate current time:", error);
-        return null;
-      }
-    }, []);
-
-    const isPlayerReady = useCallback((player: YTPlayer) => {
-      try {
-        const playerState = player.getPlayerState();
-        return playerState !== null && playerState !== undefined;
-      } catch {
-        return false;
-      }
-    }, []);
-
-    const syncTime = useCallback(
-      (player: YTPlayer) => {
-        const expectedCurrentTime = getCurrentTime();
-        if (expectedCurrentTime === null) {
-          return;
-        }
-
-        if (!isPlayerReady(player)) {
-          return;
-        }
-
-        if (typeof player.getCurrentTime !== "function" || typeof player.seekTo !== "function") {
-          return;
-        }
-
-        try {
-          const currentPlayerTime = player.getCurrentTime();
-          const timeDiff = Math.abs(currentPlayerTime - expectedCurrentTime);
-          if (timeDiff > DEFAULT_VALUES.seekThreshold) {
-            player.seekTo(expectedCurrentTime, true);
+    // プレイヤーインターフェースの作成
+    const playerInterface = useCallback(
+      (): PlayerSyncInterface => ({
+        getCurrentTime: () => {
+          const player = playerRef.current;
+          if (!player) {
+            return null;
           }
-        } catch (seekError) {
-          console.warn("Failed to seek video:", seekError);
-        }
-      },
-      [getCurrentTime, isPlayerReady]
-    );
-
-    const syncPlaybackRate = useCallback(
-      (player: YTPlayer, syncData: VJSyncData) => {
-        if (typeof player.setPlaybackRate === "function") {
           try {
-            if (isPlayerReady(player)) {
-              player.setPlaybackRate(syncData.playbackRate);
-            }
-          } catch (playbackRateError) {
-            console.warn("Failed to set playback rate:", playbackRateError);
+            return player.getCurrentTime();
+          } catch {
+            return null;
           }
-        }
-      },
-      [isPlayerReady]
+        },
+        getPlaybackRate: () => {
+          const player = playerRef.current;
+          if (!player) {
+            return null;
+          }
+          try {
+            return player.getPlaybackRate();
+          } catch {
+            return null;
+          }
+        },
+        setPlaybackRate: (rate: number) => {
+          const player = playerRef.current;
+          if (player && player.getPlayerState() === YT_PLAYER_STATE.PLAYING) {
+            player.setPlaybackRate(rate);
+          }
+        },
+        seekTo: (time: number) => {
+          const player = playerRef.current;
+          if (player && player.getPlayerState() === YT_PLAYER_STATE.PLAYING) {
+            player.seekTo(time, true);
+          }
+        },
+        getDuration: () => {
+          const player = playerRef.current;
+          if (!player) {
+            return null;
+          }
+          try {
+            return player.getDuration();
+          } catch {
+            return null;
+          }
+        },
+      }),
+      []
     );
 
-    const syncTiming = useCallback(() => {
-      const player = playerRef.current;
-      if (!player) {
-        return;
+    // カスタムフックの使用
+    const { getCurrentTime, performSync, beginPeriodicSync, stopPeriodicSync } = usePlayerSync(
+      playerInterface(),
+      (): VJSyncData => syncDataRef.current,
+      {
+        syncInterval: 1000,
+        realtimeFps: 60,
+        seekThreshold: 1.0,
+        syncThreshold: 0.01,
       }
+    );
 
-      if (!isPlayerReady(player)) {
-        return;
-      }
-
-      const syncData = syncDataRef.current;
-
-      try {
-        syncTime(player);
-        syncPlaybackRate(player, syncData);
-      } catch {}
-    }, [syncTime, syncPlaybackRate, isPlayerReady]);
+    // 同期開始関数を安定化（再レンダリングを防ぐため）
+    const beginPeriodicSyncRef = useRef(beginPeriodicSync);
+    beginPeriodicSyncRef.current = beginPeriodicSync;
 
     const handleReady = useCallback(
       (event: YTPlayerEvent) => {
         const player = event.target;
         try {
           player.mute();
-
           playerRef.current = player;
 
           const syncData = readFromStorage();
@@ -126,6 +92,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
             player.loadVideoById(syncData.videoId);
             handleSyncData(syncData);
           }
+
+          // プレイヤーが準備できたら同期を開始
+          beginPeriodicSyncRef.current();
         } catch {}
       },
       [readFromStorage]
@@ -135,10 +104,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       (syncData: VJSyncData) => {
         const player = playerRef.current;
         if (!player) {
-          return;
-        }
-
-        if (!isPlayerReady(player)) {
           return;
         }
 
@@ -163,10 +128,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         }
 
         if (needTimingSync) {
-          syncTiming();
+          performSync();
         }
       },
-      [syncTiming, isPlayerReady]
+      [performSync]
     );
 
     const handleStateChange = useCallback(
@@ -190,11 +155,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     }, [onXWinSync, handleSyncData]);
 
     useEffect(() => {
-      const interval = setInterval(syncTiming, 1000);
       return () => {
-        clearInterval(interval);
+        stopPeriodicSync();
       };
-    }, [syncTiming]);
+    }, [stopPeriodicSync]);
 
     useEffect(() => {
       return () => {
