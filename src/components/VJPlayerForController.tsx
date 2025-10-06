@@ -111,7 +111,10 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
             });
           }
         },
-        seekTo: (seconds: number) => {
+        isPlaying: () => {
+          return playerStateRef.current === YT_PLAYER_STATE.PLAYING;
+        },
+        seekTo: (seconds: number, _allowSeekAhead: boolean) => {
           updateSyncData({
             currentTime: seconds,
             baseTime: Date.now(),
@@ -119,6 +122,9 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         },
         mute: () => vjPlayerRef.current?.getPlayer()?.mute(),
         unMute: () => vjPlayerRef.current?.getPlayer()?.unMute(),
+        isMuted: () => {
+          return vjPlayerRef.current?.getPlayer()?.isMuted() ?? false;
+        },
         setVolume: (newVolume: number) => {
           vjPlayerRef.current?.getPlayer()?.setVolume(Math.max(0, Math.min(100, newVolume)));
         },
