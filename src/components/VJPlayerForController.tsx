@@ -9,7 +9,7 @@ import type {
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/types/vj";
 import type { YTPlayerEvent } from "@/types/youtube";
 import { YT_PLAYER_STATE } from "@/types/youtube";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
 
 const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerProps>(
   (
@@ -23,9 +23,8 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     ref
   ) => {
     const vjPlayerRef = useRef<VJPlayerRef | null>(null);
+    const playerStateRef = useRef<number>(0);
     const isInitializedRef = useRef(false);
-
-    const [playerState, setPlayerState] = useState<number>(0);
 
     const { writeToStorage: writeToXWinSync } = useXWinSync(syncKey);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
@@ -50,30 +49,31 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
 
     const handleStateChange = useCallback(
       (e: YTPlayerEvent) => {
-        setPlayerState(e.data);
+        const playerState = e.data;
+        playerStateRef.current = playerState;
 
-        if (e.data === YT_PLAYER_STATE.UNSTARTED) {
+        if (playerState === YT_PLAYER_STATE.UNSTARTED) {
           updateSyncData({
             currentTime: 0,
             baseTime: Date.now(),
           });
         }
 
-        if (e.data === YT_PLAYER_STATE.PAUSED && !syncDataRef.current.paused) {
+        if (playerState === YT_PLAYER_STATE.PAUSED && !syncDataRef.current.paused) {
           updateSyncData({
             currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
             baseTime: Date.now(),
             paused: true,
           });
         }
-        if (e.data !== YT_PLAYER_STATE.PAUSED && syncDataRef.current.paused) {
+        if (playerState !== YT_PLAYER_STATE.PAUSED && syncDataRef.current.paused) {
           updateSyncData({
             baseTime: Date.now(),
             paused: false,
           });
         }
 
-        if (e.data === YT_PLAYER_STATE.ENDED) {
+        if (playerState === YT_PLAYER_STATE.ENDED) {
           updateSyncData({
             currentTime: 0,
             baseTime: Date.now(),
@@ -95,17 +95,21 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
       ref,
       () => ({
         playVideo: () => {
-          updateSyncData({
-            baseTime: Date.now(),
-            paused: false,
-          });
+          if (playerStateRef.current === YT_PLAYER_STATE.PAUSED) {
+            updateSyncData({
+              baseTime: Date.now(),
+              paused: false,
+            });
+          }
         },
         pauseVideo: () => {
-          updateSyncData({
-            baseTime: Date.now(),
-            currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
-            paused: true,
-          });
+          if (playerStateRef.current === YT_PLAYER_STATE.PLAYING) {
+            updateSyncData({
+              baseTime: Date.now(),
+              currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
+              paused: true,
+            });
+          }
         },
         seekTo: (seconds: number) => {
           updateSyncData({
@@ -150,10 +154,10 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
           }
         },
 
-        playerState,
+        playerState: playerStateRef.current,
         playbackRate: syncDataRef.current.playbackRate,
       }),
-      [playerState, updateSyncData]
+      [updateSyncData]
     );
 
     return (
