@@ -57,21 +57,20 @@ export const useXWinSync = <T extends JsonValue = JsonValue>(
     const loaded = storage.load(syncKey);
     return loaded as T | null;
   });
+  const isExternalChangeRef = useRef(false);
 
-  // 外部からの変更を監視（他のタブからの変更など）
   useEffect(() => {
     return storage.onChange(syncKey, (newData: object | null) => {
+      isExternalChangeRef.current = true;
       setData(newData as T);
     });
   }, [storage, syncKey]);
 
-  // データが変更された時のみストレージに保存（無限ループを防ぐ）
-  const prevDataRef = useRef<T | null>(data);
   useEffect(() => {
-    if (prevDataRef.current !== data) {
+    if (!isExternalChangeRef.current) {
       storage.save(syncKey, data as object | null);
-      prevDataRef.current = data;
     }
+    isExternalChangeRef.current = false;
   }, [data, storage, syncKey]);
 
   return {
