@@ -32,7 +32,14 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     const updateSyncData = useCallback(
       (partialSyncData: Partial<VJSyncData>) => {
         const previousSyncData = syncDataRef.current;
-        const newSyncData = { ...previousSyncData, ...partialSyncData };
+        // undefinedの値を除外してマージ
+        const filteredPartialData = Object.fromEntries(
+          Object.entries(partialSyncData).filter(([_, value]) => value !== undefined)
+        );
+        const newSyncData = {
+          ...previousSyncData,
+          ...filteredPartialData,
+        } as VJSyncData;
         syncDataRef.current = newSyncData;
         writeToXWinSync(newSyncData);
 

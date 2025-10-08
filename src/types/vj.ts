@@ -2,6 +2,7 @@
  * VJアプリケーション共通の型定義
  */
 
+import type { JsonValue } from "@/types/common";
 import type { YTPlayer, YTPlayerEvent, YTPlayerState } from "./youtube";
 import { YT_PLAYER_STATE } from "./youtube";
 
@@ -11,7 +12,7 @@ declare global {
   }
 }
 /** 複数プレイヤー間の同期データ */
-export interface VJSyncData {
+export interface VJSyncData extends Record<string, JsonValue> {
   videoId: string;
   playbackRate: number;
   currentTime: number;

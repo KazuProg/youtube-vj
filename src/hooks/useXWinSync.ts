@@ -1,14 +1,7 @@
+import type { JsonValue } from "@/types/common";
 import { useCallback } from "react";
 
 const XWIN_SYNC_EVENT = "vj-xwin-sync";
-
-interface VJSyncData {
-  videoId: string;
-  playbackRate: number;
-  currentTime: number;
-  baseTime: number;
-  paused: boolean;
-}
 
 interface StorageAdapter {
   setItem(key: string, value: string): void;
@@ -22,12 +15,12 @@ const defaultStorageAdapter: StorageAdapter = {
   removeItem: (key: string) => localStorage.removeItem(key),
 };
 
-export const useXWinSync = (
+export const useXWinSync = <T extends JsonValue = JsonValue>(
   syncKey: string,
   storageAdapter: StorageAdapter = defaultStorageAdapter
 ) => {
   const writeToStorage = useCallback(
-    (data: VJSyncData) => {
+    (data: T) => {
       try {
         storageAdapter.setItem(syncKey, JSON.stringify(data));
 
@@ -43,7 +36,7 @@ export const useXWinSync = (
     [syncKey, storageAdapter]
   );
 
-  const readFromStorage = useCallback((): VJSyncData | null => {
+  const readFromStorage = useCallback((): T | null => {
     try {
       const stored = storageAdapter.getItem(syncKey);
       return stored ? JSON.parse(stored) : null;
@@ -54,7 +47,7 @@ export const useXWinSync = (
   }, [syncKey, storageAdapter]);
 
   const onXWinSync = useCallback(
-    (callback: (data: VJSyncData) => void) => {
+    (callback: (data: T) => void) => {
       const handleCustomSync = (e: CustomEvent) => {
         if (e.detail.key === syncKey) {
           callback(e.detail.data);

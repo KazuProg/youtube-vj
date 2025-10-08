@@ -10,7 +10,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ({ className, onStateChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
     const playerRef = useRef<YTPlayer | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
-    const { onXWinSync, readFromStorage } = useXWinSync(syncKey);
+    const { onXWinSync, readFromStorage } = useXWinSync<VJSyncData>(syncKey);
 
     // プレイヤーインターフェースの作成
     const playerInterface = useCallback(
