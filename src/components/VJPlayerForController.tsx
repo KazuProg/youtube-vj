@@ -1,5 +1,4 @@
 import VJPlayer from "@/components/VJPlayer";
-import { useXWinSync } from "@/hooks/useXWinSync";
 import type {
   VJControllerRef,
   VJPlayerForControllerProps,
@@ -26,7 +25,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
     const playerStateRef = useRef<number>(0);
     const isInitializedRef = useRef(false);
 
-    const { writeToStorage: writeToXWinSync } = useXWinSync(syncKey);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
 
     const updateSyncData = useCallback(
@@ -41,13 +39,13 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
           ...filteredPartialData,
         } as VJSyncData;
         syncDataRef.current = newSyncData;
-        writeToXWinSync(newSyncData);
+        vjPlayerRef.current?.setSyncData(newSyncData);
 
         if (previousSyncData.playbackRate !== newSyncData.playbackRate) {
           onPlaybackRateChange?.(newSyncData.playbackRate);
         }
       },
-      [writeToXWinSync, onPlaybackRateChange]
+      [onPlaybackRateChange]
     );
 
     useEffect(() => {

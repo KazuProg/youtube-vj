@@ -10,7 +10,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ({ className, onStateChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
     const playerRef = useRef<YTPlayer | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
-    const { onXWinSync, readFromStorage } = useXWinSync<VJSyncData>(syncKey);
+    const { data: syncData, setData: setSyncData } = useXWinSync<VJSyncData>(syncKey);
 
     // プレイヤーインターフェースの作成
     const playerInterface = useCallback(
@@ -80,25 +80,30 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const beginPeriodicSyncRef = useRef(beginPeriodicSync);
     beginPeriodicSyncRef.current = beginPeriodicSync;
 
-    const handleReady = useCallback(
-      (event: YTPlayerEvent) => {
-        const player = event.target;
-        try {
-          player.mute();
-          playerRef.current = player;
+    const handleReady = useCallback((event: YTPlayerEvent) => {
+      const player = event.target;
+      try {
+        player.mute();
+        playerRef.current = player;
 
-          const syncData = readFromStorage();
-          if (syncData) {
-            player.loadVideoById(syncData.videoId);
-            handleSyncData(syncData);
-          }
+        if (syncDataRef.current) {
+          player.loadVideoById(syncDataRef.current.videoId);
+          handleSyncData(syncDataRef.current);
+        }
 
-          // プレイヤーが準備できたら同期を開始
-          beginPeriodicSyncRef.current();
-        } catch {}
-      },
-      [readFromStorage]
-    );
+        // プレイヤーが準備できたら同期を開始
+        beginPeriodicSyncRef.current();
+      } catch {}
+    }, []);
+
+    // 初期同期データの設定（一度だけ実行）
+    const hasInitializedRef = useRef(false);
+    useEffect(() => {
+      if (syncData && !hasInitializedRef.current) {
+        syncDataRef.current = syncData;
+        hasInitializedRef.current = true;
+      }
+    }, [syncData]);
 
     const handleSyncData = useCallback(
       (syncData: VJSyncData) => {
@@ -151,8 +156,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     useEffect(() => {
-      return onXWinSync(handleSyncData);
-    }, [onXWinSync, handleSyncData]);
+      if (syncData) {
+        handleSyncData(syncData);
+      }
+    }, [syncData, handleSyncData]);
 
     useEffect(() => {
       return () => {
@@ -171,8 +178,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       () => ({
         getPlayer: () => playerRef.current,
         getCurrentTime,
+        setSyncData,
       }),
-      [getCurrentTime]
+      [getCurrentTime, setSyncData]
     );
 
     return (

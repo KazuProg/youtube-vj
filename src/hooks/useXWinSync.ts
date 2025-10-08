@@ -1,99 +1,85 @@
 import type { JsonValue } from "@/types/common";
-import { useCallback } from "react";
-
-const XWIN_SYNC_EVENT = "vj-xwin-sync";
+import { useEffect, useRef, useState } from "react";
 
 interface StorageAdapter {
-  setItem(key: string, value: string): void;
-  getItem(key: string): string | null;
-  removeItem(key: string): void;
+  save(key: string, value: object | null): void;
+  load(key: string): object | null;
+  clear(key: string): void;
+  onChange(key: string, callback: (data: object | null) => void): void;
 }
 
-const defaultStorageAdapter: StorageAdapter = {
-  setItem: (key: string, value: string) => localStorage.setItem(key, value),
-  getItem: (key: string) => localStorage.getItem(key),
-  removeItem: (key: string) => localStorage.removeItem(key),
+const localStorageAdapter: StorageAdapter = {
+  save: (key: string, value: object | null) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error("Error saving to localStorage:", error);
+    }
+  },
+  load: (key: string) => {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
+    } catch (error) {
+      console.error("Error loading from localStorage:", error);
+      return null;
+    }
+  },
+  clear: (key: string) => {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error("Error clearing localStorage:", error);
+    }
+  },
+  onChange: (key: string, callback: (data: object | null) => void) => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === key && e.newValue) {
+        try {
+          callback(JSON.parse(e.newValue));
+        } catch (error) {
+          console.error("Error parsing storage event data:", error);
+        }
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  },
 };
 
 export const useXWinSync = <T extends JsonValue = JsonValue>(
   syncKey: string,
-  storageAdapter: StorageAdapter = defaultStorageAdapter
+  storage: StorageAdapter = localStorageAdapter
 ) => {
-  const writeToStorage = useCallback(
-    (data: T) => {
-      try {
-        storageAdapter.setItem(syncKey, JSON.stringify(data));
+  const [data, setData] = useState<T | null>(() => {
+    const loaded = storage.load(syncKey);
+    return loaded as T | null;
+  });
 
-        window.dispatchEvent(
-          new CustomEvent(XWIN_SYNC_EVENT, {
-            detail: { key: syncKey, data },
-          })
-        );
-      } catch (error) {
-        console.error("Error writing to storage:", error);
-      }
-    },
-    [syncKey, storageAdapter]
-  );
+  // 外部からの変更を監視（他のタブからの変更など）
+  useEffect(() => {
+    return storage.onChange(syncKey, (newData: object | null) => {
+      setData(newData as T);
+    });
+  }, [storage, syncKey]);
 
-  const readFromStorage = useCallback((): T | null => {
-    try {
-      const stored = storageAdapter.getItem(syncKey);
-      return stored ? JSON.parse(stored) : null;
-    } catch (error) {
-      console.error("Error reading from storage:", error);
-      return null;
+  // データが変更された時のみストレージに保存（無限ループを防ぐ）
+  const prevDataRef = useRef<T | null>(data);
+  useEffect(() => {
+    if (prevDataRef.current !== data) {
+      storage.save(syncKey, data as object | null);
+      prevDataRef.current = data;
     }
-  }, [syncKey, storageAdapter]);
-
-  const onXWinSync = useCallback(
-    (callback: (data: T) => void) => {
-      const handleCustomSync = (e: CustomEvent) => {
-        if (e.detail.key === syncKey) {
-          callback(e.detail.data);
-        }
-      };
-
-      const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === syncKey && e.newValue) {
-          try {
-            const data = JSON.parse(e.newValue);
-            callback(data);
-          } catch (error) {
-            console.error("Error parsing storage event data:", error);
-          }
-        }
-      };
-
-      window.addEventListener(XWIN_SYNC_EVENT, handleCustomSync as EventListener);
-      window.addEventListener("storage", handleStorageChange);
-
-      return () => {
-        window.removeEventListener(XWIN_SYNC_EVENT, handleCustomSync as EventListener);
-        window.removeEventListener("storage", handleStorageChange);
-      };
-    },
-    [syncKey]
-  );
-
-  const clearStorage = useCallback(() => {
-    try {
-      storageAdapter.removeItem(syncKey);
-
-      window.dispatchEvent(
-        new CustomEvent(XWIN_SYNC_EVENT, {
-          detail: { key: syncKey, data: null, cleared: true },
-        })
-      );
-    } catch (error) {
-      console.error("Error clearing storage:", error);
-    }
-  }, [syncKey, storageAdapter]);
+  }, [data, storage, syncKey]);
 
   return {
-    writeToStorage,
-    readFromStorage,
-    onXWinSync,
-    clearStorage,
+    data,
+    setData,
+    clearData: () => {
+      setData(null);
+      storage.clear(syncKey);
+    },
   };
 };

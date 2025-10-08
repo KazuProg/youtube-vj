@@ -34,6 +34,7 @@ export const PLAYER_STATE_MAP: Record<YTPlayerState, string> = {
 export interface VJPlayerRef {
   getPlayer: () => YTPlayer | null;
   getCurrentTime: () => number | null;
+  setSyncData: (syncData: VJSyncData) => void;
 }
 
 /** VJコントローラーのRef型 */
