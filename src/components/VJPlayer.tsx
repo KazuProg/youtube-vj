@@ -114,7 +114,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
         const beforeSyncData = syncDataRef.current;
         const changedVideoId = syncData.videoId !== beforeSyncData.videoId;
-        const changedTiming = syncData.currentTime !== beforeSyncData.currentTime;
+        const changedTiming =
+          syncData.baseTime !== beforeSyncData.baseTime ||
+          syncData.currentTime !== beforeSyncData.currentTime;
         const changedSpeed = syncData.playbackRate !== beforeSyncData.playbackRate;
         const changedPaused = syncData.paused !== beforeSyncData.paused;
         const needTimingSync = changedVideoId || changedTiming || changedSpeed || changedPaused;
