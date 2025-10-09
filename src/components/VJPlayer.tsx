@@ -1,5 +1,5 @@
 import { type PlayerSyncInterface, usePlayerSync } from "@/hooks/usePlayerSync";
-import { useXWinSync } from "@/hooks/useXWinSync";
+import { useStorageSync } from "@/hooks/useStorageSync";
 import type { VJPlayerProps, VJPlayerRef, VJSyncData } from "@/types/vj";
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/types/vj";
 import { type YTPlayer, type YTPlayerEvent, YT_PLAYER_STATE } from "@/types/youtube";
@@ -10,7 +10,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ({ className, onStateChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
     const playerRef = useRef<YTPlayer | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
-    const { data: syncData, setData: setSyncData } = useXWinSync<VJSyncData>(syncKey);
+    const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(syncKey);
 
     // プレイヤーインターフェースの作成
     const playerInterface = useCallback(

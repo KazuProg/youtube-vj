@@ -49,7 +49,7 @@ const localStorageAdapter: StorageAdapter = {
   },
 };
 
-export const useXWinSync = <T extends JsonValue = JsonValue>(
+export const useStorageSync = <T extends JsonValue = JsonValue>(
   syncKey: string,
   storage: StorageAdapter = localStorageAdapter
 ) => {
