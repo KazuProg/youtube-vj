@@ -76,6 +76,10 @@ const VJController = ({
           syncKey={localStorageKey}
           videoId={videoId}
           onPlaybackRateChange={setPlaybackRate}
+          onVolumeChange={(volume: number, isMuted: boolean) => {
+            setVolume(volume);
+            setIsMuted(isMuted);
+          }}
         />
         <SeekBar
           currentTimeFunc={getCurrentTime}

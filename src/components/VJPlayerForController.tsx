@@ -16,6 +16,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
       className,
       onStateChange,
       onPlaybackRateChange,
+      onVolumeChange,
       syncKey = DEFAULT_VALUES.syncKey,
       videoId = DEFAULT_VALUES.videoId,
     },
@@ -125,13 +126,20 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
             baseTime: Date.now(),
           });
         },
-        mute: () => vjPlayerRef.current?.getPlayer()?.mute(),
-        unMute: () => vjPlayerRef.current?.getPlayer()?.unMute(),
+        mute: () => {
+          vjPlayerRef.current?.getPlayer()?.mute();
+          onVolumeChange?.(vjPlayerRef.current?.getPlayer()?.getVolume() ?? 0, true);
+        },
+        unMute: () => {
+          vjPlayerRef.current?.getPlayer()?.unMute();
+          onVolumeChange?.(vjPlayerRef.current?.getPlayer()?.getVolume() ?? 0, false);
+        },
         isMuted: () => {
           return vjPlayerRef.current?.getPlayer()?.isMuted() ?? false;
         },
         setVolume: (newVolume: number) => {
-          vjPlayerRef.current?.getPlayer()?.setVolume(Math.max(0, Math.min(100, newVolume)));
+          vjPlayerRef.current?.getPlayer()?.setVolume(newVolume);
+          onVolumeChange?.(newVolume, vjPlayerRef.current?.getPlayer()?.isMuted() ?? false);
         },
         setPlaybackRate: (rate: number) => {
           updateSyncData({
@@ -168,7 +176,7 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         playerState: playerStateRef.current,
         playbackRate: syncDataRef.current.playbackRate,
       }),
-      [updateSyncData]
+      [updateSyncData, onVolumeChange]
     );
 
     return (
