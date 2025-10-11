@@ -170,7 +170,7 @@ const VJController = ({
                 : {}),
             }}
           >
-            {volume}%
+            {volume.toFixed(0)}%
           </span>
         </fieldset>
       </div>
