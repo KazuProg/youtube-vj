@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useElementSize } from "../hooks/useElementSize";
 import styles from "./Fader.module.css";
 
@@ -24,10 +23,6 @@ const Fader = ({
   style,
 }: FaderProps) => {
   const [containerRef, containerSize] = useElementSize();
-
-  useEffect(() => {
-    console.log(containerSize);
-  }, [containerSize]);
 
   const rotateDeg = (vertical ? -90 : 0) + (reverse ? 180 : 0);
   return (
