@@ -65,14 +65,14 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     // カスタムフックの使用
-    const { getCurrentTime, performSync, beginPeriodicSync, stopPeriodicSync } = usePlayerSync(
+    const { getCurrentTime, performSync } = usePlayerSync(
       playerInterface(),
       (): VJSyncData => syncDataRef.current
     );
 
     // 同期開始関数を安定化（再レンダリングを防ぐため）
-    const beginPeriodicSyncRef = useRef(beginPeriodicSync);
-    beginPeriodicSyncRef.current = beginPeriodicSync;
+    const performSyncRef = useRef(performSync);
+    performSyncRef.current = performSync;
 
     const handleReady = useCallback((event: YTPlayerEvent) => {
       const player = event.target;
@@ -86,7 +86,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         }
 
         // プレイヤーが準備できたら同期を開始
-        beginPeriodicSyncRef.current();
+        performSyncRef.current();
       } catch {}
     }, []);
 
@@ -156,12 +156,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         handleSyncData(syncData);
       }
     }, [syncData, handleSyncData]);
-
-    useEffect(() => {
-      return () => {
-        stopPeriodicSync();
-      };
-    }, [stopPeriodicSync]);
 
     useEffect(() => {
       return () => {

@@ -1,5 +1,5 @@
 import type { VJSyncData } from "@/types/vj";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 const SYNC_INTERVAL = 1000; // 定期的な同期間隔（ms）
 const SEEK_THRESHOLD = 1.0; // 強制シークの閾値（秒）
@@ -18,8 +18,6 @@ export interface PlayerSyncInterface {
 export interface UsePlayerSyncReturn {
   getCurrentTime: () => number | null;
   performSync: () => void;
-  beginPeriodicSync: () => void;
-  stopPeriodicSync: () => void;
   isSyncing: boolean;
 }
 
@@ -205,11 +203,16 @@ export const usePlayerSync = (
     }
   }, []);
 
+  useEffect(() => {
+    beginPeriodicSync();
+    return () => {
+      stopPeriodicSync();
+    };
+  }, [beginPeriodicSync, stopPeriodicSync]);
+
   return {
     getCurrentTime,
     performSync,
-    beginPeriodicSync,
-    stopPeriodicSync,
     isSyncing: periodicSyncIdRef.current !== null,
   };
 };
