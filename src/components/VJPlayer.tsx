@@ -67,13 +67,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     // カスタムフックの使用
     const { getCurrentTime, performSync, beginPeriodicSync, stopPeriodicSync } = usePlayerSync(
       playerInterface(),
-      (): VJSyncData => syncDataRef.current,
-      {
-        syncInterval: 1000,
-        realtimeFps: 60,
-        seekThreshold: 1.0,
-        syncThreshold: 0.01,
-      }
+      (): VJSyncData => syncDataRef.current
     );
 
     // 同期開始関数を安定化（再レンダリングを防ぐため）

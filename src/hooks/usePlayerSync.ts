@@ -1,6 +1,10 @@
 import type { VJSyncData } from "@/types/vj";
 import { useCallback, useRef } from "react";
 
+const SYNC_INTERVAL = 1000; // 定期的な同期間隔（ms）
+const SEEK_THRESHOLD = 1.0; // 強制シークの閾値（秒）
+const SYNC_THRESHOLD = 0.01; // 同期完了の閾値（秒）
+
 /** プレイヤー同期用のインターフェース */
 export interface PlayerSyncInterface {
   getCurrentTime: () => number | null;
@@ -8,14 +12,6 @@ export interface PlayerSyncInterface {
   setPlaybackRate: (rate: number) => void;
   seekTo: (time: number) => void;
   getDuration: () => number | null;
-}
-
-/** カスタムフックのオプション */
-export interface UsePlayerSyncOptions {
-  syncInterval?: number; // 定期的な同期間隔（ms）
-  realtimeFps?: number; // リアルタイム同期のFPS
-  seekThreshold?: number; // 強制シークの閾値（秒）
-  syncThreshold?: number; // 同期完了の閾値（秒）
 }
 
 /** カスタムフックの戻り値 */
@@ -33,11 +29,8 @@ export interface UsePlayerSyncReturn {
  */
 export const usePlayerSync = (
   playerInterface: PlayerSyncInterface,
-  getSyncData: () => VJSyncData,
-  options: UsePlayerSyncOptions = {}
+  getSyncData: () => VJSyncData
 ): UsePlayerSyncReturn => {
-  const { syncInterval = 1000, seekThreshold = 1.0, syncThreshold = 0.01 } = options;
-
   const lastAppliedRateRef = useRef<number>(1.0);
   const isAdjustingRateRef = useRef<boolean>(false);
   const animationFrameIdRef = useRef<number | null>(null);
@@ -156,12 +149,12 @@ export const usePlayerSync = (
       const timeDiff = currentPlayerTime - expectedCurrentTime;
       const absTimeDiff = Math.abs(timeDiff);
 
-      if (absTimeDiff <= syncThreshold) {
+      if (absTimeDiff <= SYNC_THRESHOLD) {
         // 差分が10ms以下の場合、設定された速度をそのまま使用
         if (!isAdjustingRateRef.current) {
           syncPlaybackRate();
         }
-      } else if (absTimeDiff >= seekThreshold) {
+      } else if (absTimeDiff >= SEEK_THRESHOLD) {
         // 差分が1秒以上の場合は強制シーク
         playerInterface.seekTo(expectedCurrentTime);
       } else {
@@ -179,8 +172,6 @@ export const usePlayerSync = (
     getCurrentTime,
     getSyncData,
     playerInterface,
-    syncThreshold,
-    seekThreshold,
     syncPlaybackRate,
     calculateAdjustmentRate,
     applyPlaybackRateAdjustment,
@@ -198,8 +189,8 @@ export const usePlayerSync = (
       if (periodicSyncIdRef.current && !animationFrameIdRef.current) {
         performSync();
       }
-    }, syncInterval);
-  }, [performSync, syncInterval]);
+    }, SYNC_INTERVAL);
+  }, [performSync]);
 
   // 定期同期の停止
   const stopPeriodicSync = useCallback(() => {
