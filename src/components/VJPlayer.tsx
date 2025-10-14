@@ -120,12 +120,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           player.loadVideoById(syncData.videoId);
         }
 
-        if (changedPaused) {
-          if (syncData.paused) {
-            player.pauseVideo();
-          } else {
-            player.playVideo();
-          }
+        if (syncData.paused) {
+          player.pauseVideo();
+        } else {
+          player.playVideo();
         }
 
         if (needTimingSync) {
@@ -133,22 +131,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         }
       },
       [performSync]
-    );
-
-    const handleStateChange = useCallback(
-      (e: YTPlayerEvent) => {
-        const newState = e.data;
-
-        if (newState === YT_PLAYER_STATE.ENDED && playerRef.current) {
-          try {
-            playerRef.current.seekTo(0, true);
-            playerRef.current.playVideo();
-          } catch {}
-        }
-
-        onStateChange?.(e);
-      },
-      [onStateChange]
     );
 
     useEffect(() => {
@@ -178,7 +160,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         className={className}
         videoId={DEFAULT_VALUES.videoId}
         onReady={handleReady}
-        onStateChange={handleStateChange}
+        onStateChange={onStateChange}
       />
     );
   }
