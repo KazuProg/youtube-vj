@@ -32,7 +32,6 @@ export const usePlayerSync = (
   const lastAppliedRateRef = useRef<number>(1.0);
   const isAdjustingRateRef = useRef<boolean>(false);
   const animationFrameIdRef = useRef<number | null>(null);
-  const periodicSyncIdRef = useRef<number | null>(null);
 
   // 期待時間の計算
   const getCurrentTime = useCallback(() => {
@@ -127,10 +126,6 @@ export const usePlayerSync = (
 
   // メインの同期処理（再帰的にrequestAnimationFrameで呼び出される）
   const performSync = useCallback(() => {
-    if (!periodicSyncIdRef.current) {
-      return;
-    }
-
     const expectedCurrentTime = getCurrentTime();
     if (expectedCurrentTime === null) {
       return;
@@ -176,17 +171,12 @@ export const usePlayerSync = (
   ]);
 
   useEffect(() => {
-    periodicSyncIdRef.current = setInterval(() => {
-      if (periodicSyncIdRef.current && !animationFrameIdRef.current) {
-        performSync();
-      }
+    const interval = setInterval(() => {
+      performSync();
     }, SYNC_INTERVAL);
 
     return () => {
-      if (periodicSyncIdRef.current) {
-        clearInterval(periodicSyncIdRef.current);
-        periodicSyncIdRef.current = null;
-      }
+      clearInterval(interval);
 
       if (animationFrameIdRef.current) {
         cancelAnimationFrame(animationFrameIdRef.current);
@@ -198,6 +188,6 @@ export const usePlayerSync = (
   return {
     getCurrentTime,
     performSync,
-    isSyncing: periodicSyncIdRef.current !== null,
+    isSyncing: true,
   };
 };
