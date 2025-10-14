@@ -175,40 +175,25 @@ export const usePlayerSync = (
     applyPlaybackRateAdjustment,
   ]);
 
-  // 定期同期の開始
-  const beginPeriodicSync = useCallback(() => {
-    if (periodicSyncIdRef.current) {
-      return;
-    }
-
-    // 定期的に同期処理を開始（requestAnimationFrameで再帰的に実行される）
+  useEffect(() => {
     periodicSyncIdRef.current = setInterval(() => {
-      console.log("beginPeriodicSync");
       if (periodicSyncIdRef.current && !animationFrameIdRef.current) {
         performSync();
       }
     }, SYNC_INTERVAL);
-  }, [performSync]);
 
-  // 定期同期の停止
-  const stopPeriodicSync = useCallback(() => {
-    if (periodicSyncIdRef.current) {
-      clearInterval(periodicSyncIdRef.current);
-      periodicSyncIdRef.current = null;
-    }
-
-    if (animationFrameIdRef.current) {
-      cancelAnimationFrame(animationFrameIdRef.current);
-      animationFrameIdRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    beginPeriodicSync();
     return () => {
-      stopPeriodicSync();
+      if (periodicSyncIdRef.current) {
+        clearInterval(periodicSyncIdRef.current);
+        periodicSyncIdRef.current = null;
+      }
+
+      if (animationFrameIdRef.current) {
+        cancelAnimationFrame(animationFrameIdRef.current);
+        animationFrameIdRef.current = null;
+      }
     };
-  }, [beginPeriodicSync, stopPeriodicSync]);
+  }, [performSync]);
 
   return {
     getCurrentTime,
