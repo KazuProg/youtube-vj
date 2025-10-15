@@ -37,7 +37,7 @@ export const usePlayerSync = (
   const getCurrentTime = useCallback(() => {
     const syncData = getSyncData();
 
-    if (!playerInterface.getCurrentTime() || syncData.baseTime === 0) {
+    if (syncData.baseTime === 0) {
       return null;
     }
 
