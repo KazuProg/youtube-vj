@@ -65,9 +65,8 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     // カスタムフックの使用
-    const { getCurrentTime, performSync, setDuration } = usePlayerSync(
-      playerInterface(),
-      (): VJSyncData => syncDataRef.current
+    const { getCurrentTime, performSync, setDuration, notifySyncData } = usePlayerSync(
+      playerInterface()
     );
 
     // 同期開始関数を安定化（再レンダリングを防ぐため）
@@ -127,10 +126,11 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         }
 
         if (needTimingSync) {
+          notifySyncData(syncData);
           performSync();
         }
       },
-      [performSync]
+      [performSync, notifySyncData]
     );
 
     useEffect(() => {

@@ -1,4 +1,4 @@
-import type { VJSyncData } from "@/types/vj";
+import { INITIAL_SYNC_DATA, type VJSyncData } from "@/types/vj";
 import { useCallback, useEffect, useRef } from "react";
 
 const SYNC_INTERVAL = 1000; // 定期的な同期間隔（ms）
@@ -18,6 +18,7 @@ export interface PlayerSyncInterface {
 export interface UsePlayerSyncReturn {
   getCurrentTime: () => number | null;
   setDuration: (duration: number | null) => void;
+  notifySyncData: (syncData: VJSyncData) => void;
   performSync: () => void;
   isSyncing: boolean;
 }
@@ -26,18 +27,16 @@ export interface UsePlayerSyncReturn {
  * プレイヤー同期用のカスタムフック
  * 汎用的な関数ベースのインターフェースを使用
  */
-export const usePlayerSync = (
-  playerInterface: PlayerSyncInterface,
-  getSyncData: () => VJSyncData
-): UsePlayerSyncReturn => {
+export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSyncReturn => {
   const lastAppliedRateRef = useRef<number>(1.0);
   const isAdjustingRateRef = useRef<boolean>(false);
   const animationFrameIdRef = useRef<number | null>(null);
   const durationRef = useRef<number | null>(null);
+  const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
 
   // 期待時間の計算
   const getCurrentTime = useCallback(() => {
-    const syncData = getSyncData();
+    const syncData = syncDataRef.current;
 
     if (syncData.baseTime === 0) {
       return null;
@@ -65,7 +64,7 @@ export const usePlayerSync = (
       console.warn("Failed to calculate current time:", error);
       return null;
     }
-  }, [getSyncData]);
+  }, []);
 
   // 指数関数的な速度調整の計算
   const getExponentialRateMultiplier = useCallback((timeDiff: number) => {
@@ -118,13 +117,13 @@ export const usePlayerSync = (
     }
 
     try {
-      const syncData = getSyncData();
+      const syncData = syncDataRef.current;
       playerInterface.setPlaybackRate(syncData.playbackRate);
       lastAppliedRateRef.current = syncData.playbackRate;
     } catch (error) {
       console.warn("Failed to set playback rate:", error);
     }
-  }, [playerInterface, getSyncData]);
+  }, [playerInterface]);
 
   // メインの同期処理（再帰的にrequestAnimationFrameで呼び出される）
   const performSync = useCallback(() => {
@@ -134,7 +133,7 @@ export const usePlayerSync = (
     }
 
     try {
-      const syncData = getSyncData();
+      const syncData = syncDataRef.current;
       const currentPlayerTime = playerInterface.getCurrentTime();
 
       if (currentPlayerTime === null) {
@@ -165,7 +164,6 @@ export const usePlayerSync = (
     animationFrameIdRef.current = requestAnimationFrame(performSync);
   }, [
     getCurrentTime,
-    getSyncData,
     playerInterface,
     syncPlaybackRate,
     calculateAdjustmentRate,
@@ -192,6 +190,9 @@ export const usePlayerSync = (
     setDuration: useCallback((duration: number | null) => {
       durationRef.current = duration;
     }, []),
+    notifySyncData: (syncData: VJSyncData) => {
+      syncDataRef.current = syncData;
+    },
     performSync,
     isSyncing: true,
   };
