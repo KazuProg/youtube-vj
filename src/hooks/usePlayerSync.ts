@@ -17,6 +17,7 @@ export interface PlayerSyncInterface {
 /** カスタムフックの戻り値 */
 export interface UsePlayerSyncReturn {
   getCurrentTime: () => number | null;
+  setDuration: (duration: number | null) => void;
   performSync: () => void;
   isSyncing: boolean;
 }
@@ -32,6 +33,7 @@ export const usePlayerSync = (
   const lastAppliedRateRef = useRef<number>(1.0);
   const isAdjustingRateRef = useRef<boolean>(false);
   const animationFrameIdRef = useRef<number | null>(null);
+  const durationRef = useRef<number | null>(null);
 
   // 期待時間の計算
   const getCurrentTime = useCallback(() => {
@@ -53,9 +55,9 @@ export const usePlayerSync = (
         return 0;
       }
 
-      const playerDuration = playerInterface.getDuration();
-      if (playerDuration && adjustedTime > playerDuration) {
-        return playerDuration;
+      const duration = durationRef.current;
+      if (duration && adjustedTime > duration) {
+        return duration;
       }
 
       return adjustedTime;
@@ -63,7 +65,7 @@ export const usePlayerSync = (
       console.warn("Failed to calculate current time:", error);
       return null;
     }
-  }, [getSyncData, playerInterface]);
+  }, [getSyncData]);
 
   // 指数関数的な速度調整の計算
   const getExponentialRateMultiplier = useCallback((timeDiff: number) => {
@@ -187,6 +189,9 @@ export const usePlayerSync = (
 
   return {
     getCurrentTime,
+    setDuration: useCallback((duration: number | null) => {
+      durationRef.current = duration;
+    }, []),
     performSync,
     isSyncing: true,
   };

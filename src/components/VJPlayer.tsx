@@ -65,7 +65,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     // カスタムフックの使用
-    const { getCurrentTime, performSync } = usePlayerSync(
+    const { getCurrentTime, performSync, setDuration } = usePlayerSync(
       playerInterface(),
       (): VJSyncData => syncDataRef.current
     );
@@ -145,6 +145,17 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       };
     }, []);
 
+    const handleStateChange = useCallback(
+      (e: YTPlayerEvent) => {
+        const playerState = e.data;
+        if (playerState === YT_PLAYER_STATE.PLAYING) {
+          setDuration(playerRef.current?.getDuration() ?? null);
+        }
+        onStateChange?.(e);
+      },
+      [onStateChange, setDuration]
+    );
+
     useImperativeHandle(
       ref,
       () => ({
@@ -160,7 +171,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         className={className}
         videoId={DEFAULT_VALUES.videoId}
         onReady={handleReady}
-        onStateChange={onStateChange}
+        onStateChange={handleStateChange}
       />
     );
   }
