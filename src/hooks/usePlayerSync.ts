@@ -147,6 +147,7 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
         // 差分が10ms以下の場合、設定された速度をそのまま使用
         if (!isAdjustingRateRef.current) {
           syncPlaybackRate();
+          animationFrameIdRef.current = null;
         }
       } else if (absTimeDiff >= SEEK_THRESHOLD) {
         // 差分が1秒以上の場合は強制シーク
@@ -194,6 +195,6 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
       syncDataRef.current = syncData;
     },
     performSync,
-    isSyncing: true,
+    isSyncing: animationFrameIdRef.current !== null,
   };
 };
