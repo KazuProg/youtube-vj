@@ -168,7 +168,12 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
     }
 
     // 次のフレームで再帰的に呼び出し
-    animationFrameIdRef.current = requestAnimationFrame(performSync);
+    if (animationFrameIdRef.current === null) {
+      animationFrameIdRef.current = requestAnimationFrame(() => {
+        animationFrameIdRef.current = null;
+        performSync();
+      });
+    }
   }, [
     getCurrentTime,
     playerInterface,
