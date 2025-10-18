@@ -66,25 +66,31 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
     }
   }, []);
 
-  // 指数関数的な速度調整の計算
-  const getExponentialRateMultiplier = useCallback((timeDiff: number) => {
+  // 時間差に基づく速度調整値の計算
+  const getRateAdjustment = useCallback((timeDiff: number) => {
     const absTimeDiff = Math.abs(timeDiff);
-    const base = 1.5;
-    const exponent = Math.min(absTimeDiff * 10, 3);
+
+    // 1.0秒閾値に基づく調整値の計算
+    // 時間差が大きいほど大きな調整値を返す
+    const maxAdjustment = 0.5; // 最大調整値
+    const adjustment = (absTimeDiff / SEEK_THRESHOLD) * maxAdjustment;
 
     if (timeDiff > 0) {
-      return Math.max(0.25, 1 / base ** exponent);
+      // プレイヤーが進みすぎている場合、速度を下げる（負の調整値）
+      return -Math.min(adjustment, maxAdjustment);
     }
-    return Math.min(2.0, base ** exponent);
+    // プレイヤーが遅れている場合、速度を上げる（正の調整値）
+    return Math.min(adjustment, maxAdjustment);
   }, []);
 
   // 速度調整値の計算
   const calculateAdjustmentRate = useCallback(
     (timeDiff: number, currentPlaybackRate: number) => {
-      const rateMultiplier = getExponentialRateMultiplier(timeDiff);
-      return Math.max(0.25, Math.min(2.0, currentPlaybackRate * rateMultiplier));
+      const adjustment = getRateAdjustment(timeDiff);
+      const newRate = currentPlaybackRate + adjustment;
+      return Math.max(0.25, Math.min(2.0, newRate));
     },
-    [getExponentialRateMultiplier]
+    [getRateAdjustment]
   );
 
   // 速度調整の適用
