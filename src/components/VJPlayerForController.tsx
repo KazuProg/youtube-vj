@@ -18,7 +18,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
       onPlaybackRateChange,
       onVolumeChange,
       syncKey = DEFAULT_VALUES.syncKey,
-      videoId = DEFAULT_VALUES.videoId,
     },
     ref
   ) => {
@@ -48,10 +47,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
       },
       [onPlaybackRateChange]
     );
-
-    useEffect(() => {
-      updateSyncData({ ...INITIAL_SYNC_DATA, videoId });
-    }, [updateSyncData, videoId]);
 
     const handleStateChange = useCallback(
       (e: YTPlayerEvent) => {
@@ -185,7 +180,6 @@ const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerP
         ref={vjPlayerRef}
         onStateChange={handleStateChange}
         syncKey={syncKey}
-        videoId={videoId}
       />
     );
   }

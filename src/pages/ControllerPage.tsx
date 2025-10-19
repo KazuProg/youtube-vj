@@ -2,7 +2,6 @@ import Status from "@/components/Status";
 import VJController from "@/components/VJController";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import type { MIDIScriptManager } from "@/types/midi-script-manager";
-import { DEFAULT_VALUES } from "@/types/vj";
 import { parseYouTubeURL } from "@/utils/YouTubeURLParser";
 import { useEffect, useRef, useState } from "react";
 import styles from "./ControllerPage.module.css";
@@ -12,7 +11,6 @@ const ControllerPage = () => {
   const [midi, setMidi] = useState<MIDIScriptManager | null>(null);
   const [preparedVideoId, setPreparedVideoId] = useState<string>("");
   const [thumbnailUrl, setThumbnailUrl] = useState<string>("https://img.youtube.com/vi/");
-  const [leftDeckVideoId, setLeftDeckVideoId] = useState<string>(DEFAULT_VALUES.videoId);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -83,7 +81,6 @@ const ControllerPage = () => {
         <VJController
           className={styles.deck}
           localStorageKey={LOCAL_STORAGE_KEY.player}
-          videoId={leftDeckVideoId}
           setGlobalPlayer={(player) => {
             window.ch0 = player;
           }}
@@ -93,7 +90,7 @@ const ControllerPage = () => {
             <button
               className={styles.loadButton}
               type="button"
-              onClick={() => setLeftDeckVideoId(preparedVideoId)}
+              onClick={() => window.ch0?.loadVideoById(preparedVideoId)}
             >
               Load
             </button>

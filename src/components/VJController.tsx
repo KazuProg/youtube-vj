@@ -7,17 +7,11 @@ import styles from "./VJController.module.css";
 
 interface VJControllerProps {
   localStorageKey: string;
-  videoId: string;
   setGlobalPlayer: (player: VJControllerRef | null) => void;
   className?: string;
 }
 
-const VJController = ({
-  localStorageKey,
-  videoId,
-  setGlobalPlayer,
-  className,
-}: VJControllerProps) => {
+const VJController = ({ localStorageKey, setGlobalPlayer, className }: VJControllerProps) => {
   const playerRef = useRef<VJControllerRef | null>(null);
 
   const [playbackRate, setPlaybackRate] = useState<number>(1);
@@ -54,12 +48,6 @@ const VJController = ({
     }
   }, [isMuted]);
 
-  useEffect(() => {
-    if (playerRef.current && videoId) {
-      playerRef.current.loadVideoById(videoId);
-    }
-  }, [videoId]);
-
   const handleSeek = useCallback((time: number) => {
     if (playerRef.current) {
       playerRef.current.seekTo(time, true);
@@ -74,7 +62,6 @@ const VJController = ({
           className={styles.player}
           ref={playerRef}
           syncKey={localStorageKey}
-          videoId={videoId}
           onPlaybackRateChange={setPlaybackRate}
           onVolumeChange={(volume: number, isMuted: boolean) => {
             setVolume(volume);
