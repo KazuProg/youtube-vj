@@ -1,5 +1,5 @@
 import { LOCAL_STORAGE_KEY } from "@/constants";
-import type { MIDIScriptManager } from "@/types/midi-script-manager";
+import type { MIDIScriptManager } from "@/types/global";
 import { useEffect, useRef, useState } from "react";
 import Status from "./components/Status";
 import VJController from "./components/VJController";

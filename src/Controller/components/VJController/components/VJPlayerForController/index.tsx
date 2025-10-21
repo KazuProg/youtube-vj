@@ -1,14 +1,11 @@
+import type { VJControllerRef } from "@/Controller/components/VJController/types";
 import VJPlayer from "@/components/VJPlayer";
+import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
 import type { YTPlayerEvent } from "@/components/YouTubePlayer/types";
 import { YT_PLAYER_STATE } from "@/components/YouTubePlayer/types";
-import type {
-  VJControllerRef,
-  VJPlayerForControllerProps,
-  VJPlayerRef,
-  VJSyncData,
-} from "@/types/vj";
-import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/types/vj";
+import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/constants";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
+import type { VJPlayerForControllerProps } from "./types";
 
 const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerProps>(
   (

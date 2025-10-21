@@ -1,5 +1,6 @@
-import { INITIAL_SYNC_DATA, type VJSyncData } from "@/types/vj";
+import { INITIAL_SYNC_DATA } from "@/constants";
 import { useCallback, useEffect, useRef } from "react";
+import type { VJSyncData } from "../../types";
 
 const SYNC_INTERVAL = 1000; // 定期的な同期間隔（ms）
 const SEEK_THRESHOLD = 1.0; // 強制シークの閾値（秒）

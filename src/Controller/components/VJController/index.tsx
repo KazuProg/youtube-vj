@@ -1,9 +1,9 @@
 import Fader from "@/components/Fader";
-import type { VJControllerRef } from "@/types/vj";
 import { useCallback, useEffect, useRef, useState } from "react";
 import SeekBar from "./components/SeekBar";
 import VJPlayerForController from "./components/VJPlayerForController";
 import styles from "./index.module.css";
+import type { VJControllerRef } from "./types";
 
 interface VJControllerProps {
   localStorageKey: string;
