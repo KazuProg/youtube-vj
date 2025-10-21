@@ -1,5 +1,5 @@
-import { useElementSize } from "../hooks/useElementSize";
-import styles from "./Fader.module.css";
+import { useElementSize } from "./hooks/useElementSize";
+import styles from "./index.module.css";
 
 interface FaderProps {
   min?: number;

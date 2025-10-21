@@ -1,5 +1,5 @@
-import ControllerPage from "@/pages/ControllerPage";
-import ProjectionPage from "@/pages/ProjectionPage";
+import ControllerPage from "@/Controller/page";
+import ProjectionPage from "@/Projection/page";
 
 function App() {
   const urlParams = new URLSearchParams(window.location.search);

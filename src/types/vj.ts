@@ -3,8 +3,8 @@
  */
 
 import type { JsonValue } from "@/types/common";
-import type { YTPlayer, YTPlayerEvent, YTPlayerState } from "./youtube";
-import { YT_PLAYER_STATE } from "./youtube";
+import type { YTPlayer, YTPlayerEvent, YTPlayerState } from "../components/YouTubePlayer/types";
+import { YT_PLAYER_STATE } from "../components/YouTubePlayer/types";
 
 declare global {
   interface Window {

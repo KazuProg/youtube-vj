@@ -1,10 +1,10 @@
-import Status from "@/components/Status";
-import VJController from "@/components/VJController";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import type { MIDIScriptManager } from "@/types/midi-script-manager";
-import { parseYouTubeURL } from "@/utils/YouTubeURLParser";
 import { useEffect, useRef, useState } from "react";
-import styles from "./ControllerPage.module.css";
+import Status from "./components/Status";
+import VJController from "./components/VJController";
+import styles from "./page.module.css";
+import { parseYouTubeURL } from "./utils";
 
 const ControllerPage = () => {
   const [projectionWindow, setProjectionWindow] = useState<Window | null>(null);

@@ -1,4 +1,6 @@
 import VJPlayer from "@/components/VJPlayer";
+import type { YTPlayerEvent } from "@/components/YouTubePlayer/types";
+import { YT_PLAYER_STATE } from "@/components/YouTubePlayer/types";
 import type {
   VJControllerRef,
   VJPlayerForControllerProps,
@@ -6,8 +8,6 @@ import type {
   VJSyncData,
 } from "@/types/vj";
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/types/vj";
-import type { YTPlayerEvent } from "@/types/youtube";
-import { YT_PLAYER_STATE } from "@/types/youtube";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
 
 const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerProps>(

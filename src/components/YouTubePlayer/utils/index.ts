@@ -1,4 +1,4 @@
-const loadYouTubeIFrameAPI = (): Promise<void> => {
+export const loadYouTubeIFrameAPI = (): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (window.YT?.Player) {
       resolve();
@@ -28,5 +28,3 @@ const loadYouTubeIFrameAPI = (): Promise<void> => {
     document.head.appendChild(script);
   });
 };
-
-export default loadYouTubeIFrameAPI;

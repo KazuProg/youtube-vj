@@ -1,6 +1,6 @@
-import { formatTime } from "@/utils/formatTime";
 import { useEffect, useState } from "react";
-import styles from "./SeekBar.module.css";
+import styles from "./index.module.css";
+import { formatTime } from "./utils";
 
 interface SeekBarProps {
   currentTimeFunc: () => number;

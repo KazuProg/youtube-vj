@@ -1,11 +1,11 @@
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import {
   DEFAULT_PLAYER_OPTIONS,
   type YTPlayer,
   type YTPlayerEvent,
   type YTPlayerOptions,
-} from "@/types/youtube";
-import loadYouTubeIFrameAPI from "@/utils/loadYouTubeIFrameAPI";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+} from "./types";
+import { loadYouTubeIFrameAPI } from "./utils";
 
 interface YouTubePlayerProps {
   className?: string;

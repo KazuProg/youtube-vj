@@ -1,4 +1,4 @@
-import styles from "./Status.module.css";
+import styles from "./index.module.css";
 
 type StatusProps = {
   text: string;

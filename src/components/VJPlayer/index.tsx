@@ -1,10 +1,10 @@
-import { type PlayerSyncInterface, usePlayerSync } from "@/hooks/usePlayerSync";
-import { useStorageSync } from "@/hooks/useStorageSync";
 import type { VJPlayerProps, VJPlayerRef, VJSyncData } from "@/types/vj";
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/types/vj";
-import { type YTPlayer, type YTPlayerEvent, YT_PLAYER_STATE } from "@/types/youtube";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
-import YouTubePlayer from "./YouTubePlayer";
+import YouTubePlayer from "../YouTubePlayer";
+import { type YTPlayer, type YTPlayerEvent, YT_PLAYER_STATE } from "../YouTubePlayer/types";
+import { type PlayerSyncInterface, usePlayerSync } from "./hooks/usePlayerSync";
+import { useStorageSync } from "./hooks/useStorageSync";
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ({ className, onStateChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
