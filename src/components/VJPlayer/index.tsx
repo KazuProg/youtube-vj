@@ -4,7 +4,14 @@ import YouTubePlayer from "../YouTubePlayer";
 import { type YTPlayer, type YTPlayerEvent, YT_PLAYER_STATE } from "../YouTubePlayer/types";
 import { type PlayerSyncInterface, usePlayerSync } from "./hooks/usePlayerSync";
 import { useStorageSync } from "./hooks/useStorageSync";
-import type { VJPlayerProps, VJPlayerRef, VJSyncData } from "./types";
+import type { VJPlayerRef, VJSyncData } from "./types";
+
+interface VJPlayerProps {
+  className?: string;
+  onStateChange?: (state: YTPlayerEvent) => void;
+  syncKey?: string;
+  videoId?: string;
+}
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ({ className, onStateChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {

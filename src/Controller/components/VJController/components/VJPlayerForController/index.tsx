@@ -5,7 +5,15 @@ import type { YTPlayerEvent } from "@/components/YouTubePlayer/types";
 import { YT_PLAYER_STATE } from "@/components/YouTubePlayer/types";
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/constants";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
-import type { VJPlayerForControllerProps } from "./types";
+
+interface VJPlayerForControllerProps {
+  className?: string;
+  onStateChange?: (state: YTPlayerEvent) => void;
+  syncKey?: string;
+  videoId?: string;
+  onPlaybackRateChange?: (rate: number) => void;
+  onVolumeChange?: (volume: number, isMuted: boolean) => void;
+}
 
 const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerProps>(
   (

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { JsonValue } from "./types";
+import type { JsonValue } from "../../types";
 
 interface StorageAdapter {
   save(key: string, value: object | null): void;

@@ -1,5 +1,12 @@
-import type { YTPlayer, YTPlayerEvent } from "@/components/YouTubePlayer/types";
-import type { JsonValue } from "../hooks/useStorageSync/types";
+import type { YTPlayer } from "@/components/YouTubePlayer/types";
+
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
 
 export interface VJSyncData extends Record<string, JsonValue> {
   videoId: string;
@@ -13,11 +20,4 @@ export interface VJPlayerRef {
   getPlayer: () => YTPlayer | null;
   getCurrentTime: () => number | null;
   setSyncData: (syncData: VJSyncData) => void;
-}
-
-export interface VJPlayerProps {
-  className?: string;
-  onStateChange?: (state: YTPlayerEvent) => void;
-  syncKey?: string;
-  videoId?: string;
 }
