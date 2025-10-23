@@ -26,19 +26,6 @@
   flex-grow: 1;
 }
 
-.statusBar {
-  flex: 0;
-
-  height: 1.5em;
-  background-color: #333;
-  color: white;
-  border-top: 1px solid #555;
-
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
 .loadButtons {
   display: flex;
   justify-content: space-between;
