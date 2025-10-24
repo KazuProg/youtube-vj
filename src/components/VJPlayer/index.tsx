@@ -10,7 +10,6 @@ interface VJPlayerProps {
   className?: string;
   onStateChange?: (state: YTPlayerEvent) => void;
   syncKey?: string;
-  videoId?: string;
 }
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
