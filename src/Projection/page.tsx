@@ -1,4 +1,4 @@
-import YTPlayerForVJ from "@/components/VJPlayer";
+import VJPlayer from "@/components/VJPlayer";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useEffect } from "react";
 import styles from "./page.module.css";
@@ -17,7 +17,7 @@ const ProjectionPage = () => {
     };
   }, []);
 
-  return <YTPlayerForVJ className={styles.player} syncKey={LOCAL_STORAGE_KEY.player} />;
+  return <VJPlayer className={styles.player} syncKey={LOCAL_STORAGE_KEY.player} />;
 };
 
 export default ProjectionPage;
