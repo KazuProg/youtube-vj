@@ -48,18 +48,14 @@ const YouTubePlayer = ({
 
       isInitializedRef.current = true;
 
-      new window.YT.Player(playerElementId, {
+      playerRef.current = new window.YT.Player(playerElementId, {
         videoId,
         playerVars: {
           ...DEFAULT_PLAYER_OPTIONS.playerVars,
           ...playerVars,
         },
         events: {
-          onReady: (event: YTPlayerEvent) => {
-            playerRef.current = event.target;
-            isInitializedRef.current = true;
-            onReady?.(event);
-          },
+          onReady: onReady,
           onStateChange: onStateChange,
           onPlaybackQualityChange: onPlaybackQualityChange,
           onPlaybackRateChange: onPlaybackRateChange,
