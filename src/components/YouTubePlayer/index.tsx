@@ -86,8 +86,9 @@ const YouTubePlayer = ({
       if (playerRef.current) {
         playerRef.current.destroy();
         playerRef.current = null;
-        isInitializedRef.current = false;
       }
+      isInitializedRef.current = false;
+      setError(null);
     };
   }, [initializePlayer]);
 
