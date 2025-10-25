@@ -7,24 +7,14 @@ import {
 } from "./types";
 import { loadYouTubeIFrameAPI } from "./utils";
 
-interface YouTubePlayerProps extends YTPlayerEventHandlers {
+interface YouTubePlayerProps {
   className?: string;
   videoId: string;
   playerVars?: YTPlayerOptions["playerVars"];
+  events?: YTPlayerEventHandlers;
 }
 
-const YouTubePlayer = ({
-  className,
-  videoId,
-  playerVars,
-  onReady,
-  onStateChange,
-  onPlaybackQualityChange,
-  onPlaybackRateChange,
-  onError,
-  onApiChange,
-  onAutoplayBlocked,
-}: YouTubePlayerProps) => {
+const YouTubePlayer = ({ className, videoId, playerVars, events }: YouTubePlayerProps) => {
   const playerElementId = useId();
   const playerRef = useRef<YTPlayer | null>(null);
   const isInitializedRef = useRef(false);
@@ -46,32 +36,13 @@ const YouTubePlayer = ({
           ...DEFAULT_PLAYER_OPTIONS.playerVars,
           ...playerVars,
         },
-        events: {
-          onReady: onReady,
-          onStateChange: onStateChange,
-          onPlaybackQualityChange: onPlaybackQualityChange,
-          onPlaybackRateChange: onPlaybackRateChange,
-          onError: onError,
-          onApiChange: onApiChange,
-          onAutoplayBlocked: onAutoplayBlocked,
-        },
+        events: events ?? undefined,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
       isInitializedRef.current = false;
     }
-  }, [
-    onError,
-    onReady,
-    onStateChange,
-    onPlaybackRateChange,
-    onApiChange,
-    onPlaybackQualityChange,
-    onAutoplayBlocked,
-    videoId,
-    playerVars,
-    playerElementId,
-  ]);
+  }, [events, playerElementId, playerVars, videoId]);
 
   useEffect(() => {
     initializePlayer();
