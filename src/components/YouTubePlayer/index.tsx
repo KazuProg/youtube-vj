@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import styles from "./index.module.css";
 import {
   DEFAULT_PLAYER_OPTIONS,
   type YTPlayer,
@@ -59,22 +60,12 @@ const YouTubePlayer = ({ className, videoId, playerVars, events }: YouTubePlayer
 
   return (
     <div id={playerElementId} className={className}>
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          border: "1px solid #666",
-          boxSizing: "border-box",
-        }}
-      >
-        <div style={{ textAlign: "center", color: "#666" }}>
+      <div className={styles.container}>
+        <div className={styles.errorContainer}>
           {error ? (
             <>
               <p>YouTube Player Error</p>
-              <p style={{ fontSize: "0.9rem" }}>{error}</p>
+              <p className={styles.errorMessage}>{error}</p>
             </>
           ) : (
             <p>Loading YouTube Player...</p>
