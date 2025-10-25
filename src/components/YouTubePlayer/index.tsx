@@ -2,21 +2,15 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import {
   DEFAULT_PLAYER_OPTIONS,
   type YTPlayer,
-  type YTPlayerEvent,
+  type YTPlayerEventHandlers,
   type YTPlayerOptions,
 } from "./types";
 import { loadYouTubeIFrameAPI } from "./utils";
 
-interface YouTubePlayerProps {
+interface YouTubePlayerProps extends YTPlayerEventHandlers {
   className?: string;
   videoId: string;
   playerVars?: YTPlayerOptions["playerVars"];
-  onReady?: (event: YTPlayerEvent) => void;
-  onStateChange?: (event: YTPlayerEvent) => void;
-  onPlaybackQualityChange?: (event: YTPlayerEvent) => void;
-  onPlaybackRateChange?: (event: YTPlayerEvent) => void;
-  onError?: (event: YTPlayerEvent) => void;
-  onApiChange?: (event: YTPlayerEvent) => void;
 }
 
 const YouTubePlayer = ({
@@ -29,6 +23,7 @@ const YouTubePlayer = ({
   onPlaybackRateChange,
   onError,
   onApiChange,
+  onAutoplayBlocked,
 }: YouTubePlayerProps) => {
   const playerElementId = useId();
   const playerRef = useRef<YTPlayer | null>(null);
@@ -61,6 +56,7 @@ const YouTubePlayer = ({
           onPlaybackRateChange: onPlaybackRateChange,
           onError: onError,
           onApiChange: onApiChange,
+          onAutoplayBlocked: onAutoplayBlocked,
         },
       });
     } catch (err) {
@@ -74,6 +70,7 @@ const YouTubePlayer = ({
     onPlaybackRateChange,
     onApiChange,
     onPlaybackQualityChange,
+    onAutoplayBlocked,
     videoId,
     playerVars,
     playerElementId,

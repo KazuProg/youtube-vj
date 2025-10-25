@@ -36,6 +36,17 @@ export interface YTPlayerEvent {
   data: number;
 }
 
+// プレイヤーイベントハンドラー型
+export interface YTPlayerEventHandlers {
+  onReady?: (event: YTPlayerEvent) => void;
+  onStateChange?: (event: YTPlayerEvent) => void;
+  onPlaybackQualityChange?: (event: YTPlayerEvent) => void;
+  onPlaybackRateChange?: (event: YTPlayerEvent) => void;
+  onError?: (event: YTPlayerEvent) => void;
+  onApiChange?: (event: YTPlayerEvent) => void;
+  onAutoplayBlocked?: (event: YTPlayerEvent) => void;
+}
+
 // プレイヤーオプション型
 export interface YTPlayerOptions {
   width?: number;
@@ -68,15 +79,7 @@ export interface YTPlayerOptions {
     widget_referrer?: string;
     [key: string]: string | number | boolean | string[] | undefined;
   };
-  events?: {
-    onReady?: (event: YTPlayerEvent) => void;
-    onStateChange?: (event: YTPlayerEvent) => void;
-    onPlaybackQualityChange?: (event: YTPlayerEvent) => void;
-    onPlaybackRateChange?: (event: YTPlayerEvent) => void;
-    onError?: (event: YTPlayerEvent) => void;
-    onApiChange?: (event: YTPlayerEvent) => void;
-    onAutoplayBlocked?: (event: YTPlayerEvent) => void;
-  };
+  events?: YTPlayerEventHandlers;
 }
 
 // プレイヤークラス型
