@@ -96,7 +96,7 @@ const YouTubePlayer = ({
   }, [initializePlayer]);
 
   return (
-    <div id={playerElementId} className={className} style={{ border: "none" }}>
+    <div id={playerElementId} className={className}>
       <div
         style={{
           width: "100%",
@@ -112,7 +112,7 @@ const YouTubePlayer = ({
           {error ? (
             <>
               <p>YouTube Player Error</p>
-              <p style={{ fontSize: "0.9em" }}>{error}</p>
+              <p style={{ fontSize: "0.9rem" }}>{error}</p>
             </>
           ) : (
             <p>Loading YouTube Player...</p>
