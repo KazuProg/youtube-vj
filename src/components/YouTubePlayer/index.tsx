@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import styles from "./index.module.css";
-import {
-  DEFAULT_PLAYER_OPTIONS,
-  type YTPlayer,
-  type YTPlayerEventHandlers,
-  type YTPlayerOptions,
-} from "./types";
+import type { YTPlayer, YTPlayerEventHandlers, YTPlayerOptions } from "./types";
 import { loadYouTubeIFrameAPI } from "./utils";
 
 interface YouTubePlayerProps {
@@ -33,11 +28,8 @@ const YouTubePlayer = ({ className, videoId, playerVars, events }: YouTubePlayer
 
       playerRef.current = new window.YT.Player(playerElementId, {
         videoId,
-        playerVars: {
-          ...DEFAULT_PLAYER_OPTIONS.playerVars,
-          ...playerVars,
-        },
-        events: events ?? undefined,
+        playerVars,
+        events,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");

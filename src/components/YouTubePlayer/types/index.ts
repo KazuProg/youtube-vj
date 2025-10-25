@@ -241,21 +241,3 @@ export const YT_PLAYER_QUALITY = {
 } as const;
 
 export type YTPlayerQuality = (typeof YT_PLAYER_QUALITY)[keyof typeof YT_PLAYER_QUALITY];
-
-// デフォルト値
-export const DEFAULT_PLAYER_OPTIONS: YTPlayerOptions = {
-  width: 640,
-  height: 390,
-  playerVars: {
-    autoplay: 0,
-    color: "red",
-    controls: 1,
-    disablekb: 0,
-    enablejsapi: 0,
-    fs: 1,
-    // biome-ignore lint/style/useNamingConvention: YouTube API parameter
-    iv_load_policy: 1,
-    loop: 0,
-    playsinline: 0,
-  },
-};
