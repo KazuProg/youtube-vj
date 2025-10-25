@@ -33,14 +33,11 @@ const YouTubePlayer = ({
 
   const initializePlayer = useCallback(async () => {
     try {
-      setError(null);
-
       await loadYouTubeIFrameAPI();
 
       if (isInitializedRef.current) {
         return;
       }
-
       isInitializedRef.current = true;
 
       playerRef.current = new window.YT.Player(playerElementId, {
