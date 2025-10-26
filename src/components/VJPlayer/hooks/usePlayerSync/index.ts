@@ -204,8 +204,17 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
       durationRef.current = duration;
     }, []),
     notifySyncData: (syncData: VJSyncData) => {
+      const beforeSyncData = syncDataRef.current;
+
+      const needTimingSync =
+        syncData.baseTime !== beforeSyncData.baseTime ||
+        syncData.currentTime !== beforeSyncData.currentTime ||
+        syncData.playbackRate !== beforeSyncData.playbackRate;
+
       syncDataRef.current = syncData;
-      performSync();
+      if (needTimingSync) {
+        performSync();
+      }
     },
     performSync,
     isSyncing: animationFrameIdRef.current !== null,

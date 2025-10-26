@@ -98,18 +98,14 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const handleSyncData = useCallback(
       (syncData: VJSyncData) => {
         const player = playerRef.current;
+        const beforeSyncData = syncDataRef.current;
+
         if (!player) {
           return;
         }
 
-        const beforeSyncData = syncDataRef.current;
         const changedVideoId = syncData.videoId !== beforeSyncData.videoId;
-        const changedTiming =
-          syncData.baseTime !== beforeSyncData.baseTime ||
-          syncData.currentTime !== beforeSyncData.currentTime;
-        const changedSpeed = syncData.playbackRate !== beforeSyncData.playbackRate;
-        const changedPaused = syncData.paused !== beforeSyncData.paused;
-        const needTimingSync = changedVideoId || changedTiming || changedSpeed || changedPaused;
+
         syncDataRef.current = syncData;
 
         if (changedVideoId) {
@@ -122,9 +118,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           player.playVideo();
         }
 
-        if (needTimingSync) {
-          notifySyncData(syncData);
-        }
+        notifySyncData(syncData);
       },
       [notifySyncData]
     );
