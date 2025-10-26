@@ -75,10 +75,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       playerInterface()
     );
 
-    // 同期開始関数を安定化（再レンダリングを防ぐため）
-    const performSyncRef = useRef(performSync);
-    performSyncRef.current = performSync;
-
     const handleReady = useCallback((event: YTPlayerEvent) => {
       const player = event.target;
       try {
@@ -89,9 +85,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           player.loadVideoById(syncDataRef.current.videoId);
           handleSyncData(syncDataRef.current);
         }
-
-        // プレイヤーが準備できたら同期を開始
-        performSyncRef.current();
       } catch {}
     }, []);
 
