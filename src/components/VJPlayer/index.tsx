@@ -71,9 +71,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     // カスタムフックの使用
-    const { getCurrentTime, performSync, setDuration, notifySyncData } = usePlayerSync(
-      playerInterface()
-    );
+    const { getCurrentTime, setDuration, notifySyncData } = usePlayerSync(playerInterface());
 
     const handleReady = useCallback((event: YTPlayerEvent) => {
       const player = event.target;
@@ -126,10 +124,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
 
         if (needTimingSync) {
           notifySyncData(syncData);
-          performSync();
         }
       },
-      [performSync, notifySyncData]
+      [notifySyncData]
     );
 
     useEffect(() => {

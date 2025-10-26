@@ -205,6 +205,7 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
     }, []),
     notifySyncData: (syncData: VJSyncData) => {
       syncDataRef.current = syncData;
+      performSync();
     },
     performSync,
     isSyncing: animationFrameIdRef.current !== null,
