@@ -1,4 +1,7 @@
+import Fader from "@/components/Fader";
 import { LOCAL_STORAGE_KEY } from "@/constants";
+import { useStorageSync } from "@/hooks/useStorageSync";
+import type { MixerData } from "@/types";
 import { useEffect, useRef, useState } from "react";
 import StatusBar from "./components/StatusBar";
 import VJController from "./components/VJController";
@@ -8,13 +11,20 @@ import { parseYouTubeURL } from "./utils";
 const ControllerPage = () => {
   const [preparedVideoId, setPreparedVideoId] = useState<string>("");
   const [thumbnailUrl, setThumbnailUrl] = useState<string>("https://img.youtube.com/vi/");
+  const { data: mixerData, setData: setMixerData } = useStorageSync<MixerData>("mixer");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, []);
+
+    window.mixer = {
+      setCrossfader: (value: number) => {
+        setMixerData({ ...mixerData, crossfader: value });
+      },
+    };
+  }, [mixerData, setMixerData]);
 
   const handleVideoIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const parsed = parseYouTubeURL(e.target.value);
@@ -55,6 +65,18 @@ const ControllerPage = () => {
               placeholder="Enter YouTube ID"
               onChange={handleVideoIdChange}
               ref={inputRef}
+            />
+          </fieldset>
+          <fieldset>
+            <legend>Crossfader</legend>
+            <Fader
+              min={0}
+              max={1}
+              value={mixerData?.crossfader ?? 0}
+              step={0.01}
+              onChange={(value) => {
+                setMixerData({ ...mixerData, crossfader: value });
+              }}
             />
           </fieldset>
         </div>

@@ -14,6 +14,11 @@ declare global {
     // VJ Controller reference
     ch0: VJControllerRef | null;
 
+    // Mixer
+    mixer: {
+      setCrossfader: (value: number) => void;
+    };
+
     // MIDI Script Manager
     // biome-ignore lint/style/useNamingConvention: MIDI API naming
     MIDIScriptManager: MIDIScriptManagerConstructor;

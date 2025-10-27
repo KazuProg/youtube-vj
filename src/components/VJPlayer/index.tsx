@@ -1,9 +1,9 @@
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/constants";
+import { useStorageSync } from "@/hooks/useStorageSync";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import YouTubePlayer from "../YouTubePlayer";
 import { type YTPlayer, type YTPlayerEvent, YT_PLAYER_STATE } from "../YouTubePlayer/types";
 import { type PlayerSyncInterface, usePlayerSync } from "./hooks/usePlayerSync";
-import { useStorageSync } from "./hooks/useStorageSync";
 import type { VJPlayerRef, VJSyncData } from "./types";
 
 interface VJPlayerProps {
