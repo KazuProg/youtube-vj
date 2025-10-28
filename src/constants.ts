@@ -1,5 +1,6 @@
 export const LOCAL_STORAGE_KEY = {
-  player: "ytvj_player",
+  leftDeck: "ytvj_left_deck",
+  mixer: "ytvj_mixer",
 };
 
 export const DEFAULT_VALUES = {

@@ -11,7 +11,9 @@ import { parseYouTubeURL } from "./utils";
 const ControllerPage = () => {
   const [preparedVideoId, setPreparedVideoId] = useState<string>("");
   const [thumbnailUrl, setThumbnailUrl] = useState<string>("https://img.youtube.com/vi/");
-  const { data: mixerData, setData: setMixerData } = useStorageSync<MixerData>("mixer");
+  const { data: mixerData, setData: setMixerData } = useStorageSync<MixerData>(
+    LOCAL_STORAGE_KEY.mixer
+  );
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -41,7 +43,7 @@ const ControllerPage = () => {
       <div className={styles.controller}>
         <VJController
           className={styles.deck}
-          localStorageKey={LOCAL_STORAGE_KEY.player}
+          localStorageKey={LOCAL_STORAGE_KEY.leftDeck}
           setGlobalPlayer={(player) => {
             window.ch0 = player;
           }}

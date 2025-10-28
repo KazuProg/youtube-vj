@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import styles from "./page.module.css";
 
 const ProjectionPage = () => {
-  const { data: mixerData } = useStorageSync<MixerData>("mixer");
+  const { data: mixerData } = useStorageSync<MixerData>(LOCAL_STORAGE_KEY.mixer);
   useEffect(() => {
     document.title = "📺 VJ投影画面";
     document.body.style.backgroundColor = "#000";
@@ -26,7 +26,7 @@ const ProjectionPage = () => {
         opacity: Math.min((1 - (mixerData?.crossfader ?? 0)) * 2, 1),
       }}
     >
-      <VJPlayer className={styles.player} syncKey={LOCAL_STORAGE_KEY.player} />
+      <VJPlayer className={styles.player} syncKey={LOCAL_STORAGE_KEY.leftDeck} />
     </div>
   );
 };
