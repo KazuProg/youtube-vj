@@ -1,6 +1,8 @@
 import type { JsonValue } from "@/types";
 import { useEffect, useRef, useState } from "react";
 
+const LOCAL_STORAGE_CHANGE_EVENT = "_storage" as const;
+
 interface StorageAdapter {
   save(key: string, value: object | null): void;
   load(key: string): object | null;
@@ -12,6 +14,12 @@ const localStorageAdapter: StorageAdapter = {
   save: (key: string, value: object | null) => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
+
+      window.dispatchEvent(
+        new CustomEvent(LOCAL_STORAGE_CHANGE_EVENT, {
+          detail: { key, value },
+        })
+      );
     } catch (error) {
       console.error("Error saving to localStorage:", error);
     }
@@ -28,6 +36,12 @@ const localStorageAdapter: StorageAdapter = {
   clear: (key: string) => {
     try {
       localStorage.removeItem(key);
+
+      window.dispatchEvent(
+        new CustomEvent(LOCAL_STORAGE_CHANGE_EVENT, {
+          detail: { key, value: null },
+        })
+      );
     } catch (error) {
       console.error("Error clearing localStorage:", error);
     }
@@ -42,9 +56,22 @@ const localStorageAdapter: StorageAdapter = {
         }
       }
     };
+
+    const handleCustomStorageChange = (e: CustomEvent) => {
+      if (e.detail.key === key) {
+        callback(e.detail.value);
+      }
+    };
+
     window.addEventListener("storage", handleStorageChange);
+    window.addEventListener(LOCAL_STORAGE_CHANGE_EVENT, handleCustomStorageChange as EventListener);
+
     return () => {
       window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(
+        LOCAL_STORAGE_CHANGE_EVENT,
+        handleCustomStorageChange as EventListener
+      );
     };
   },
 };
