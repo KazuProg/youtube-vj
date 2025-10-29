@@ -10,7 +10,6 @@ import { parseYouTubeURL } from "./utils";
 
 const ControllerPage = () => {
   const [preparedVideoId, setPreparedVideoId] = useState<string>("");
-  const [thumbnailUrl, setThumbnailUrl] = useState<string>("https://img.youtube.com/vi/");
   const { data: mixerData, setData: setMixerData } = useStorageSync<MixerData>(
     LOCAL_STORAGE_KEY.mixer
   );
@@ -33,8 +32,6 @@ const ControllerPage = () => {
     if (parsed && inputRef.current) {
       inputRef.current.value = parsed.id;
       setPreparedVideoId(parsed.id);
-      const thumbnailUrl = `https://img.youtube.com/vi/${parsed.id}/default.jpg`;
-      setThumbnailUrl(thumbnailUrl);
     }
   };
 
@@ -60,7 +57,11 @@ const ControllerPage = () => {
           </div>
           <fieldset className={styles.loadTrack}>
             <legend>Load Track</legend>
-            <img className={styles.ytThumbnail} alt="YouTube Thumbnail" src={thumbnailUrl} />
+            <img
+              className={styles.ytThumbnail}
+              alt="YouTube Thumbnail"
+              src={`https://img.youtube.com/vi/${preparedVideoId}/default.jpg`}
+            />
             <input
               type="text"
               id="input-videoId"
