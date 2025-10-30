@@ -3,16 +3,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import SeekBar from "./components/SeekBar";
 import VJPlayerForController from "./components/VJPlayerForController";
 import styles from "./index.module.css";
-import type { VJControllerRef } from "./types";
+import type { DeckRef } from "./types";
 
-interface VJControllerProps {
+interface DeckProps {
   localStorageKey: string;
-  setGlobalPlayer: (player: VJControllerRef | null) => void;
+  setGlobalPlayer: (player: DeckRef | null) => void;
   className?: string;
 }
 
-const VJController = ({ localStorageKey, setGlobalPlayer, className }: VJControllerProps) => {
-  const playerRef = useRef<VJControllerRef | null>(null);
+const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
+  const playerRef = useRef<DeckRef | null>(null);
 
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [volume, setVolume] = useState<number>(100);
@@ -206,4 +206,4 @@ const VJController = ({ localStorageKey, setGlobalPlayer, className }: VJControl
   );
 };
 
-export default VJController;
+export default Deck;

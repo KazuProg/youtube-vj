@@ -1,4 +1,4 @@
-import type { VJControllerRef } from "@/Controller/components/VJController/types";
+import type { DeckRef } from "@/Controller/components/Deck/types";
 import VJPlayer from "@/components/VJPlayer";
 import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
 import type { YTPlayerEvent } from "@/components/YouTubePlayer/types";
@@ -15,7 +15,7 @@ interface VJPlayerForControllerProps {
   onVolumeChange?: (volume: number, isMuted: boolean) => void;
 }
 
-const VJPlayerForController = forwardRef<VJControllerRef, VJPlayerForControllerProps>(
+const VJPlayerForController = forwardRef<DeckRef, VJPlayerForControllerProps>(
   (
     {
       className,

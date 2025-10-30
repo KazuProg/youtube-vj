@@ -3,8 +3,8 @@ import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import type { MixerData } from "@/types";
 import { useEffect, useRef, useState } from "react";
+import Deck from "./components/Deck";
 import StatusBar from "./components/StatusBar";
-import VJController from "./components/VJController";
 import styles from "./page.module.css";
 import { parseYouTubeURL } from "./utils";
 
@@ -38,7 +38,7 @@ const ControllerPage = () => {
   return (
     <div className={styles.controllerWindow}>
       <div className={styles.controller}>
-        <VJController
+        <Deck
           className={styles.deck}
           localStorageKey={LOCAL_STORAGE_KEY.leftDeck}
           setGlobalPlayer={(player) => {

@@ -1,4 +1,4 @@
-export interface VJControllerRef {
+export interface DeckRef {
   playVideo: () => void;
   pauseVideo: () => void;
   isPlaying: () => boolean;

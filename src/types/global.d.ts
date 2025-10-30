@@ -1,4 +1,4 @@
-import type { VJControllerRef } from "@/Controller/components/VJController/types";
+import type { DeckRef as VJControllerRef } from "@/Controller/components/Deck/types";
 
 export interface MIDIScriptManager {
   openCustomScriptEditor: () => void;
