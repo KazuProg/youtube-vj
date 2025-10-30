@@ -17,11 +17,10 @@ interface DeckProps {
 
 const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
   const vjPlayerRef = useRef<VJPlayerRef | null>(null);
-  const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(
-    localStorageKey,
-    INITIAL_SYNC_DATA,
-    true
-  );
+  const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(localStorageKey, {
+    defaultValue: INITIAL_SYNC_DATA,
+    overwrite: true,
+  });
   const syncDataRef = useRef<VJSyncData>(syncData);
   const deckControllerRef = useRef<DeckAPI | null>(null);
 

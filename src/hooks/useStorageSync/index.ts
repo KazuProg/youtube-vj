@@ -78,36 +78,46 @@ const localStorageAdapter: StorageAdapter = {
 
 export const useStorageSync = <T extends JsonValue = JsonValue>(
   syncKey: string,
-  defaultValue: T | null = null,
-  overwrite = false,
-  storage: StorageAdapter = localStorageAdapter
+  configParam?: {
+    overwrite?: boolean;
+    defaultValue?: T | null;
+    storage?: StorageAdapter;
+  }
 ) => {
+  const config = {
+    overwrite: false,
+    defaultValue: null,
+    storage: localStorageAdapter,
+    ...configParam,
+  };
   const [data, setData] = useState<T | null>(() => {
-    const loaded = overwrite ? defaultValue : (storage.load(syncKey) ?? defaultValue);
+    const loaded = config.overwrite
+      ? config.defaultValue
+      : (config.storage.load(syncKey) ?? config.defaultValue);
     return loaded as T | null;
   });
   const isExternalChangeRef = useRef(false);
 
   useEffect(() => {
-    return storage.onChange(syncKey, (newData: object | null) => {
+    return config.storage.onChange(syncKey, (newData: object | null) => {
       isExternalChangeRef.current = true;
       setData(newData as T);
     });
-  }, [storage, syncKey]);
+  }, [config.storage, syncKey]);
 
   useEffect(() => {
     if (!isExternalChangeRef.current) {
-      storage.save(syncKey, data as object | null);
+      config.storage.save(syncKey, data as object | null);
     }
     isExternalChangeRef.current = false;
-  }, [data, storage, syncKey]);
+  }, [data, config.storage, syncKey]);
 
   return {
     data,
     setData,
     clearData: () => {
       setData(null);
-      storage.clear(syncKey);
+      config.storage.clear(syncKey);
     },
   };
 };
