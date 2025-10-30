@@ -1,77 +1,191 @@
 import Fader from "@/components/Fader";
+import VJPlayer from "@/components/VJPlayer";
+import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
+import { type YTPlayerEvent, YT_PLAYER_STATE } from "@/components/YouTubePlayer/types";
+import { INITIAL_SYNC_DATA } from "@/constants";
+import { useStorageSync } from "@/hooks/useStorageSync";
 import { useCallback, useEffect, useRef, useState } from "react";
 import SeekBar from "./components/SeekBar";
-import VJPlayerForController from "./components/VJPlayerForController";
 import styles from "./index.module.css";
-import type { DeckRef } from "./types";
+import type { DeckAPI } from "./types";
 
 interface DeckProps {
   localStorageKey: string;
-  setGlobalPlayer: (player: DeckRef | null) => void;
+  setGlobalPlayer: (player: DeckAPI | null) => void;
   className?: string;
 }
 
 const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
-  const playerRef = useRef<DeckRef | null>(null);
+  const vjPlayerRef = useRef<VJPlayerRef | null>(null);
+  const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(localStorageKey);
+  const syncDataRef = useRef<VJSyncData>(syncData);
+  const deckControllerRef = useRef<DeckAPI | null>(null);
 
+  // UI用のstate
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [volume, setVolume] = useState<number>(100);
   const [isMuted, setIsMuted] = useState<boolean>(true);
 
   const getCurrentTime = (): number => {
-    return playerRef.current?.getCurrentTime() ?? 0;
+    return vjPlayerRef.current?.getCurrentTime() ?? 0;
   };
 
   useEffect(() => {
-    setGlobalPlayer(playerRef.current ?? null);
-  }, [setGlobalPlayer]);
+    setSyncData(INITIAL_SYNC_DATA);
+  }, [setSyncData]);
 
   useEffect(() => {
-    if (playerRef.current) {
-      playerRef.current.setVolume(volume);
-    }
+    syncDataRef.current = syncData;
+  }, [syncData]);
+
+  const updateSyncData = useCallback(
+    (partialSyncData: Partial<VJSyncData>) => {
+      const previousSyncData = syncDataRef.current;
+      // undefinedの値を除外してマージ
+      const filteredPartialData = Object.fromEntries(
+        Object.entries(partialSyncData).filter(([_, value]) => value !== undefined)
+      );
+      const newSyncData = {
+        ...previousSyncData,
+        ...filteredPartialData,
+      } as VJSyncData;
+      setSyncData(newSyncData);
+
+      if (previousSyncData?.playbackRate !== newSyncData.playbackRate) {
+        setPlaybackRate(newSyncData.playbackRate);
+      }
+    },
+    [setSyncData]
+  );
+
+  useEffect(() => {
+    deckControllerRef.current = {
+      playVideo: () => {
+        updateSyncData({
+          baseTime: Date.now(),
+          paused: false,
+        });
+      },
+      pauseVideo: () => {
+        updateSyncData({
+          baseTime: Date.now(),
+          currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
+          paused: true,
+        });
+      },
+      isPlaying: () => {
+        return syncDataRef.current?.paused === false;
+      },
+      seekTo: (seconds: number, _allowSeekAhead: boolean) => {
+        updateSyncData({
+          ...syncDataRef.current,
+          baseTime: Date.now(),
+          currentTime: seconds,
+        });
+      },
+      mute: () => {
+        vjPlayerRef.current?.getPlayer()?.mute();
+      },
+      unMute: () => {
+        vjPlayerRef.current?.getPlayer()?.unMute();
+      },
+      isMuted: () => {
+        return vjPlayerRef.current?.getPlayer()?.isMuted() ?? false;
+      },
+      setVolume: (volume: number) => {
+        vjPlayerRef.current?.getPlayer()?.setVolume(volume);
+      },
+      setPlaybackRate: (rate: number) => {
+        updateSyncData({
+          currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
+          baseTime: Date.now(),
+          playbackRate: Number.parseFloat(rate.toFixed(2)),
+        });
+      },
+      loadVideoById: (newVideoId: string) => {
+        updateSyncData({
+          videoId: newVideoId,
+          currentTime: 0,
+          baseTime: Date.now(),
+          paused: false,
+        });
+      },
+      getCurrentTime: () => {
+        return vjPlayerRef.current?.getCurrentTime() ?? 0;
+      },
+      getDuration: () => {
+        return vjPlayerRef.current?.getPlayer()?.getDuration() ?? 0;
+      },
+    } as DeckAPI;
+    setGlobalPlayer(deckControllerRef.current);
+  }, [setGlobalPlayer, updateSyncData]);
+
+  useEffect(() => {
+    deckControllerRef.current?.setVolume(volume);
   }, [volume]);
 
   useEffect(() => {
-    if (playerRef.current) {
-      playerRef.current.setPlaybackRate(playbackRate);
-    }
+    deckControllerRef.current?.setPlaybackRate(playbackRate);
   }, [playbackRate]);
 
   useEffect(() => {
-    if (playerRef.current) {
-      if (isMuted) {
-        playerRef.current.mute();
-      } else {
-        playerRef.current.unMute();
-      }
+    if (isMuted) {
+      deckControllerRef.current?.mute();
+    } else {
+      deckControllerRef.current?.unMute();
     }
   }, [isMuted]);
 
-  const handleSeek = useCallback((time: number) => {
-    if (playerRef.current) {
-      playerRef.current.seekTo(time, true);
-    }
-  }, []);
+  const handleStateChange = useCallback(
+    (e: YTPlayerEvent) => {
+      //return;
+      const playerState = e.data;
+
+      if (playerState === YT_PLAYER_STATE.UNSTARTED) {
+        updateSyncData({
+          currentTime: 0,
+          baseTime: Date.now(),
+        });
+      }
+
+      if (playerState === YT_PLAYER_STATE.PAUSED && !syncDataRef.current?.paused) {
+        updateSyncData({
+          currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
+          baseTime: Date.now(),
+          paused: true,
+        });
+      }
+      if (playerState !== YT_PLAYER_STATE.PAUSED && syncDataRef.current?.paused) {
+        updateSyncData({
+          baseTime: Date.now(),
+          paused: false,
+        });
+      }
+
+      if (playerState === YT_PLAYER_STATE.ENDED) {
+        updateSyncData({
+          currentTime: 0,
+          baseTime: Date.now(),
+        });
+      }
+    },
+    [updateSyncData]
+  );
 
   return (
     <div className={`${styles.container} ${className}`}>
       <fieldset>
         <legend>Preview</legend>
-        <VJPlayerForController
+        <VJPlayer
           className={styles.player}
-          ref={playerRef}
+          ref={vjPlayerRef}
+          onStateChange={handleStateChange}
           syncKey={localStorageKey}
-          onPlaybackRateChange={setPlaybackRate}
-          onVolumeChange={(volume: number, isMuted: boolean) => {
-            setVolume(volume);
-            setIsMuted(isMuted);
-          }}
         />
         <SeekBar
           currentTimeFunc={getCurrentTime}
-          durationFunc={() => playerRef.current?.getDuration() ?? 0}
-          onSeek={handleSeek}
+          durationFunc={() => deckControllerRef.current?.getDuration() ?? 0}
+          onSeek={(time: number) => deckControllerRef.current?.seekTo(time, true)}
         />
       </fieldset>
       <div
@@ -110,7 +224,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
               width: "50px",
               height: "150px",
             }}
-            onChange={(e) => setPlaybackRate(e)}
+            onChange={setPlaybackRate}
           />
           <span>{playbackRate.toFixed(2)}x</span>
         </fieldset>
@@ -168,7 +282,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
             type="button"
             onClick={() => {
               const newTime = getCurrentTime() - 1;
-              playerRef.current?.seekTo(newTime, true);
+              deckControllerRef.current?.seekTo(newTime, true);
             }}
           >
             -1
@@ -177,7 +291,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
             type="button"
             onClick={() => {
               const newTime = getCurrentTime() + 1;
-              playerRef.current?.seekTo(newTime, true);
+              deckControllerRef.current?.seekTo(newTime, true);
             }}
           >
             +1
@@ -186,7 +300,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
             type="button"
             onClick={() => {
               const newTime = getCurrentTime() - 0.1;
-              playerRef.current?.seekTo(newTime, true);
+              deckControllerRef.current?.seekTo(newTime, true);
             }}
           >
             -0.1
@@ -195,7 +309,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
             type="button"
             onClick={() => {
               const newTime = getCurrentTime() + 0.1;
-              playerRef.current?.seekTo(newTime, true);
+              deckControllerRef.current?.seekTo(newTime, true);
             }}
           >
             +0.1

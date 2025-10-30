@@ -1,4 +1,4 @@
-export interface DeckRef {
+export interface DeckAPI {
   playVideo: () => void;
   pauseVideo: () => void;
   isPlaying: () => boolean;
@@ -11,6 +11,4 @@ export interface DeckRef {
   getCurrentTime: () => number | null;
   loadVideoById: (videoId: string) => void;
   getDuration: () => number | null;
-  playerState: number;
-  playbackRate: number;
 }

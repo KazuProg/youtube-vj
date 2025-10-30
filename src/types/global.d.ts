@@ -1,4 +1,4 @@
-import type { DeckRef as VJControllerRef } from "@/Controller/components/Deck/types";
+import type { DeckAPI } from "@/Controller/components/Deck/types";
 
 export interface MIDIScriptManager {
   openCustomScriptEditor: () => void;
@@ -12,7 +12,7 @@ export interface MIDIScriptManagerConstructor {
 declare global {
   interface Window {
     // VJ Controller reference
-    ch0: VJControllerRef | null;
+    ch0: DeckAPI | null;
 
     // Mixer
     mixer: {
