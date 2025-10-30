@@ -17,7 +17,11 @@ interface DeckProps {
 
 const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
   const vjPlayerRef = useRef<VJPlayerRef | null>(null);
-  const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(localStorageKey);
+  const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(
+    localStorageKey,
+    INITIAL_SYNC_DATA,
+    true
+  );
   const syncDataRef = useRef<VJSyncData>(syncData);
   const deckControllerRef = useRef<DeckAPI | null>(null);
 
@@ -29,10 +33,6 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
   const getCurrentTime = (): number => {
     return vjPlayerRef.current?.getCurrentTime() ?? 0;
   };
-
-  useEffect(() => {
-    setSyncData(INITIAL_SYNC_DATA);
-  }, [setSyncData]);
 
   useEffect(() => {
     syncDataRef.current = syncData;

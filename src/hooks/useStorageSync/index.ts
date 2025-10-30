@@ -78,10 +78,12 @@ const localStorageAdapter: StorageAdapter = {
 
 export const useStorageSync = <T extends JsonValue = JsonValue>(
   syncKey: string,
+  defaultValue: T | null = null,
+  overwrite = false,
   storage: StorageAdapter = localStorageAdapter
 ) => {
   const [data, setData] = useState<T | null>(() => {
-    const loaded = storage.load(syncKey);
+    const loaded = overwrite ? defaultValue : (storage.load(syncKey) ?? defaultValue);
     return loaded as T | null;
   });
   const isExternalChangeRef = useRef(false);
