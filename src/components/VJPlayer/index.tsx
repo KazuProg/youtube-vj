@@ -2,9 +2,19 @@ import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import YouTubePlayer from "../YouTubePlayer";
-import { type YTPlayer, type YTPlayerEvent, YT_PLAYER_STATE } from "../YouTubePlayer/types";
+import {
+  type YTPlayer,
+  type YTPlayerEvent,
+  type YTPlayerVars,
+  YT_PLAYER_STATE,
+} from "../YouTubePlayer/types";
 import { type PlayerSyncInterface, usePlayerSync } from "./hooks/usePlayerSync";
 import type { VJPlayerRef, VJSyncData } from "./types";
+
+const playerVars: YTPlayerVars = {
+  controls: 0,
+  disablekb: 1,
+};
 
 interface VJPlayerProps {
   className?: string;
@@ -164,7 +174,14 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [handleReady, handleStateChange]
     );
 
-    return <YouTubePlayer className={className} videoId={DEFAULT_VALUES.videoId} events={events} />;
+    return (
+      <YouTubePlayer
+        className={className}
+        videoId={DEFAULT_VALUES.videoId}
+        events={events}
+        playerVars={playerVars}
+      />
+    );
   }
 );
 
