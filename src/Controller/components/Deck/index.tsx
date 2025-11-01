@@ -77,7 +77,6 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
       },
       seekTo: (seconds: number, _allowSeekAhead: boolean) => {
         updateSyncData({
-          ...syncDataRef.current,
           baseTime: Date.now(),
           currentTime: seconds,
         });
