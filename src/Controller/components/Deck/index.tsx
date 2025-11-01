@@ -22,7 +22,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
     overwrite: true,
   });
   const syncDataRef = useRef<VJSyncData>(syncData);
-  const deckControllerRef = useRef<DeckAPI | null>(null);
+  const deckAPIRef = useRef<DeckAPI | null>(null);
 
   // UI用のstate
   const [playbackRate, setPlaybackRate] = useState<number>(1);
@@ -58,7 +58,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
   );
 
   useEffect(() => {
-    deckControllerRef.current = {
+    deckAPIRef.current = {
       playVideo: () => {
         updateSyncData({
           baseTime: Date.now(),
@@ -116,22 +116,22 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
         return vjPlayerRef.current?.getPlayer()?.getDuration() ?? 0;
       },
     } as DeckAPI;
-    setGlobalPlayer(deckControllerRef.current);
+    setGlobalPlayer(deckAPIRef.current);
   }, [setGlobalPlayer, updateSyncData]);
 
   useEffect(() => {
-    deckControllerRef.current?.setVolume(volume);
+    deckAPIRef.current?.setVolume(volume);
   }, [volume]);
 
   useEffect(() => {
-    deckControllerRef.current?.setPlaybackRate(playbackRate);
+    deckAPIRef.current?.setPlaybackRate(playbackRate);
   }, [playbackRate]);
 
   useEffect(() => {
     if (isMuted) {
-      deckControllerRef.current?.mute();
+      deckAPIRef.current?.mute();
     } else {
-      deckControllerRef.current?.unMute();
+      deckAPIRef.current?.unMute();
     }
   }, [isMuted]);
 
@@ -183,8 +183,8 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
         />
         <SeekBar
           currentTimeFunc={getCurrentTime}
-          durationFunc={() => deckControllerRef.current?.getDuration() ?? 0}
-          onSeek={(time: number) => deckControllerRef.current?.seekTo(time, true)}
+          durationFunc={() => deckAPIRef.current?.getDuration() ?? 0}
+          onSeek={(time: number) => deckAPIRef.current?.seekTo(time, true)}
         />
       </fieldset>
       <div
@@ -281,7 +281,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
             type="button"
             onClick={() => {
               const newTime = getCurrentTime() - 1;
-              deckControllerRef.current?.seekTo(newTime, true);
+              deckAPIRef.current?.seekTo(newTime, true);
             }}
           >
             -1
@@ -290,7 +290,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
             type="button"
             onClick={() => {
               const newTime = getCurrentTime() + 1;
-              deckControllerRef.current?.seekTo(newTime, true);
+              deckAPIRef.current?.seekTo(newTime, true);
             }}
           >
             +1
@@ -299,7 +299,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
             type="button"
             onClick={() => {
               const newTime = getCurrentTime() - 0.1;
-              deckControllerRef.current?.seekTo(newTime, true);
+              deckAPIRef.current?.seekTo(newTime, true);
             }}
           >
             -0.1
@@ -308,7 +308,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
             type="button"
             onClick={() => {
               const newTime = getCurrentTime() + 0.1;
-              deckControllerRef.current?.seekTo(newTime, true);
+              deckAPIRef.current?.seekTo(newTime, true);
             }}
           >
             +0.1
