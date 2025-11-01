@@ -47,38 +47,41 @@ export interface YTPlayerEventHandlers {
   onAutoplayBlocked?: (event: YTPlayerEvent) => void;
 }
 
+//  プレイヤーパラメータ型
+export interface YTPlayerVars {
+  autoplay?: 0 | 1;
+  // biome-ignore lint/style/useNamingConvention: YouTube API parameter
+  cc_lang_pref?: string;
+  // biome-ignore lint/style/useNamingConvention: YouTube API parameter
+  cc_load_policy?: 0 | 1;
+  color?: "red" | "white";
+  controls?: 0 | 1;
+  disablekb?: 0 | 1;
+  enablejsapi?: 0 | 1;
+  end?: number;
+  fs?: 0 | 1;
+  hl?: string;
+  // biome-ignore lint/style/useNamingConvention: YouTube API parameter
+  iv_load_policy?: 1 | 3;
+  list?: string | string[];
+  listType?: "playlist" | "user_uploads";
+  loop?: 0 | 1;
+  origin?: string;
+  playlist?: string[];
+  playsinline?: 0 | 1;
+  rel?: 0 | 1;
+  start?: number;
+  // biome-ignore lint/style/useNamingConvention: YouTube API parameter
+  widget_referrer?: string;
+  [key: string]: string | number | boolean | string[] | undefined;
+}
+
 // プレイヤーオプション型
 export interface YTPlayerOptions {
   width?: number;
   height?: number;
   videoId?: string;
-  playerVars?: {
-    autoplay?: 0 | 1;
-    // biome-ignore lint/style/useNamingConvention: YouTube API parameter
-    cc_lang_pref?: string;
-    // biome-ignore lint/style/useNamingConvention: YouTube API parameter
-    cc_load_policy?: 0 | 1;
-    color?: "red" | "white";
-    controls?: 0 | 1;
-    disablekb?: 0 | 1;
-    enablejsapi?: 0 | 1;
-    end?: number;
-    fs?: 0 | 1;
-    hl?: string;
-    // biome-ignore lint/style/useNamingConvention: YouTube API parameter
-    iv_load_policy?: 1 | 3;
-    list?: string | string[];
-    listType?: "playlist" | "user_uploads";
-    loop?: 0 | 1;
-    origin?: string;
-    playlist?: string[];
-    playsinline?: 0 | 1;
-    rel?: 0 | 1;
-    start?: number;
-    // biome-ignore lint/style/useNamingConvention: YouTube API parameter
-    widget_referrer?: string;
-    [key: string]: string | number | boolean | string[] | undefined;
-  };
+  playerVars?: YTPlayerVars;
   events?: YTPlayerEventHandlers;
 }
 

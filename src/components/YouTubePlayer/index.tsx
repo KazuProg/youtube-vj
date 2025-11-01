@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import styles from "./index.module.css";
-import type { YTPlayer, YTPlayerEventHandlers, YTPlayerOptions } from "./types";
+import type { YTPlayer, YTPlayerEventHandlers, YTPlayerVars } from "./types";
 import { loadYouTubeIFrameAPI } from "./utils";
 
 interface YouTubePlayerProps {
   className?: string;
   videoId: string;
-  playerVars?: YTPlayerOptions["playerVars"];
+  playerVars?: YTPlayerVars;
   events?: YTPlayerEventHandlers;
 }
 
