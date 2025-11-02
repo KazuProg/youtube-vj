@@ -1,21 +1,26 @@
 import type { MixerData } from "@/types";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { MixerAPI } from "../../types";
 
 interface UseMixerAPIParams {
   setMixerData: (mixerData: MixerData | ((prev: MixerData | null) => MixerData)) => void;
+  setGlobalMixer: (mixer: MixerAPI | null) => void;
 }
 
-export const useMixerAPI = ({ setMixerData }: UseMixerAPIParams) => {
+export const useMixerAPI = ({ setMixerData, setGlobalMixer }: UseMixerAPIParams) => {
+  const mixerAPIRef = useRef<MixerAPI | null>(null);
+
   useEffect(() => {
-    const mixerAPI: MixerAPI = {
+    mixerAPIRef.current = {
       setCrossfader: (value: number) => {
         setMixerData((prev) => ({
           ...(prev ?? { crossfader: 0 }),
           crossfader: value,
         }));
       },
-    };
-    window.mixer = mixerAPI;
-  }, [setMixerData]);
+    } as MixerAPI;
+    setGlobalMixer(mixerAPIRef.current);
+  }, [setMixerData, setGlobalMixer]);
+
+  return mixerAPIRef;
 };

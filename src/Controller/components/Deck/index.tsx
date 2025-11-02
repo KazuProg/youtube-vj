@@ -11,11 +11,12 @@ import type { DeckAPI } from "./types";
 
 interface DeckProps {
   localStorageKey: string;
-  setGlobalPlayer: (player: DeckAPI | null) => void;
+  deckId: number;
+  setGlobalPlayer: (deckId: number, player: DeckAPI | null) => void;
   className?: string;
 }
 
-const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
+const Deck = ({ localStorageKey, deckId, setGlobalPlayer, className }: DeckProps) => {
   const vjPlayerRef = useRef<VJPlayerRef | null>(null);
   const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(localStorageKey, {
     defaultValue: INITIAL_SYNC_DATA,
@@ -60,6 +61,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
     vjPlayerRef,
     syncDataRef,
     updateSyncData,
+    deckId,
     setGlobalPlayer,
   });
 
