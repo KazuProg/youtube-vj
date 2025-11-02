@@ -39,7 +39,7 @@ export const useTimeSync = (syncDataRef: RefObject<VJSyncData>) => {
 
       return adjustedTime;
     } catch (error) {
-      console.warn("Failed to calculate current time:", error);
+      console.warn("[useTimeSync] Failed to calculate current time:", error);
       return null;
     }
   }, [syncDataRef]);

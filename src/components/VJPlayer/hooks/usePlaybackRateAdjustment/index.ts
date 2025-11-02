@@ -78,7 +78,7 @@ export const usePlaybackRateAdjustment = ({
           }, SYNC_CONFIG.rateAdjustmentTimeout);
         }
       } catch (error) {
-        console.warn("Failed to set playback rate:", error);
+        console.warn("[usePlaybackRateAdjustment] Failed to set playback rate:", error);
         isAdjustingRateRef.current = false;
       }
     },
@@ -98,7 +98,7 @@ export const usePlaybackRateAdjustment = ({
       playerInterface.setPlaybackRate(syncData.playbackRate);
       lastAppliedRateRef.current = syncData.playbackRate;
     } catch (error) {
-      console.warn("Failed to set playback rate:", error);
+      console.warn("[usePlaybackRateAdjustment] Failed to set playback rate:", error);
     }
   }, [playerInterface, syncDataRef]);
 

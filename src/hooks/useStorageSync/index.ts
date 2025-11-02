@@ -21,7 +21,7 @@ const localStorageAdapter: StorageAdapter = {
         })
       );
     } catch (error) {
-      console.error("Error saving to localStorage:", error);
+      console.error("[useStorageSync] Failed to save to localStorage:", error);
     }
   },
   load: (key: string) => {
@@ -29,7 +29,7 @@ const localStorageAdapter: StorageAdapter = {
       const item = localStorage.getItem(key);
       return item ? JSON.parse(item) : null;
     } catch (error) {
-      console.error("Error loading from localStorage:", error);
+      console.error("[useStorageSync] Failed to load from localStorage:", error);
       return null;
     }
   },
@@ -43,7 +43,7 @@ const localStorageAdapter: StorageAdapter = {
         })
       );
     } catch (error) {
-      console.error("Error clearing localStorage:", error);
+      console.error("[useStorageSync] Failed to clear localStorage:", error);
     }
   },
   onChange: (key: string, callback: (data: object | null) => void) => {
@@ -52,7 +52,7 @@ const localStorageAdapter: StorageAdapter = {
         try {
           callback(JSON.parse(e.newValue));
         } catch (error) {
-          console.error("Error parsing storage event data:", error);
+          console.error("[useStorageSync] Failed to parse storage event data:", error);
         }
       }
     };

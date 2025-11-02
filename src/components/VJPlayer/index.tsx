@@ -45,7 +45,8 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           }
           try {
             return player.getCurrentTime();
-          } catch {
+          } catch (error) {
+            console.error("[VJPlayer] Failed to get current time:", error);
             return null;
           }
         },
@@ -56,7 +57,8 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           }
           try {
             return player.getPlaybackRate();
-          } catch {
+          } catch (error) {
+            console.error("[VJPlayer] Failed to get playback rate:", error);
             return null;
           }
         },
@@ -79,7 +81,8 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           }
           try {
             return player.getDuration();
-          } catch {
+          } catch (error) {
+            console.error("[VJPlayer] Failed to get duration:", error);
             return null;
           }
         },
@@ -100,7 +103,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           player.loadVideoById(syncDataRef.current.videoId);
           handleSyncData(syncDataRef.current);
         }
-      } catch {}
+      } catch (error) {
+        console.error("[VJPlayer] Failed to initialize player:", error);
+      }
     }, []);
 
     // 初期同期データの設定（一度だけ実行）

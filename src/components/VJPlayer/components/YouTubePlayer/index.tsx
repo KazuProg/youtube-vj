@@ -32,7 +32,9 @@ const YouTubePlayer = ({ className, videoId, playerVars, events }: YouTubePlayer
         events,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      console.error("[YouTubePlayer] Failed to initialize player:", err);
+      setError(errorMessage);
       isInitializedRef.current = false;
     }
   }, [events, playerElementId, playerVars, videoId]);

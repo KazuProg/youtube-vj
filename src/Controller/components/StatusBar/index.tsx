@@ -26,7 +26,8 @@ const StatusBar = () => {
         .then(() => {
           localStorage.setItem("midi", "true");
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error("[StatusBar] Failed to request MIDI access:", error);
           setMidi(null);
         });
     } else {

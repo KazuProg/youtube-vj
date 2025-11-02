@@ -81,7 +81,7 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
         applyPlaybackRateAdjustment(adjustmentRate);
       }
     } catch (error) {
-      console.warn("Failed to sync:", error);
+      console.warn("[usePlayerSync] Failed to sync:", error);
     }
 
     // 次のフレームで再帰的に呼び出し
