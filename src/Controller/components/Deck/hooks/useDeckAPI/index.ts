@@ -1,3 +1,4 @@
+import { useDeckAPIContext } from "@/Controller/contexts/DeckAPIContext";
 import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
@@ -19,6 +20,7 @@ export const useDeckAPI = ({
   setGlobalPlayer,
 }: UseDeckAPIParams) => {
   const deckAPIRef = useRef<DeckAPI | null>(null);
+  const { setDeckAPI } = useDeckAPIContext();
 
   useEffect(() => {
     deckAPIRef.current = {
@@ -79,7 +81,8 @@ export const useDeckAPI = ({
       },
     } as DeckAPI;
     setGlobalPlayer(deckId, deckAPIRef.current);
-  }, [deckId, setGlobalPlayer, updateSyncData, vjPlayerRef, syncDataRef]);
+    setDeckAPI(deckId, deckAPIRef.current);
+  }, [deckId, setGlobalPlayer, setDeckAPI, updateSyncData, vjPlayerRef, syncDataRef]);
 
   return deckAPIRef;
 };
