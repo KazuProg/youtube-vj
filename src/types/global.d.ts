@@ -1,4 +1,5 @@
 import type { DeckAPI } from "@/Controller/components/Deck/types";
+import type { MixerAPI } from "@/Controller/components/Mixer/types";
 
 export interface MIDIScriptManager {
   openCustomScriptEditor: () => void;
@@ -15,9 +16,7 @@ declare global {
     ch0: DeckAPI | null;
 
     // Mixer
-    mixer: {
-      setCrossfader: (value: number) => void;
-    };
+    mixer: MixerAPI | null;
 
     // MIDI Script Manager
     // biome-ignore lint/style/useNamingConvention: MIDI API naming
