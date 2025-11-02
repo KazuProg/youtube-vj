@@ -13,7 +13,7 @@ export interface MIDIScriptManagerConstructor {
 declare global {
   interface Window {
     // VJ Controller reference
-    ch0: DeckAPI | null;
+    ch: Record<number, DeckAPI | null>;
 
     // Mixer
     mixer: MixerAPI | null;
@@ -23,3 +23,5 @@ declare global {
     MIDIScriptManager: MIDIScriptManagerConstructor;
   }
 }
+
+window.ch = {};

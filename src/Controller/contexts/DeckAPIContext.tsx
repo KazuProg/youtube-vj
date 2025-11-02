@@ -24,9 +24,7 @@ export const DeckAPIProvider = ({
       return newArray;
     });
 
-    if (deckId === 0) {
-      window.ch0 = deckAPI;
-    }
+    window.ch[deckId] = deckAPI;
   }, []);
 
   const setMixerAPI = useCallback((mixer: MixerAPI | null) => {
