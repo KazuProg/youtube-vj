@@ -125,17 +125,8 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
           onSeek={(time: number) => deckAPIRef.current?.seekTo(time, true)}
         />
       </fieldset>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "100%",
-          gap: "20px",
-        }}
-      >
-        <fieldset style={{ flex: 1 }}>
+      <div className={styles.controlsContainer}>
+        <fieldset className={styles.controlFieldset}>
           <legend>
             <button
               type="button"
@@ -157,25 +148,16 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
             step={0.01}
             vertical={true}
             reverse={true}
-            style={{
-              width: "50px",
-              height: "150px",
-            }}
+            className={styles.fader}
             onChange={setPlaybackRate}
           />
           <span>{playbackRate.toFixed(2)}x</span>
         </fieldset>
-        <fieldset style={{ flex: 1 }}>
+        <fieldset className={styles.controlFieldset}>
           <legend>
             <button
               type="button"
-              style={{
-                ...(isMuted
-                  ? {
-                      color: "#f88",
-                    }
-                  : {}),
-              }}
+              className={isMuted ? styles.mutedButton : undefined}
               onClick={() => setIsMuted(!isMuted)}
               tabIndex={0}
               onKeyDown={(e) => {
@@ -193,23 +175,10 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
             value={volume}
             step={1}
             vertical={true}
-            style={{
-              width: "50px",
-              height: "150px",
-            }}
+            className={styles.fader}
             onChange={(e) => setVolume(e)}
           />
-          <span
-            style={{
-              ...(isMuted
-                ? {
-                    textDecoration: "line-through",
-                  }
-                : {}),
-            }}
-          >
-            {volume.toFixed(0)}%
-          </span>
+          <span className={isMuted ? styles.mutedText : undefined}>{volume.toFixed(0)}%</span>
         </fieldset>
       </div>
       <fieldset>
