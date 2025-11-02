@@ -1,5 +1,5 @@
-import type { YTPlayer } from "@/components/YouTubePlayer/types";
 import type { JsonValue } from "@/types";
+import type { YTPlayer } from "../components/YouTubePlayer/types";
 
 export interface VJSyncData extends Record<string, JsonValue> {
   videoId: string;

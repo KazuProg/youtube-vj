@@ -1,10 +1,9 @@
 import Fader from "@/components/Fader";
 import VJPlayer from "@/components/VJPlayer";
 import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
-import { type YTPlayerEvent, YT_PLAYER_STATE } from "@/components/YouTubePlayer/types";
 import { INITIAL_SYNC_DATA } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SeekBar from "./components/SeekBar";
 import styles from "./index.module.css";
 import type { DeckAPI } from "./types";
@@ -134,39 +133,34 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
     }
   }, [isMuted]);
 
-  const handleStateChange = useCallback(
-    (e: YTPlayerEvent) => {
-      //return;
-      const playerState = e.data;
-
-      if (playerState === YT_PLAYER_STATE.UNSTARTED) {
+  const vjPlayerEvents = useMemo(
+    () => ({
+      onUnstarted: () => {
         updateSyncData({
           currentTime: 0,
           baseTime: Date.now(),
         });
-      }
-
-      if (playerState === YT_PLAYER_STATE.PAUSED && !syncDataRef.current?.paused) {
+      },
+      onPaused: () => {
         updateSyncData({
           currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
           baseTime: Date.now(),
           paused: true,
         });
-      }
-      if (playerState !== YT_PLAYER_STATE.PAUSED && syncDataRef.current?.paused) {
+      },
+      onUnpaused: () => {
         updateSyncData({
           baseTime: Date.now(),
           paused: false,
         });
-      }
-
-      if (playerState === YT_PLAYER_STATE.ENDED) {
+      },
+      onEnded: () => {
         updateSyncData({
           currentTime: 0,
           baseTime: Date.now(),
         });
-      }
-    },
+      },
+    }),
     [updateSyncData]
   );
 
@@ -177,7 +171,7 @@ const Deck = ({ localStorageKey, setGlobalPlayer, className }: DeckProps) => {
         <VJPlayer
           className={styles.player}
           ref={vjPlayerRef}
-          onStateChange={handleStateChange}
+          events={vjPlayerEvents}
           syncKey={localStorageKey}
         />
         <SeekBar

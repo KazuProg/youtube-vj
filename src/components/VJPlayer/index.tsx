@@ -1,13 +1,13 @@
 import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from "react";
-import YouTubePlayer from "../YouTubePlayer";
+import YouTubePlayer from "./components/YouTubePlayer";
 import {
   type YTPlayer,
   type YTPlayerEvent,
   type YTPlayerVars,
   YT_PLAYER_STATE,
-} from "../YouTubePlayer/types";
+} from "./components/YouTubePlayer/types";
 import { type PlayerSyncInterface, usePlayerSync } from "./hooks/usePlayerSync";
 import type { VJPlayerRef, VJSyncData } from "./types";
 
@@ -16,14 +16,21 @@ const playerVars: YTPlayerVars = {
   disablekb: 1,
 };
 
+interface VJPlayerEvents {
+  onUnstarted?: () => void;
+  onPaused?: () => void;
+  onUnpaused?: () => void;
+  onEnded?: () => void;
+}
+
 interface VJPlayerProps {
   className?: string;
-  onStateChange?: (state: YTPlayerEvent) => void;
+  events?: VJPlayerEvents;
   syncKey?: string;
 }
 
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
-  ({ className, onStateChange, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
+  ({ className, events, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
     const playerRef = useRef<YTPlayer | null>(null);
     const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
     const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(syncKey);
@@ -151,9 +158,24 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         if (playerState === YT_PLAYER_STATE.PLAYING) {
           setDuration(playerRef.current?.getDuration() ?? null);
         }
-        onStateChange?.(e);
+
+        if (playerState === YT_PLAYER_STATE.UNSTARTED) {
+          events?.onUnstarted?.();
+        }
+
+        if (playerState === YT_PLAYER_STATE.PAUSED && !syncDataRef.current?.paused) {
+          events?.onPaused?.();
+        }
+
+        if (playerState !== YT_PLAYER_STATE.PAUSED && syncDataRef.current?.paused) {
+          events?.onUnpaused?.();
+        }
+
+        if (playerState === YT_PLAYER_STATE.ENDED) {
+          events?.onEnded?.();
+        }
       },
-      [onStateChange, setDuration]
+      [setDuration, events]
     );
 
     useImperativeHandle(
@@ -166,7 +188,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [getCurrentTime, setSyncData]
     );
 
-    const events = useMemo(
+    const ytPlayerEvents = useMemo(
       () => ({
         onReady: handleReady,
         onStateChange: handleStateChange,
@@ -178,7 +200,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       <YouTubePlayer
         className={className}
         videoId={DEFAULT_VALUES.videoId}
-        events={events}
+        events={ytPlayerEvents}
         playerVars={playerVars}
       />
     );
