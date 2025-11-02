@@ -2,6 +2,9 @@ import type { DeckAPI } from "@/Controller/components/Deck/types";
 import type { MixerAPI } from "@/Controller/components/Mixer/types";
 import { createContext, useCallback, useContext, useState } from "react";
 
+// レガシーAPI をグローバルに設定（自動実行）
+import "@/utils/legacyAPI";
+
 interface DeckAPIContextValue {
   deckAPIs: (DeckAPI | null)[];
   setDeckAPI: (deckId: number, deckAPI: DeckAPI | null) => void;
