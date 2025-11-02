@@ -1,10 +1,8 @@
-import { INITIAL_SYNC_DATA } from "@/constants";
+import { INITIAL_SYNC_DATA, SYNC_CONFIG } from "@/constants";
 import { useCallback, useEffect, useRef } from "react";
 import type { VJSyncData } from "../../types";
-
-const SYNC_INTERVAL = 1000; // 定期的な同期間隔（ms）
-const SEEK_THRESHOLD = 1.0; // 強制シークの閾値（秒）
-const SYNC_THRESHOLD = 0.01; // 同期完了の閾値（秒）
+import { usePlaybackRateAdjustment } from "../usePlaybackRateAdjustment";
+import { useTimeSync } from "../useTimeSync";
 
 /** プレイヤー同期用のインターフェース */
 export interface PlayerSyncInterface {
@@ -26,115 +24,33 @@ export interface UsePlayerSyncReturn {
 
 /**
  * プレイヤー同期用のカスタムフック
- * 汎用的な関数ベースのインターフェースを使用
+ * 時間同期と速度調整を統合して、プレイヤーの同期を管理する
+ *
+ * @param playerInterface プレイヤー操作のインターフェース
+ * @returns 同期制御用の関数群
  */
 export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSyncReturn => {
-  const lastAppliedRateRef = useRef<number>(1.0);
-  const isAdjustingRateRef = useRef<boolean>(false);
   const animationFrameIdRef = useRef<number | null>(null);
-  const durationRef = useRef<number | null>(null);
   const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
 
-  // 期待時間の計算
-  const getCurrentTime = useCallback(() => {
-    const syncData = syncDataRef.current;
+  // 時間同期フック
+  const { getExpectedCurrentTime, setDuration } = useTimeSync(syncDataRef);
 
-    if (syncData.baseTime === 0) {
-      return null;
-    }
+  // 再生速度調整フック
+  const { calculateAdjustmentRate, applyPlaybackRateAdjustment, syncPlaybackRate, isAdjusting } =
+    usePlaybackRateAdjustment({
+      playerInterface: {
+        getPlaybackRate: playerInterface.getPlaybackRate,
+        setPlaybackRate: playerInterface.setPlaybackRate,
+      },
+      syncDataRef,
+    });
 
-    if (syncData.paused) {
-      return syncData.currentTime;
-    }
-
-    try {
-      const timeSinceUpdate = (Date.now() - syncData.baseTime) / 1000;
-      const adjustedTime = syncData.currentTime + timeSinceUpdate * syncData.playbackRate;
-
-      if (adjustedTime < 0) {
-        return 0;
-      }
-
-      const duration = durationRef.current;
-      if (duration && adjustedTime > duration) {
-        return duration;
-      }
-
-      return adjustedTime;
-    } catch (error) {
-      console.warn("Failed to calculate current time:", error);
-      return null;
-    }
-  }, []);
-
-  // 時間差に基づく速度調整値の計算
-  const getRateAdjustment = useCallback((timeDiff: number) => {
-    const absTimeDiff = Math.abs(timeDiff);
-
-    // 1.0秒閾値に基づく調整値の計算
-    // 時間差が大きいほど大きな調整値を返す
-    const maxAdjustment = 0.5; // 最大調整値
-    const adjustment = (absTimeDiff / SEEK_THRESHOLD) * maxAdjustment;
-
-    if (timeDiff > 0) {
-      // プレイヤーが進みすぎている場合、速度を下げる（負の調整値）
-      return -Math.min(adjustment, maxAdjustment);
-    }
-    // プレイヤーが遅れている場合、速度を上げる（正の調整値）
-    return Math.min(adjustment, maxAdjustment);
-  }, []);
-
-  // 速度調整値の計算
-  const calculateAdjustmentRate = useCallback(
-    (timeDiff: number, currentPlaybackRate: number) => {
-      const adjustment = getRateAdjustment(timeDiff);
-      const newRate = currentPlaybackRate + adjustment;
-      return Math.max(0.25, Math.min(2.0, newRate));
-    },
-    [getRateAdjustment]
-  );
-
-  // 速度調整の適用
-  const applyPlaybackRateAdjustment = useCallback(
-    (adjustmentRate: number) => {
-      try {
-        const lastAppliedRate = lastAppliedRateRef.current;
-
-        if (Math.abs(adjustmentRate - lastAppliedRate) >= 0.05) {
-          isAdjustingRateRef.current = true;
-          playerInterface.setPlaybackRate(adjustmentRate);
-          lastAppliedRateRef.current = adjustmentRate;
-
-          setTimeout(() => {
-            isAdjustingRateRef.current = false;
-          }, 2000);
-        }
-      } catch (error) {
-        console.warn("Failed to set playback rate:", error);
-        isAdjustingRateRef.current = false;
-      }
-    },
-    [playerInterface]
-  );
-
-  // 同期データの速度適用
-  const syncPlaybackRate = useCallback(() => {
-    if (isAdjustingRateRef.current) {
-      return;
-    }
-
-    try {
-      const syncData = syncDataRef.current;
-      playerInterface.setPlaybackRate(syncData.playbackRate);
-      lastAppliedRateRef.current = syncData.playbackRate;
-    } catch (error) {
-      console.warn("Failed to set playback rate:", error);
-    }
-  }, [playerInterface]);
-
-  // メインの同期処理（再帰的にrequestAnimationFrameで呼び出される）
+  /**
+   * メインの同期処理（再帰的に requestAnimationFrame で呼び出される）
+   */
   const performSync = useCallback(() => {
-    const expectedCurrentTime = getCurrentTime();
+    const expectedCurrentTime = getExpectedCurrentTime();
     if (expectedCurrentTime === null) {
       return;
     }
@@ -150,14 +66,14 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
       const timeDiff = currentPlayerTime - expectedCurrentTime;
       const absTimeDiff = Math.abs(timeDiff);
 
-      if (absTimeDiff <= SYNC_THRESHOLD) {
-        // 差分が10ms以下の場合、設定された速度をそのまま使用
-        if (!isAdjustingRateRef.current) {
+      if (absTimeDiff <= SYNC_CONFIG.syncThreshold) {
+        // 差分が閾値以下の場合、設定された速度をそのまま使用
+        if (!isAdjusting()) {
           syncPlaybackRate();
           animationFrameIdRef.current = null;
         }
-      } else if (absTimeDiff >= SEEK_THRESHOLD) {
-        // 差分が1秒以上の場合は強制シーク
+      } else if (absTimeDiff >= SYNC_CONFIG.seekThreshold) {
+        // 差分が閾値以上の場合は強制シーク
         playerInterface.seekTo(expectedCurrentTime);
       } else {
         // その他の場合は動的速度調整
@@ -176,17 +92,19 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
       });
     }
   }, [
-    getCurrentTime,
+    getExpectedCurrentTime,
     playerInterface,
     syncPlaybackRate,
     calculateAdjustmentRate,
     applyPlaybackRateAdjustment,
+    isAdjusting,
   ]);
 
+  // 定期的な同期の開始
   useEffect(() => {
     const interval = setInterval(() => {
       performSync();
-    }, SYNC_INTERVAL);
+    }, SYNC_CONFIG.interval);
 
     return () => {
       clearInterval(interval);
@@ -198,12 +116,12 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
     };
   }, [performSync]);
 
-  return {
-    getCurrentTime,
-    setDuration: useCallback((duration: number | null) => {
-      durationRef.current = duration;
-    }, []),
-    notifySyncData: (syncData: VJSyncData) => {
+  /**
+   * 同期データの通知
+   * タイミング関連のデータが変更された場合に同期処理を開始する
+   */
+  const notifySyncData = useCallback(
+    (syncData: VJSyncData) => {
       const beforeSyncData = syncDataRef.current;
 
       const needTimingSync =
@@ -216,6 +134,13 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
         performSync();
       }
     },
+    [performSync]
+  );
+
+  return {
+    getCurrentTime: getExpectedCurrentTime,
+    setDuration,
+    notifySyncData,
     performSync,
     isSyncing: animationFrameIdRef.current !== null,
   };
