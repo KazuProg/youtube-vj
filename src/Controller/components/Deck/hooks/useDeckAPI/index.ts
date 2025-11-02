@@ -1,10 +1,11 @@
 import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
 import { useEffect, useRef } from "react";
+import type { RefObject } from "react";
 import type { DeckAPI } from "../../types";
 
 interface UseDeckAPIParams {
-  vjPlayerRef: React.RefObject<VJPlayerRef | null>;
-  syncDataRef: React.MutableRefObject<VJSyncData>;
+  vjPlayerRef: RefObject<VJPlayerRef | null>;
+  syncDataRef: RefObject<VJSyncData>;
   updateSyncData: (partialSyncData: Partial<VJSyncData>) => void;
   setGlobalPlayer: (player: DeckAPI | null) => void;
 }
