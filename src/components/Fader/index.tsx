@@ -10,6 +10,7 @@ interface FaderProps {
   vertical?: boolean;
   reverse?: boolean;
   style?: React.CSSProperties;
+  className?: string;
 }
 
 const Fader = ({
@@ -21,12 +22,17 @@ const Fader = ({
   vertical = false,
   reverse = false,
   style,
+  className,
 }: FaderProps) => {
   const [containerRef, containerSize] = useElementSize();
 
   const rotateDeg = (vertical ? -90 : 0) + (reverse ? 180 : 0);
   return (
-    <div ref={containerRef} className={`${styles.faderContainer}`} style={style}>
+    <div
+      ref={containerRef}
+      className={`${styles.faderContainer} ${className ?? ""}`.trim()}
+      style={style}
+    >
       <input
         type="range"
         step={step}
