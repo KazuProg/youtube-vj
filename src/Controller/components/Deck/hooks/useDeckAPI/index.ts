@@ -9,7 +9,6 @@ interface UseDeckAPIParams {
   syncDataRef: RefObject<VJSyncData>;
   updateSyncData: (partialSyncData: Partial<VJSyncData>) => void;
   deckId: number;
-  setGlobalPlayer: (deckId: number, player: DeckAPI | null) => void;
 }
 
 export const useDeckAPI = ({
@@ -17,7 +16,6 @@ export const useDeckAPI = ({
   syncDataRef,
   updateSyncData,
   deckId,
-  setGlobalPlayer,
 }: UseDeckAPIParams) => {
   const deckAPIRef = useRef<DeckAPI | null>(null);
   const { setDeckAPI } = useDeckAPIContext();
@@ -80,9 +78,8 @@ export const useDeckAPI = ({
         return vjPlayerRef.current?.getPlayer()?.getDuration() ?? 0;
       },
     } as DeckAPI;
-    setGlobalPlayer(deckId, deckAPIRef.current);
     setDeckAPI(deckId, deckAPIRef.current);
-  }, [deckId, setGlobalPlayer, setDeckAPI, updateSyncData, vjPlayerRef, syncDataRef]);
+  }, [deckId, setDeckAPI, updateSyncData, vjPlayerRef, syncDataRef]);
 
   return deckAPIRef;
 };

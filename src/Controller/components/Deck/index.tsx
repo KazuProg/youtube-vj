@@ -7,16 +7,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SeekBar from "./components/SeekBar";
 import { useDeckAPI } from "./hooks/useDeckAPI";
 import styles from "./index.module.css";
-import type { DeckAPI } from "./types";
 
 interface DeckProps {
   localStorageKey: string;
   deckId: number;
-  setGlobalPlayer: (deckId: number, player: DeckAPI | null) => void;
   className?: string;
 }
 
-const Deck = ({ localStorageKey, deckId, setGlobalPlayer, className }: DeckProps) => {
+const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
   const vjPlayerRef = useRef<VJPlayerRef | null>(null);
   const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(localStorageKey, {
     defaultValue: INITIAL_SYNC_DATA,
@@ -62,7 +60,6 @@ const Deck = ({ localStorageKey, deckId, setGlobalPlayer, className }: DeckProps
     syncDataRef,
     updateSyncData,
     deckId,
-    setGlobalPlayer,
   });
 
   useEffect(() => {

@@ -1,5 +1,4 @@
 import { LOCAL_STORAGE_KEY } from "@/constants";
-import { useGlobalAPI } from "@/hooks/useGlobalAPI";
 import Deck from "./components/Deck";
 import Mixer from "./components/Mixer";
 import StatusBar from "./components/StatusBar";
@@ -7,20 +6,12 @@ import { DeckAPIProvider } from "./contexts/DeckAPIContext";
 import styles from "./page.module.css";
 
 const ControllerPage = () => {
-  // グローバルAPI管理フックを使用
-  const { setGlobalPlayer, setGlobalMixer } = useGlobalAPI();
-
   return (
     <DeckAPIProvider>
       <div className={styles.controllerWindow}>
         <div className={styles.controller}>
-          <Deck
-            className={styles.deck}
-            localStorageKey={LOCAL_STORAGE_KEY.leftDeck}
-            deckId={0}
-            setGlobalPlayer={setGlobalPlayer}
-          />
-          <Mixer className={styles.mixer} setGlobalMixer={setGlobalMixer} />
+          <Deck className={styles.deck} localStorageKey={LOCAL_STORAGE_KEY.leftDeck} deckId={0} />
+          <Mixer className={styles.mixer} />
           <div
             className={styles.deck}
             style={{

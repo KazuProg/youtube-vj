@@ -1,9 +1,11 @@
 import type { DeckAPI } from "@/Controller/components/Deck/types";
+import type { MixerAPI } from "@/Controller/components/Mixer/types";
 import { createContext, useCallback, useContext, useState } from "react";
 
 interface DeckAPIContextValue {
   deckAPIs: (DeckAPI | null)[];
   setDeckAPI: (deckId: number, deckAPI: DeckAPI | null) => void;
+  setMixerAPI: (mixer: MixerAPI | null) => void;
 }
 
 const DeckAPIContext = createContext<DeckAPIContextValue | null>(null);
@@ -21,10 +23,20 @@ export const DeckAPIProvider = ({
       newArray[deckId] = deckAPI;
       return newArray;
     });
+
+    if (deckId === 0) {
+      window.ch0 = deckAPI;
+    }
+  }, []);
+
+  const setMixerAPI = useCallback((mixer: MixerAPI | null) => {
+    window.mixer = mixer;
   }, []);
 
   return (
-    <DeckAPIContext.Provider value={{ deckAPIs, setDeckAPI }}>{children}</DeckAPIContext.Provider>
+    <DeckAPIContext.Provider value={{ deckAPIs, setDeckAPI, setMixerAPI }}>
+      {children}
+    </DeckAPIContext.Provider>
   );
 };
 

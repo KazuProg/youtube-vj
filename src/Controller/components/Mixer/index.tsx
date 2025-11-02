@@ -8,15 +8,12 @@ import { parseYouTubeURL } from "../../utils";
 import { useMixerAPI } from "./hooks/useMixerAPI";
 import styles from "./index.module.css";
 
-import type { MixerAPI } from "./types";
-
 interface MixerProps {
-  setGlobalMixer: (mixer: MixerAPI | null) => void;
   className?: string;
 }
 
-const Mixer = ({ setGlobalMixer, className }: MixerProps) => {
-  const { deckAPIs } = useDeckAPIContext();
+const Mixer = ({ className }: MixerProps) => {
+  const { deckAPIs, setMixerAPI } = useDeckAPIContext();
   const [preparedVideoId, setPreparedVideoId] = useState<string>("");
   const { data: mixerData, setData: setMixerData } = useStorageSync<MixerData>(
     LOCAL_STORAGE_KEY.mixer
@@ -31,7 +28,7 @@ const Mixer = ({ setGlobalMixer, className }: MixerProps) => {
 
   useMixerAPI({
     setMixerData,
-    setGlobalMixer,
+    setGlobalMixer: setMixerAPI,
   });
 
   const handleVideoIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
