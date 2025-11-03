@@ -4,7 +4,7 @@ import { useLibraryAPI } from "./hooks/useLibraryAPI";
 import type { HistoryItem } from "./types";
 
 const Library = () => {
-  const { setLibraryAPI } = useControllerAPIContext();
+  const { mixerAPI, setLibraryAPI } = useControllerAPIContext();
 
   // useLibraryAPIから履歴データを取得（useStorageSyncの重複を避ける）
   const { history } = useLibraryAPI({
@@ -33,7 +33,19 @@ const Library = () => {
           </thead>
           <tbody className={styles.tbody}>
             {[...history].reverse().map((item: HistoryItem) => (
-              <tr key={item.id} youtube-id={item.id} style={{ cursor: "pointer" }} tabIndex={0}>
+              <tr
+                key={item.id}
+                youtube-id={item.id}
+                style={{ cursor: "pointer" }}
+                tabIndex={0}
+                onClick={() => mixerAPI?.setPreparedVideoId(item.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    mixerAPI?.setPreparedVideoId(item.id);
+                  }
+                }}
+              >
                 <td className={styles.tdArt}>
                   <img src={getThumbnailUrl(item.id)} alt={item.title} />
                 </td>

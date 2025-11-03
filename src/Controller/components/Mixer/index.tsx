@@ -2,7 +2,7 @@ import Fader from "@/components/Fader";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import type { MixerData } from "@/types";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useControllerAPIContext } from "../../contexts/ControllerAPIContext";
 import { parseYouTubeURL } from "../../utils";
 import { useMixerAPI } from "./hooks/useMixerAPI";
@@ -14,7 +14,6 @@ interface MixerProps {
 
 const Mixer = ({ className }: MixerProps) => {
   const { deckAPIs, setMixerAPI } = useControllerAPIContext();
-  const [preparedVideoId, setPreparedVideoId] = useState<string>("");
   const { data: mixerData, setData: setMixerData } = useStorageSync<MixerData>(
     LOCAL_STORAGE_KEY.mixer
   );
@@ -26,7 +25,7 @@ const Mixer = ({ className }: MixerProps) => {
     }
   }, []);
 
-  useMixerAPI({
+  const { mixerAPIRef, preparedVideoId } = useMixerAPI({
     setMixerData,
     setGlobalMixer: setMixerAPI,
   });
@@ -35,9 +34,15 @@ const Mixer = ({ className }: MixerProps) => {
     const parsed = parseYouTubeURL(e.target.value);
     if (parsed && inputRef.current) {
       inputRef.current.value = parsed.id;
-      setPreparedVideoId(parsed.id);
+      mixerAPIRef.current?.setPreparedVideoId(parsed.id);
     }
   };
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.value = preparedVideoId;
+    }
+  }, [preparedVideoId]);
 
   return (
     <div className={`${styles.mixer} ${className}`}>

@@ -1,5 +1,5 @@
 import type { MixerData } from "@/types";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MixerAPI } from "../../types";
 
 interface UseMixerAPIParams {
@@ -9,6 +9,7 @@ interface UseMixerAPIParams {
 
 export const useMixerAPI = ({ setMixerData, setGlobalMixer }: UseMixerAPIParams) => {
   const mixerAPIRef = useRef<MixerAPI | null>(null);
+  const [preparedVideoId, setPreparedVideoId] = useState<string>("");
 
   useEffect(() => {
     mixerAPIRef.current = {
@@ -18,9 +19,15 @@ export const useMixerAPI = ({ setMixerData, setGlobalMixer }: UseMixerAPIParams)
           crossfader: value,
         }));
       },
+      setPreparedVideoId: (videoId: string) => {
+        setPreparedVideoId(videoId);
+      },
     } as MixerAPI;
     setGlobalMixer(mixerAPIRef.current);
   }, [setMixerData, setGlobalMixer]);
 
-  return mixerAPIRef;
+  return {
+    mixerAPIRef,
+    preparedVideoId,
+  };
 };

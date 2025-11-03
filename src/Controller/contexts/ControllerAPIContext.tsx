@@ -9,6 +9,7 @@ import "@/utils/legacyAPI";
 interface ControllerAPIContextValue {
   deckAPIs: (DeckAPI | null)[];
   setDeckAPI: (deckId: number, deckAPI: DeckAPI | null) => void;
+  mixerAPI: MixerAPI | null;
   setMixerAPI: (mixer: MixerAPI | null) => void;
   libraryAPI: LibraryAPI | null;
   setLibraryAPI: (library: LibraryAPI | null) => void;
@@ -23,6 +24,7 @@ export const ControllerAPIProvider = ({
 }) => {
   const [deckAPIs, setDeckAPIs] = useState<(DeckAPI | null)[]>([]);
   const [libraryAPI, _setLibraryAPI] = useState<LibraryAPI | null>(null);
+  const [mixerAPI, _setMixerAPI] = useState<MixerAPI | null>(null);
 
   const setDeckAPI = useCallback((deckId: number, deckAPI: DeckAPI | null) => {
     setDeckAPIs((prev) => {
@@ -36,6 +38,7 @@ export const ControllerAPIProvider = ({
   }, []);
 
   const setMixerAPI = useCallback((mixer: MixerAPI | null) => {
+    _setMixerAPI(mixer);
     window.mixer = mixer;
   }, []);
 
@@ -49,6 +52,7 @@ export const ControllerAPIProvider = ({
       value={{
         deckAPIs,
         setDeckAPI,
+        mixerAPI,
         setMixerAPI,
         libraryAPI,
         setLibraryAPI,
