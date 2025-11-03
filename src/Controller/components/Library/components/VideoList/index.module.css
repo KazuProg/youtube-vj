@@ -1,0 +1,43 @@
+.videolist {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+}
+
+.table {
+  width: 100%;
+  white-space: nowrap;
+  border-spacing: 0;
+}
+
+.thead {
+  z-index: 1;
+  position: sticky;
+  top: 0;
+  background: #222;
+}
+
+.thArt {
+  width: 1.6rem;
+}
+
+.tbody tr:nth-child(odd) {
+  background: #fff1;
+}
+
+.tbody tr:hover {
+  background: #fff3;
+}
+
+.tdArt img {
+  display: block;
+  height: 1.6rem;
+  aspect-ratio: 10 / 4;
+  object-fit: cover;
+}
+
+.tdTitle {
+  text-align: left;
+  padding-left: 0.5rem;
+}

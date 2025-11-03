@@ -1,20 +1,15 @@
 import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
 import styles from "./Library.module.css";
+import VideoList from "./components/VideoList";
 import { useLibraryAPI } from "./hooks/useLibraryAPI";
-import type { HistoryItem } from "./types";
 
 const Library = () => {
-  const { mixerAPI, setLibraryAPI } = useControllerAPIContext();
+  const { setLibraryAPI } = useControllerAPIContext();
 
   // useLibraryAPIから履歴データを取得（useStorageSyncの重複を避ける）
   const { history } = useLibraryAPI({
     setGlobalLibrary: setLibraryAPI,
   });
-
-  // サムネイル画像をIDから導出する関数
-  const getThumbnailUrl = (videoId: string): string => {
-    return `https://img.youtube.com/vi/${videoId}/default.jpg`;
-  };
 
   return (
     <div className={styles.library}>
@@ -23,38 +18,7 @@ const Library = () => {
           <li className={styles.focused}>History</li>
         </ul>
       </div>
-      <div className={styles.videolist}>
-        <table className={styles.table}>
-          <thead className={styles.thead}>
-            <tr>
-              <th className={styles.thArt}>Art</th>
-              <th className={styles.thTitle}>Title</th>
-            </tr>
-          </thead>
-          <tbody className={styles.tbody}>
-            {[...history].reverse().map((item: HistoryItem) => (
-              <tr
-                key={item.id}
-                youtube-id={item.id}
-                style={{ cursor: "pointer" }}
-                tabIndex={0}
-                onClick={() => mixerAPI?.setPreparedVideoId(item.id)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    mixerAPI?.setPreparedVideoId(item.id);
-                  }
-                }}
-              >
-                <td className={styles.tdArt}>
-                  <img src={getThumbnailUrl(item.id)} alt={item.title} />
-                </td>
-                <td className={styles.tdTitle}>{item.title}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <VideoList videos={[...history].reverse()} />
     </div>
   );
 };
