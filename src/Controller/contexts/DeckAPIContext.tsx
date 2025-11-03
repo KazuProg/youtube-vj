@@ -27,6 +27,7 @@ export const DeckAPIProvider = ({
       return newArray;
     });
 
+    window.ch ??= {};
     window.ch[deckId] = deckAPI;
   }, []);
 

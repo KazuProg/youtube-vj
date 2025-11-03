@@ -23,5 +23,3 @@ declare global {
     MIDIScriptManager: MIDIScriptManagerConstructor;
   }
 }
-
-window.ch = {};
