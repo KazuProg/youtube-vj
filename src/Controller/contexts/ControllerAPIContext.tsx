@@ -5,15 +5,15 @@ import { createContext, useCallback, useContext, useState } from "react";
 // レガシーAPI をグローバルに設定（自動実行）
 import "@/utils/legacyAPI";
 
-interface DeckAPIContextValue {
+interface ControllerAPIContextValue {
   deckAPIs: (DeckAPI | null)[];
   setDeckAPI: (deckId: number, deckAPI: DeckAPI | null) => void;
   setMixerAPI: (mixer: MixerAPI | null) => void;
 }
 
-const DeckAPIContext = createContext<DeckAPIContextValue | null>(null);
+const ControllerAPIContext = createContext<ControllerAPIContextValue | null>(null);
 
-export const DeckAPIProvider = ({
+export const ControllerAPIProvider = ({
   children,
 }: {
   children: React.ReactNode;
@@ -36,16 +36,16 @@ export const DeckAPIProvider = ({
   }, []);
 
   return (
-    <DeckAPIContext.Provider value={{ deckAPIs, setDeckAPI, setMixerAPI }}>
+    <ControllerAPIContext.Provider value={{ deckAPIs, setDeckAPI, setMixerAPI }}>
       {children}
-    </DeckAPIContext.Provider>
+    </ControllerAPIContext.Provider>
   );
 };
 
-export const useDeckAPIContext = () => {
-  const context = useContext(DeckAPIContext);
+export const useControllerAPIContext = () => {
+  const context = useContext(ControllerAPIContext);
   if (!context) {
-    throw new Error("useDeckAPIContext must be used within DeckAPIProvider");
+    throw new Error("useControllerAPIContext must be used within ControllerAPIProvider");
   }
   return context;
 };

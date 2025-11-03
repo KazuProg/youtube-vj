@@ -2,12 +2,12 @@ import { LOCAL_STORAGE_KEY } from "@/constants";
 import Deck from "./components/Deck";
 import Mixer from "./components/Mixer";
 import StatusBar from "./components/StatusBar";
-import { DeckAPIProvider } from "./contexts/DeckAPIContext";
+import { ControllerAPIProvider } from "./contexts/ControllerAPIContext";
 import styles from "./page.module.css";
 
 const ControllerPage = () => {
   return (
-    <DeckAPIProvider>
+    <ControllerAPIProvider>
       <div className={styles.controllerWindow}>
         <div className={styles.controller}>
           <Deck className={styles.deck} localStorageKey={LOCAL_STORAGE_KEY.leftDeck} deckId={0} />
@@ -23,7 +23,7 @@ const ControllerPage = () => {
         </div>
         <StatusBar />
       </div>
-    </DeckAPIProvider>
+    </ControllerAPIProvider>
   );
 };
 

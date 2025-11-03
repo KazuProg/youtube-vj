@@ -3,7 +3,7 @@ import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import type { MixerData } from "@/types";
 import { useEffect, useRef, useState } from "react";
-import { useDeckAPIContext } from "../../contexts/DeckAPIContext";
+import { useControllerAPIContext } from "../../contexts/ControllerAPIContext";
 import { parseYouTubeURL } from "../../utils";
 import { useMixerAPI } from "./hooks/useMixerAPI";
 import styles from "./index.module.css";
@@ -13,7 +13,7 @@ interface MixerProps {
 }
 
 const Mixer = ({ className }: MixerProps) => {
-  const { deckAPIs, setMixerAPI } = useDeckAPIContext();
+  const { deckAPIs, setMixerAPI } = useControllerAPIContext();
   const [preparedVideoId, setPreparedVideoId] = useState<string>("");
   const { data: mixerData, setData: setMixerData } = useStorageSync<MixerData>(
     LOCAL_STORAGE_KEY.mixer

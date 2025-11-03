@@ -1,4 +1,4 @@
-import { useDeckAPIContext } from "@/Controller/contexts/DeckAPIContext";
+import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
 import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
@@ -18,7 +18,7 @@ export const useDeckAPI = ({
   deckId,
 }: UseDeckAPIParams) => {
   const deckAPIRef = useRef<DeckAPI | null>(null);
-  const { setDeckAPI } = useDeckAPIContext();
+  const { setDeckAPI } = useControllerAPIContext();
 
   useEffect(() => {
     deckAPIRef.current = {
