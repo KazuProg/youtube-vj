@@ -1,0 +1,74 @@
+.library {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  border-top: solid 1px #555;
+  position: relative;
+}
+
+.playlist {
+  width: 150px;
+  border-right: solid 1px #555;
+  text-align: center;
+}
+
+.playlist > ul {
+  text-align: left;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.playlist > ul > li {
+  padding-left: 1rem;
+}
+
+.playlist > ul li.focused,
+.playlist > ul li:hover {
+  background: #fff3;
+}
+
+.videolist {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+}
+
+.table {
+  width: 100%;
+  white-space: nowrap;
+  border-spacing: 0;
+}
+
+.thead {
+  z-index: 1;
+  position: sticky;
+  top: 0;
+  background: #222;
+}
+
+.thArt {
+  width: 1.6rem;
+}
+
+.tbody tr:nth-child(odd) {
+  background: #fff1;
+}
+
+.focused,
+.tbody tr:hover {
+  background: #fff3;
+}
+
+.tdArt img {
+  display: block;
+  height: 1.6rem;
+  aspect-ratio: 10 / 4;
+  object-fit: cover;
+}
+
+.tdTitle {
+  text-align: left;
+  padding-left: 0.5rem;
+}

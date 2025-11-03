@@ -1,6 +1,7 @@
 export const LOCAL_STORAGE_KEY = {
   leftDeck: "ytvj_left_deck",
   mixer: "ytvj_mixer",
+  history: "ytvj_history",
 };
 
 export const DEFAULT_VALUES = {

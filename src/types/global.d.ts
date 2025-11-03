@@ -1,4 +1,5 @@
 import type { DeckAPI } from "@/Controller/components/Deck/types";
+import type { LibraryAPI } from "@/Controller/components/Library/types";
 import type { MixerAPI } from "@/Controller/components/Mixer/types";
 
 export interface MIDIScriptManager {
@@ -17,6 +18,9 @@ declare global {
 
     // Mixer
     mixer: MixerAPI | null;
+
+    // Library
+    library: LibraryAPI | null;
 
     // MIDI Script Manager
     // biome-ignore lint/style/useNamingConvention: MIDI API naming

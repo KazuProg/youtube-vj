@@ -1,5 +1,6 @@
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import Deck from "./components/Deck";
+import Library from "./components/Library";
 import Mixer from "./components/Mixer";
 import StatusBar from "./components/StatusBar";
 import { ControllerAPIProvider } from "./contexts/ControllerAPIContext";
@@ -21,6 +22,7 @@ const ControllerPage = () => {
             (RightDeck)
           </div>
         </div>
+        <Library />
         <StatusBar />
       </div>
     </ControllerAPIProvider>

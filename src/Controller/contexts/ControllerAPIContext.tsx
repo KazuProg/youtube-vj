@@ -1,4 +1,5 @@
 import type { DeckAPI } from "@/Controller/components/Deck/types";
+import type { LibraryAPI } from "@/Controller/components/Library/types";
 import type { MixerAPI } from "@/Controller/components/Mixer/types";
 import { createContext, useCallback, useContext, useState } from "react";
 
@@ -9,6 +10,8 @@ interface ControllerAPIContextValue {
   deckAPIs: (DeckAPI | null)[];
   setDeckAPI: (deckId: number, deckAPI: DeckAPI | null) => void;
   setMixerAPI: (mixer: MixerAPI | null) => void;
+  libraryAPI: LibraryAPI | null;
+  setLibraryAPI: (library: LibraryAPI | null) => void;
 }
 
 const ControllerAPIContext = createContext<ControllerAPIContextValue | null>(null);
@@ -19,6 +22,7 @@ export const ControllerAPIProvider = ({
   children: React.ReactNode;
 }) => {
   const [deckAPIs, setDeckAPIs] = useState<(DeckAPI | null)[]>([]);
+  const [libraryAPI, _setLibraryAPI] = useState<LibraryAPI | null>(null);
 
   const setDeckAPI = useCallback((deckId: number, deckAPI: DeckAPI | null) => {
     setDeckAPIs((prev) => {
@@ -35,8 +39,21 @@ export const ControllerAPIProvider = ({
     window.mixer = mixer;
   }, []);
 
+  const setLibraryAPI = useCallback((library: LibraryAPI | null) => {
+    _setLibraryAPI(library);
+    window.library = library;
+  }, []);
+
   return (
-    <ControllerAPIContext.Provider value={{ deckAPIs, setDeckAPI, setMixerAPI }}>
+    <ControllerAPIContext.Provider
+      value={{
+        deckAPIs,
+        setDeckAPI,
+        setMixerAPI,
+        libraryAPI,
+        setLibraryAPI,
+      }}
+    >
       {children}
     </ControllerAPIContext.Provider>
   );

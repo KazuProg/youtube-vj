@@ -18,7 +18,7 @@ export const useDeckAPI = ({
   deckId,
 }: UseDeckAPIParams) => {
   const deckAPIRef = useRef<DeckAPI | null>(null);
-  const { setDeckAPI } = useControllerAPIContext();
+  const { setDeckAPI, libraryAPI } = useControllerAPIContext();
 
   useEffect(() => {
     deckAPIRef.current = {
@@ -70,6 +70,7 @@ export const useDeckAPI = ({
           baseTime: Date.now(),
           paused: false,
         });
+        libraryAPI?.history.add(newVideoId, newVideoId);
       },
       getCurrentTime: () => {
         return vjPlayerRef.current?.getCurrentTime() ?? 0;
@@ -79,7 +80,7 @@ export const useDeckAPI = ({
       },
     } as DeckAPI;
     setDeckAPI(deckId, deckAPIRef.current);
-  }, [deckId, setDeckAPI, updateSyncData, vjPlayerRef, syncDataRef]);
+  }, [deckId, setDeckAPI, updateSyncData, vjPlayerRef, syncDataRef, libraryAPI]);
 
   return deckAPIRef;
 };
