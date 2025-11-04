@@ -12,4 +12,11 @@ export interface LibraryAPI {
     clear: () => void;
     get: () => HistoryItem[];
   };
+  navigation: {
+    selectNext: () => void;
+    selectPrev: () => void;
+    selectFirst: () => void;
+    selectLast: () => void;
+    selectTo: (index: number) => void;
+  };
 }

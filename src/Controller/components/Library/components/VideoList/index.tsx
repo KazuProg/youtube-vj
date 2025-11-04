@@ -1,13 +1,19 @@
 import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
+import { useEffect } from "react";
 import type { HistoryItem } from "../../types";
 import styles from "./index.module.css";
 
 interface VideoListProps {
   videos: HistoryItem[];
+  selectedIndex: number;
 }
 
-const VideoList = ({ videos }: VideoListProps) => {
+const VideoList = ({ videos, selectedIndex }: VideoListProps) => {
   const { mixerAPI } = useControllerAPIContext();
+
+  useEffect(() => {
+    mixerAPI?.setPreparedVideoId(videos[selectedIndex].id);
+  }, [mixerAPI, videos, selectedIndex]);
 
   return (
     <div className={styles.videolist}>
@@ -23,7 +29,7 @@ const VideoList = ({ videos }: VideoListProps) => {
             <tr
               key={`${item.id}-${index}`}
               youtube-id={item.id}
-              style={{ cursor: "pointer" }}
+              className={selectedIndex === index ? styles.selected : ""}
               tabIndex={0}
               onClick={() => mixerAPI?.setPreparedVideoId(item.id)}
               onKeyDown={(e) => {

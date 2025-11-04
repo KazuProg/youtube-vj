@@ -30,6 +30,13 @@ interface LegacyDeckAPI {
   fadeoutVolume: (time: number) => void;
 }
 
+interface LegacyLibraryAPI {
+  actions: {
+    up: () => void;
+    down: () => void;
+  };
+}
+
 // レガシーAPIの型定義
 declare global {
   interface Window {
@@ -40,6 +47,8 @@ declare global {
     setSwitchingDuration: (duration: number) => void;
     setCrossfader: (value: number) => void;
     selectCh: (ch: number) => void;
+    // biome-ignore lint/style/useNamingConvention: Legacy API naming
+    Library: LegacyLibraryAPI | null;
   }
 }
 
@@ -127,5 +136,16 @@ window.ch1 = {
   },
   fadeoutVolume: (_time: number) => {
     console.warn("fadeoutVolume is not implemented");
+  },
+};
+
+window.Library = {
+  actions: {
+    up: () => {
+      window.library?.navigation.selectPrev();
+    },
+    down: () => {
+      window.library?.navigation.selectNext();
+    },
   },
 };

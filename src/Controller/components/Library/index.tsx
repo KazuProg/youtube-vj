@@ -7,7 +7,7 @@ const Library = () => {
   const { setLibraryAPI } = useControllerAPIContext();
 
   // useLibraryAPIから履歴データを取得（useStorageSyncの重複を避ける）
-  const { history } = useLibraryAPI({
+  const { history, selectedIndex } = useLibraryAPI({
     setGlobalLibrary: setLibraryAPI,
   });
 
@@ -18,7 +18,7 @@ const Library = () => {
           <li className={styles.focused}>History</li>
         </ul>
       </div>
-      <VideoList videos={[...history].reverse()} />
+      <VideoList videos={[...history].reverse()} selectedIndex={selectedIndex} />
     </div>
   );
 };

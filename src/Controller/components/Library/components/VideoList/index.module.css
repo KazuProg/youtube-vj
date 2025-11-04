@@ -22,11 +22,16 @@
   width: 1.6rem;
 }
 
+.tbody tr {
+  cursor: pointer;
+}
+
 .tbody tr:nth-child(odd) {
   background: #fff1;
 }
 
-.tbody tr:hover {
+.tbody tr:hover,
+.tbody tr.selected {
   background: #fff3;
 }
 
