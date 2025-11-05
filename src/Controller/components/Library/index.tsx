@@ -1,6 +1,7 @@
 import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
 import styles from "./Library.module.css";
 import VideoList from "./components/VideoList";
+import { YouTubeDataProvider } from "./contexts/YouTubeDataContext";
 import { useLibraryAPI } from "./hooks/useLibraryAPI";
 
 const Library = () => {
@@ -12,14 +13,16 @@ const Library = () => {
   });
 
   return (
-    <div className={styles.library}>
-      <div className={styles.playlist}>
-        <ul>
-          <li className={styles.focused}>History</li>
-        </ul>
+    <YouTubeDataProvider>
+      <div className={styles.library}>
+        <div className={styles.playlist}>
+          <ul>
+            <li className={styles.focused}>History</li>
+          </ul>
+        </div>
+        <VideoList videos={[...history].reverse()} selectedIndex={selectedIndex} />
       </div>
-      <VideoList videos={[...history].reverse()} selectedIndex={selectedIndex} />
-    </div>
+    </YouTubeDataProvider>
   );
 };
 

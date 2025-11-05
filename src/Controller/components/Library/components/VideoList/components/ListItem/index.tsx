@@ -1,4 +1,4 @@
-import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
+import { useYouTubeDataContext } from "@/Controller/components/Library/contexts/YouTubeDataContext";
 import { useEffect, useState } from "react";
 import styles from "./index.module.css";
 
@@ -11,13 +11,13 @@ interface ListItemProps {
 
 const ListItem = ({ id, key, onSelect, className }: ListItemProps) => {
   const [title, setTitle] = useState<string>(id);
-  const { fetchYouTubeTitle } = useControllerAPIContext();
+  const { fetchTitle } = useYouTubeDataContext();
 
   useEffect(() => {
-    fetchYouTubeTitle(id).then((title) => {
+    fetchTitle(id).then((title) => {
       setTitle(title);
     });
-  }, [id, fetchYouTubeTitle]);
+  }, [id, fetchTitle]);
 
   return (
     <tr
