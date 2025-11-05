@@ -34,15 +34,3 @@
 .tbody tr.selected {
   background: #fff3;
 }
-
-.tdArt img {
-  display: block;
-  height: 1.6rem;
-  aspect-ratio: 10 / 4;
-  object-fit: cover;
-}
-
-.tdTitle {
-  text-align: left;
-  padding-left: 0.5rem;
-}
