@@ -1,6 +1,7 @@
 import type { DeckAPI } from "@/Controller/components/Deck/types";
 import type { LibraryAPI } from "@/Controller/components/Library/types";
 import type { MixerAPI } from "@/Controller/components/Mixer/types";
+import useYouTubeTitleFetch from "@/hooks/useYouTubeTitleFetch";
 import { createContext, useCallback, useContext, useState } from "react";
 
 // レガシーAPI をグローバルに設定（自動実行）
@@ -13,6 +14,7 @@ interface ControllerAPIContextValue {
   setMixerAPI: (mixer: MixerAPI | null) => void;
   libraryAPI: LibraryAPI | null;
   setLibraryAPI: (library: LibraryAPI | null) => void;
+  fetchYouTubeTitle: (id: string) => Promise<string>;
 }
 
 const ControllerAPIContext = createContext<ControllerAPIContextValue | null>(null);
@@ -25,6 +27,7 @@ export const ControllerAPIProvider = ({
   const [deckAPIs, setDeckAPIs] = useState<(DeckAPI | null)[]>([]);
   const [libraryAPI, _setLibraryAPI] = useState<LibraryAPI | null>(null);
   const [mixerAPI, _setMixerAPI] = useState<MixerAPI | null>(null);
+  const { fetchYouTubeTitle } = useYouTubeTitleFetch();
 
   const setDeckAPI = useCallback((deckId: number, deckAPI: DeckAPI | null) => {
     setDeckAPIs((prev) => {
@@ -56,6 +59,7 @@ export const ControllerAPIProvider = ({
         setMixerAPI,
         libraryAPI,
         setLibraryAPI,
+        fetchYouTubeTitle,
       }}
     >
       {children}

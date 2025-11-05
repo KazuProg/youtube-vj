@@ -1,3 +1,5 @@
+import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
+import { useEffect, useState } from "react";
 import styles from "./index.module.css";
 
 interface ListItemProps {
@@ -8,6 +10,15 @@ interface ListItemProps {
 }
 
 const ListItem = ({ id, key, onSelect, className }: ListItemProps) => {
+  const [title, setTitle] = useState<string>(id);
+  const { fetchYouTubeTitle } = useControllerAPIContext();
+
+  useEffect(() => {
+    fetchYouTubeTitle(id).then((title) => {
+      setTitle(title);
+    });
+  }, [id, fetchYouTubeTitle]);
+
   return (
     <tr
       key={key}
@@ -23,9 +34,9 @@ const ListItem = ({ id, key, onSelect, className }: ListItemProps) => {
       }}
     >
       <td className={styles.tdArt}>
-        <img src={`https://img.youtube.com/vi/${id}/default.jpg`} alt={id} />
+        <img src={`https://img.youtube.com/vi/${id}/default.jpg`} alt={title} />
       </td>
-      <td className={styles.tdTitle}>{id}</td>
+      <td className={styles.tdTitle}>{title}</td>
     </tr>
   );
 };
