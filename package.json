@@ -21,7 +21,8 @@
   },
   "dependencies": {
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "use-indexeddb": "^2.0.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

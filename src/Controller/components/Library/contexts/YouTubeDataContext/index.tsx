@@ -1,5 +1,7 @@
-import useYouTubeTitleFetch from "@/Controller/components/Library/hooks/useYouTubeTitleFetch";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
+import setupIndexedDB from "use-indexeddb";
+import { dbConfig } from "./dbConfig";
+import useYouTubeTitleFetch from "./hooks/useYouTubeTitleFetch";
 
 interface YouTubeDataContextValue {
   fetchTitle: (id: string) => Promise<string>;
@@ -7,17 +9,21 @@ interface YouTubeDataContextValue {
 
 const YouTubeDataContext = createContext<YouTubeDataContextValue | null>(null);
 
-export const YouTubeDataProvider = ({
-  children,
-}: {
+interface YouTubeDataProviderProps {
   children: React.ReactNode;
-}) => {
-  const { fetchYouTubeTitle } = useYouTubeTitleFetch();
+}
+
+export const YouTubeDataProvider = ({ children }: YouTubeDataProviderProps) => {
+  useEffect(() => {
+    setupIndexedDB(dbConfig);
+  }, []);
+
+  const { fetchTitle } = useYouTubeTitleFetch();
 
   return (
     <YouTubeDataContext.Provider
       value={{
-        fetchTitle: fetchYouTubeTitle,
+        fetchTitle,
       }}
     >
       {children}
