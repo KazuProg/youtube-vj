@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useElementSize } from "./hooks/useElementSize";
 import styles from "./index.module.css";
 
@@ -13,7 +14,7 @@ interface FaderProps {
   className?: string;
 }
 
-const Fader = ({
+const _Fader = ({
   min = 0,
   max = 100,
   value = 50,
@@ -52,4 +53,6 @@ const Fader = ({
   );
 };
 
+const Fader = memo(_Fader);
+Fader.displayName = "Fader";
 export default Fader;
