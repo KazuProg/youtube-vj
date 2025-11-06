@@ -4,6 +4,7 @@
   flex-direction: row;
   border-top: solid 1px #555;
   position: relative;
+  overflow: hidden;
 }
 
 .playlist {
