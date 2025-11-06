@@ -1,5 +1,5 @@
 import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { HistoryItem } from "../../types";
 import ListItem from "./components/ListItem";
 import styles from "./index.module.css";
@@ -11,13 +11,26 @@ interface VideoListProps {
 
 const VideoList = ({ videos, selectedIndex }: VideoListProps) => {
   const { mixerAPI } = useControllerAPIContext();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     mixerAPI?.setPreparedVideoId(videos[selectedIndex].id);
   }, [mixerAPI, videos, selectedIndex]);
 
+  useEffect(() => {
+    const selectedItem = containerRef.current?.querySelector<HTMLTableRowElement>(
+      `tr[data-index="${selectedIndex}"]`
+    );
+    if (selectedItem) {
+      selectedItem.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [selectedIndex]);
+
   return (
-    <div className={styles.videolist}>
+    <div ref={containerRef} className={styles.videolist}>
       <table className={styles.table}>
         <thead className={styles.thead}>
           <tr>
@@ -32,6 +45,7 @@ const VideoList = ({ videos, selectedIndex }: VideoListProps) => {
               key={`${item.id}-${index}`}
               onSelect={() => mixerAPI?.setPreparedVideoId(item.id)}
               className={selectedIndex === index ? styles.selected : ""}
+              index={index}
             />
           ))}
         </tbody>

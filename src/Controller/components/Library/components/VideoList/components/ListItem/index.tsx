@@ -4,12 +4,12 @@ import styles from "./index.module.css";
 
 interface ListItemProps {
   id: string;
-  key: string;
   onSelect: (id: string) => void;
   className: string;
+  index: number;
 }
 
-const ListItem = ({ id, key, onSelect, className }: ListItemProps) => {
+const ListItem = ({ id, onSelect, className, index }: ListItemProps) => {
   const [title, setTitle] = useState<string>(id);
   const { fetchTitle } = useYouTubeDataContext();
 
@@ -21,7 +21,7 @@ const ListItem = ({ id, key, onSelect, className }: ListItemProps) => {
 
   return (
     <tr
-      key={key}
+      data-index={index}
       youtube-id={id}
       className={className}
       tabIndex={0}
