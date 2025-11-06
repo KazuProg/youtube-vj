@@ -178,7 +178,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
             step={1}
             vertical={true}
             className={styles.fader}
-            onChange={(e) => setVolume(e)}
+            onChange={setVolume}
           />
           <span className={isMuted ? styles.mutedText : undefined}>{volume.toFixed(0)}%</span>
         </fieldset>
