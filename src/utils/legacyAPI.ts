@@ -49,8 +49,12 @@ declare global {
     selectCh: (ch: number) => void;
     // biome-ignore lint/style/useNamingConvention: Legacy API naming
     Library: LegacyLibraryAPI | null;
+
+    prepareVideoId: undefined;
   }
 }
+
+window.prepareVideoId = undefined;
 
 // レガシー setCrossfader API (範囲: -1 ~ 1) を新API (範囲: 0 ~ 1) にマッピング
 // window.mixer が設定されていれば、その setCrossfader メソッドを呼び出す
@@ -60,7 +64,10 @@ window.setCrossfader = (value: number) => {
 
 window.ch1 = {
   setVideo: (videoId: string) => {
-    window.ch[0]?.loadVideoById(videoId);
+    // レガシースクリプトでは、window.prepareVideoId を使用しているが、
+    // 新しいスクリプトでは、window.mixer?.getPreparedVideoId() を使用しているため、
+    // 互換性のために、window.prepareVideoId を使用している。
+    window.ch[0]?.loadVideoById(videoId ?? window.mixer?.getPreparedVideoId() ?? "");
   },
   setSpeed: (speed: number) => {
     window.ch[0]?.setPlaybackRate(speed);

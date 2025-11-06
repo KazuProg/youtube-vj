@@ -10,6 +10,11 @@ interface UseMixerAPIParams {
 export const useMixerAPI = ({ setMixerData, setGlobalMixer }: UseMixerAPIParams) => {
   const mixerAPIRef = useRef<MixerAPI | null>(null);
   const [preparedVideoId, setPreparedVideoId] = useState<string>("");
+  const preparedVideoIdRef = useRef<string>("");
+
+  useEffect(() => {
+    preparedVideoIdRef.current = preparedVideoId;
+  }, [preparedVideoId]);
 
   useEffect(() => {
     mixerAPIRef.current = {
@@ -21,6 +26,9 @@ export const useMixerAPI = ({ setMixerData, setGlobalMixer }: UseMixerAPIParams)
       },
       setPreparedVideoId: (videoId: string) => {
         setPreparedVideoId(videoId);
+      },
+      getPreparedVideoId: () => {
+        return preparedVideoIdRef.current;
       },
     } as MixerAPI;
     setGlobalMixer(mixerAPIRef.current);
