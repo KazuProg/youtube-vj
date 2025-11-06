@@ -9,6 +9,8 @@ interface UseDeckAPIParams {
   syncDataRef: RefObject<VJSyncData>;
   updateSyncData: (partialSyncData: Partial<VJSyncData>) => void;
   deckId: number;
+  onVolumeChange?: (volume: number) => void;
+  onMuteChange?: (isMuted: boolean) => void;
 }
 
 export const useDeckAPI = ({
@@ -16,6 +18,8 @@ export const useDeckAPI = ({
   syncDataRef,
   updateSyncData,
   deckId,
+  onVolumeChange,
+  onMuteChange,
 }: UseDeckAPIParams) => {
   const deckAPIRef = useRef<DeckAPI | null>(null);
   const { setDeckAPI, libraryAPI } = useControllerAPIContext();
@@ -46,15 +50,18 @@ export const useDeckAPI = ({
       },
       mute: () => {
         vjPlayerRef.current?.getPlayer()?.mute();
+        onMuteChange?.(true);
       },
       unMute: () => {
         vjPlayerRef.current?.getPlayer()?.unMute();
+        onMuteChange?.(false);
       },
       isMuted: () => {
         return vjPlayerRef.current?.getPlayer()?.isMuted() ?? false;
       },
       setVolume: (volume: number) => {
         vjPlayerRef.current?.getPlayer()?.setVolume(volume);
+        onVolumeChange?.(volume);
       },
       setPlaybackRate: (rate: number) => {
         updateSyncData({
@@ -80,7 +87,16 @@ export const useDeckAPI = ({
       },
     } as DeckAPI;
     setDeckAPI(deckId, deckAPIRef.current);
-  }, [deckId, setDeckAPI, updateSyncData, vjPlayerRef, syncDataRef, libraryAPI]);
+  }, [
+    deckId,
+    setDeckAPI,
+    updateSyncData,
+    vjPlayerRef,
+    syncDataRef,
+    libraryAPI,
+    onVolumeChange,
+    onMuteChange,
+  ]);
 
   return deckAPIRef;
 };

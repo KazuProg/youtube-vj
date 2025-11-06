@@ -60,6 +60,8 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
     syncDataRef,
     updateSyncData,
     deckId,
+    onVolumeChange: setVolume,
+    onMuteChange: setIsMuted,
   });
 
   useEffect(() => {
