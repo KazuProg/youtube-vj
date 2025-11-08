@@ -9,6 +9,7 @@ interface UseDeckAPIParams {
   syncDataRef: RefObject<VJSyncData>;
   updateSyncData: (partialSyncData: Partial<VJSyncData>) => void;
   deckId: number;
+  onHotCuesChange?: (hotCues: Map<number, number>) => void;
   onVolumeChange?: (volume: number) => void;
   onMuteChange?: (isMuted: boolean) => void;
 }
@@ -18,11 +19,13 @@ export const useDeckAPI = ({
   syncDataRef,
   updateSyncData,
   deckId,
+  onHotCuesChange,
   onVolumeChange,
   onMuteChange,
 }: UseDeckAPIParams) => {
   const deckAPIRef = useRef<DeckAPI | null>(null);
   const { setDeckAPI, libraryAPI } = useControllerAPIContext();
+  const hotCuesRef = useRef<Map<number, number>>(new Map());
 
   useEffect(() => {
     deckAPIRef.current = {
@@ -47,6 +50,24 @@ export const useDeckAPI = ({
           baseTime: Date.now(),
           currentTime: seconds,
         });
+      },
+      setHotCue: (cueId: number, time?: number) => {
+        const targetTime = time ?? vjPlayerRef.current?.getCurrentTime() ?? 0;
+        hotCuesRef.current.set(cueId, targetTime);
+        onHotCuesChange?.(hotCuesRef.current);
+      },
+      jumpToHotCue: (cueId: number) => {
+        const targetTime = hotCuesRef.current.get(cueId);
+        if (targetTime !== undefined) {
+          deckAPIRef.current?.seekTo(targetTime, true);
+        }
+      },
+      deleteHotCue: (cueId: number) => {
+        hotCuesRef.current.delete(cueId);
+        onHotCuesChange?.(hotCuesRef.current);
+      },
+      hasHotCue: (cueId: number) => {
+        return hotCuesRef.current.has(cueId);
       },
       mute: () => {
         vjPlayerRef.current?.getPlayer()?.mute();
@@ -77,6 +98,8 @@ export const useDeckAPI = ({
           baseTime: Date.now(),
           paused: false,
         });
+        hotCuesRef.current.clear();
+        onHotCuesChange?.(hotCuesRef.current);
         libraryAPI?.history.add(newVideoId, newVideoId);
       },
       getCurrentTime: () => {
@@ -94,6 +117,7 @@ export const useDeckAPI = ({
     vjPlayerRef,
     syncDataRef,
     libraryAPI,
+    onHotCuesChange,
     onVolumeChange,
     onMuteChange,
   ]);

@@ -5,10 +5,11 @@ import { formatTime } from "./utils";
 interface SeekBarProps {
   currentTimeFunc: () => number;
   durationFunc: () => number;
+  hotCues: Map<number, number>;
   onSeek: (time: number) => void;
 }
 
-const SeekBar = ({ currentTimeFunc, durationFunc, onSeek }: SeekBarProps) => {
+const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, onSeek }: SeekBarProps) => {
   const [isHovering, setIsHovering] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
   const [displayTime, setDisplayTime] = useState(currentTimeFunc());
@@ -64,6 +65,17 @@ const SeekBar = ({ currentTimeFunc, durationFunc, onSeek }: SeekBarProps) => {
       <div className={styles.time} data-seek-time>
         <span>{formatTime(displayTime)}</span>
         <span>{formatTime(duration)}</span>
+      </div>
+      <div className={styles.hotcues}>
+        {Array.from(hotCues.entries()).map(([cueId, time]) => (
+          <span
+            key={cueId}
+            className={styles.hotcue}
+            style={{ left: `${(time / duration) * 100}%` }}
+          >
+            {cueId}
+          </span>
+        ))}
       </div>
     </div>
   );

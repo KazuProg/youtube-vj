@@ -10,10 +10,10 @@ interface LegacyDeckAPI {
   setSpeed: (speed: number) => void;
   setTime: (time: number) => void;
   setFilter: (filter: string) => void;
-  hotcue: (cue: number) => void;
-  addHotcue: (cue: number) => void;
-  playHotcue: (cue: number) => void;
-  removeHotcue: (cue: number) => void;
+  hotcue: (cueId: number) => void;
+  addHotcue: (cueId: number) => void;
+  playHotcue: (cueId: number) => void;
+  removeHotcue: (cueId: number) => void;
   suspendPreview: () => void;
   resumePreview: () => void;
   adjustTiming: (time: number) => void;
@@ -78,17 +78,21 @@ window.ch1 = {
   setFilter: (_filter: string) => {
     console.warn("setFilter is not implemented");
   },
-  hotcue: (_cue: number) => {
-    console.warn("hotcue is not implemented");
+  hotcue: (cueId: number) => {
+    if (window.ch[0]?.hasHotCue(cueId)) {
+      window.ch[0]?.jumpToHotCue(cueId);
+    } else {
+      window.ch[0]?.setHotCue(cueId);
+    }
   },
-  addHotcue: (_cue: number) => {
-    console.warn("addHotcue is not implemented");
+  addHotcue: (cueId: number) => {
+    window.ch[0]?.setHotCue(cueId);
   },
-  playHotcue: (_cue: number) => {
-    console.warn("playHotcue is not implemented");
+  playHotcue: (cueId: number) => {
+    window.ch[0]?.jumpToHotCue(cueId);
   },
-  removeHotcue: (_cue: number) => {
-    console.warn("removeHotcue is not implemented");
+  removeHotcue: (cueId: number) => {
+    window.ch[0]?.deleteHotCue(cueId);
   },
   suspendPreview: () => {
     console.warn("suspendPreview is not implemented");

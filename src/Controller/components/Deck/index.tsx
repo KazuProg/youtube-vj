@@ -24,6 +24,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
 
   // UI用のstate
   const [playbackRate, setPlaybackRate] = useState<number>(1);
+  const [hotCues, setHotCues] = useState<Map<number, number>>(new Map());
   const [volume, setVolume] = useState<number>(100);
   const [isMuted, setIsMuted] = useState<boolean>(true);
 
@@ -60,6 +61,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
     syncDataRef,
     updateSyncData,
     deckId,
+    onHotCuesChange: setHotCues,
     onVolumeChange: setVolume,
     onMuteChange: setIsMuted,
   });
@@ -124,6 +126,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
         <SeekBar
           currentTimeFunc={getCurrentTime}
           durationFunc={() => deckAPIRef.current?.getDuration() ?? 0}
+          hotCues={hotCues}
           onSeek={(time: number) => deckAPIRef.current?.seekTo(time, true)}
         />
       </fieldset>
