@@ -2,21 +2,21 @@ import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { clamp } from "@/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { HistoryItem, LibraryAPI } from "../../types";
+import type { LibraryAPI, VideoItem } from "../../types";
 
 interface UseLibraryAPIParams {
   setGlobalLibrary: (library: LibraryAPI | null) => void;
 }
 
 interface UseLibraryAPIReturn {
-  history: HistoryItem[];
-  selectedIndex: number;
+  videos: VideoItem[];
+  selectedVideoIndex: number;
   focusTo: (absoluteIndex: number) => void;
 }
 
 export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLibraryAPIReturn => {
   // LocalStorageから再生履歴を読み取り
-  const { data: history, setData: setHistory } = useStorageSync<HistoryItem[]>(
+  const { data: history, setData: setHistory } = useStorageSync<VideoItem[]>(
     LOCAL_STORAGE_KEY.history,
     {
       defaultValue: [],
@@ -25,19 +25,19 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
 
   const libraryAPIRef = useRef<LibraryAPI | null>(null);
 
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState<number>(0);
 
   const focusTo = useCallback(
     (absoluteIndex: number) => {
       const maxIndex = (history?.length ?? 0) - 1;
-      setSelectedIndex(clamp(absoluteIndex, 0, maxIndex));
+      setSelectedVideoIndex(clamp(absoluteIndex, 0, maxIndex));
     },
     [history]
   );
 
   const focusBy = useCallback(
     (relativeIndex: number) => {
-      setSelectedIndex((prevIndex) => {
+      setSelectedVideoIndex((prevIndex) => {
         const index = prevIndex + relativeIndex;
         const maxIndex = (history?.length ?? 0) - 1;
         return clamp(index, 0, maxIndex);
@@ -58,7 +58,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
               return currentItems;
             }
             // 新しいアイテムを後ろに追加（時系列順に保持）
-            const newItem: HistoryItem = { id: videoId, title };
+            const newItem: VideoItem = { id: videoId, title };
             return [...currentItems, newItem];
           });
         },
@@ -101,5 +101,9 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
     setGlobalLibrary(libraryAPIRef.current);
   }, [setHistory, setGlobalLibrary, focusTo, focusBy, history]);
 
-  return { history: history ?? [], selectedIndex, focusTo };
+  return {
+    videos: [...(history ?? [])].reverse(),
+    selectedVideoIndex,
+    focusTo,
+  };
 };

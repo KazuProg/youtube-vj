@@ -9,7 +9,7 @@ const Library = () => {
   const { setLibraryAPI, mixerAPI } = useControllerAPIContext();
 
   // useLibraryAPIから履歴データを取得（useStorageSyncの重複を避ける）
-  const { history, selectedIndex, focusTo } = useLibraryAPI({
+  const { videos, selectedVideoIndex, focusTo } = useLibraryAPI({
     setGlobalLibrary: setLibraryAPI,
   });
 
@@ -29,11 +29,7 @@ const Library = () => {
             <li className={styles.focused}>History</li>
           </ul>
         </div>
-        <VideoList
-          videos={[...history].reverse()}
-          selectedIndex={selectedIndex}
-          onSelect={handleSelect}
-        />
+        <VideoList videos={videos} selectedIndex={selectedVideoIndex} onSelect={handleSelect} />
       </div>
     </YouTubeDataProvider>
   );

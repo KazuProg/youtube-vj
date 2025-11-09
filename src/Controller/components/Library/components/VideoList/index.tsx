@@ -1,11 +1,11 @@
 import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
 import { useEffect, useRef } from "react";
-import type { HistoryItem } from "../../types";
+import type { VideoItem } from "../../types";
 import ListItem from "./components/ListItem";
 import styles from "./index.module.css";
 
 interface VideoListProps {
-  videos: HistoryItem[];
+  videos: VideoItem[];
   selectedIndex: number;
   onSelect: (id: string, index: number) => void;
 }
@@ -40,7 +40,7 @@ const VideoList = ({ videos, selectedIndex, onSelect }: VideoListProps) => {
           </tr>
         </thead>
         <tbody className={styles.tbody}>
-          {videos.map((item: HistoryItem, index: number) => (
+          {videos.map((item: VideoItem, index: number) => (
             <ListItem
               id={item.id}
               key={`${item.id}-${index}`}
