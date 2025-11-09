@@ -24,26 +24,27 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
   );
 
   const libraryAPIRef = useRef<LibraryAPI | null>(null);
-  const historyRef = useRef<HistoryItem[]>(history ?? []);
 
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
-  useEffect(() => {
-    historyRef.current = history ?? [];
-  }, [history]);
+  const focusTo = useCallback(
+    (absoluteIndex: number) => {
+      const maxIndex = (history?.length ?? 0) - 1;
+      setSelectedIndex(clamp(absoluteIndex, 0, maxIndex));
+    },
+    [history]
+  );
 
-  const focusTo = useCallback((absoluteIndex: number) => {
-    const maxIndex = historyRef.current?.length - 1;
-    setSelectedIndex(clamp(absoluteIndex, 0, maxIndex));
-  }, []);
-
-  const focusBy = useCallback((relativeIndex: number) => {
-    setSelectedIndex((prevIndex) => {
-      const index = prevIndex + relativeIndex;
-      const maxIndex = historyRef.current?.length - 1;
-      return clamp(index, 0, maxIndex);
-    });
-  }, []);
+  const focusBy = useCallback(
+    (relativeIndex: number) => {
+      setSelectedIndex((prevIndex) => {
+        const index = prevIndex + relativeIndex;
+        const maxIndex = (history?.length ?? 0) - 1;
+        return clamp(index, 0, maxIndex);
+      });
+    },
+    [history]
+  );
 
   useEffect(() => {
     libraryAPIRef.current = {
@@ -76,7 +77,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
           setHistory([]);
         },
         get: () => {
-          return historyRef.current ?? [];
+          return history ?? [];
         },
       },
       navigation: {
@@ -90,7 +91,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
           focusTo(0);
         },
         selectLast: () => {
-          focusTo(historyRef.current?.length - 1);
+          focusTo((history?.length ?? 0) - 1);
         },
         selectTo: (index: number) => {
           focusTo(index);
@@ -98,7 +99,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
       },
     } as LibraryAPI;
     setGlobalLibrary(libraryAPIRef.current);
-  }, [setHistory, setGlobalLibrary, focusTo, focusBy]);
+  }, [setHistory, setGlobalLibrary, focusTo, focusBy, history]);
 
   return { history: history ?? [], selectedIndex, focusTo };
 };
