@@ -1,5 +1,6 @@
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
+import { clamp } from "@/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { HistoryItem, LibraryAPI } from "../../types";
 
@@ -25,26 +26,22 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
   const historyRef = useRef<HistoryItem[]>(history ?? []);
 
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const selectedIndexRef = useRef<number>(0);
 
   useEffect(() => {
     historyRef.current = history ?? [];
   }, [history]);
 
-  useEffect(() => {
-    selectedIndexRef.current = selectedIndex;
-  }, [selectedIndex]);
-
-  const focusTo = useCallback((index: number) => {
+  const focusTo = useCallback((absoluteIndex: number) => {
     const maxIndex = historyRef.current?.length - 1;
-    // 範囲チェック
-    if (index < 0) {
-      setSelectedIndex(0);
-    } else if (index > maxIndex) {
-      setSelectedIndex(maxIndex);
-    } else {
-      setSelectedIndex(index);
-    }
+    setSelectedIndex(clamp(absoluteIndex, 0, maxIndex));
+  }, []);
+
+  const focusBy = useCallback((relativeIndex: number) => {
+    setSelectedIndex((prevIndex) => {
+      const index = prevIndex + relativeIndex;
+      const maxIndex = historyRef.current?.length - 1;
+      return clamp(index, 0, maxIndex);
+    });
   }, []);
 
   useEffect(() => {
@@ -83,10 +80,10 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
       },
       navigation: {
         selectNext: () => {
-          focusTo(selectedIndexRef.current + 1);
+          focusBy(1);
         },
         selectPrev: () => {
-          focusTo(selectedIndexRef.current - 1);
+          focusBy(-1);
         },
         selectFirst: () => {
           focusTo(0);
@@ -100,7 +97,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
       },
     } as LibraryAPI;
     setGlobalLibrary(libraryAPIRef.current);
-  }, [setHistory, setGlobalLibrary, focusTo]);
+  }, [setHistory, setGlobalLibrary, focusTo, focusBy]);
 
   return { history: history ?? [], selectedIndex };
 };
