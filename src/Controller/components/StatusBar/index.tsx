@@ -1,11 +1,11 @@
-import type { MIDIScriptManager } from "@/types/global";
+import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
 import { useEffect, useRef, useState } from "react";
 import Status from "./components/Status";
 import styles from "./index.module.css";
 
 const StatusBar = () => {
   const [projectionWindow, setProjectionWindow] = useState<Window | null>(null);
-  const [midi, setMidi] = useState<MIDIScriptManager | null>(null);
+  const { midiAPI, setMidiAPI } = useControllerAPIContext();
   const isInitializedRef = useRef(false);
 
   useEffect(() => {
@@ -23,11 +23,11 @@ const StatusBar = () => {
       return;
     }
 
-    if (!midi) {
+    if (!midiAPI) {
       const _midi = new window.MIDIScriptManager("YouTube-VJ", {
         executeScript: true,
       });
-      setMidi(_midi);
+      setMidiAPI(_midi);
       _midi
         .requestAccess()
         .then(() => {
@@ -35,10 +35,10 @@ const StatusBar = () => {
         })
         .catch((error) => {
           console.error("[StatusBar] Failed to request MIDI access:", error);
-          setMidi(null);
+          setMidiAPI(null);
         });
     } else {
-      midi.openCustomScriptEditor();
+      midiAPI.openCustomScriptEditor();
     }
   };
 
@@ -66,7 +66,7 @@ const StatusBar = () => {
 
   return (
     <div className={styles.statusBar}>
-      <Status text="MIDI" status={midi !== null} onClick={() => handleMIDI()} />
+      <Status text="MIDI" status={midiAPI !== null} onClick={() => handleMIDI()} />
       <Status text="Projection" status={projectionWindow !== null} onClick={openProjectionWindow} />
     </div>
   );
