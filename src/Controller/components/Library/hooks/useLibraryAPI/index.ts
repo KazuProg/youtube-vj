@@ -11,6 +11,7 @@ interface UseLibraryAPIParams {
 interface UseLibraryAPIReturn {
   history: HistoryItem[];
   selectedIndex: number;
+  focusTo: (absoluteIndex: number) => void;
 }
 
 export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLibraryAPIReturn => {
@@ -99,5 +100,5 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
     setGlobalLibrary(libraryAPIRef.current);
   }, [setHistory, setGlobalLibrary, focusTo, focusBy]);
 
-  return { history: history ?? [], selectedIndex };
+  return { history: history ?? [], selectedIndex, focusTo };
 };

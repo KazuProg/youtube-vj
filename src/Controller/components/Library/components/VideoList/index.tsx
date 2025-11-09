@@ -7,9 +7,10 @@ import styles from "./index.module.css";
 interface VideoListProps {
   videos: HistoryItem[];
   selectedIndex: number;
+  onSelect: (id: string, index: number) => void;
 }
 
-const VideoList = ({ videos, selectedIndex }: VideoListProps) => {
+const VideoList = ({ videos, selectedIndex, onSelect }: VideoListProps) => {
   const { mixerAPI } = useControllerAPIContext();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +44,7 @@ const VideoList = ({ videos, selectedIndex }: VideoListProps) => {
             <ListItem
               id={item.id}
               key={`${item.id}-${index}`}
-              onSelect={() => mixerAPI?.setPreparedVideoId(item.id)}
+              onSelect={onSelect}
               className={selectedIndex === index ? styles.selected : ""}
               index={index}
             />

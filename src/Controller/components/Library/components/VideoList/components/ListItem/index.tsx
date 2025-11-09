@@ -4,7 +4,7 @@ import styles from "./index.module.css";
 
 interface ListItemProps {
   id: string;
-  onSelect: (id: string) => void;
+  onSelect: (id: string, index: number) => void;
   className: string;
   index: number;
 }
@@ -25,11 +25,11 @@ const ListItem = ({ id, onSelect, className, index }: ListItemProps) => {
       youtube-id={id}
       className={className}
       tabIndex={0}
-      onClick={() => onSelect(id)}
+      onClick={() => onSelect(id, index)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onSelect(id);
+          onSelect(id, index);
         }
       }}
     >

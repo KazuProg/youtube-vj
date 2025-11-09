@@ -1,16 +1,25 @@
 import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
+import { useCallback } from "react";
 import styles from "./Library.module.css";
 import VideoList from "./components/VideoList";
 import { YouTubeDataProvider } from "./contexts/YouTubeDataContext";
 import { useLibraryAPI } from "./hooks/useLibraryAPI";
 
 const Library = () => {
-  const { setLibraryAPI } = useControllerAPIContext();
+  const { setLibraryAPI, mixerAPI } = useControllerAPIContext();
 
   // useLibraryAPIから履歴データを取得（useStorageSyncの重複を避ける）
-  const { history, selectedIndex } = useLibraryAPI({
+  const { history, selectedIndex, focusTo } = useLibraryAPI({
     setGlobalLibrary: setLibraryAPI,
   });
+
+  const handleSelect = useCallback(
+    (id: string, index: number) => {
+      mixerAPI?.setPreparedVideoId(id);
+      focusTo(index);
+    },
+    [mixerAPI, focusTo]
+  );
 
   return (
     <YouTubeDataProvider>
@@ -20,7 +29,11 @@ const Library = () => {
             <li className={styles.focused}>History</li>
           </ul>
         </div>
-        <VideoList videos={[...history].reverse()} selectedIndex={selectedIndex} />
+        <VideoList
+          videos={[...history].reverse()}
+          selectedIndex={selectedIndex}
+          onSelect={handleSelect}
+        />
       </div>
     </YouTubeDataProvider>
   );
