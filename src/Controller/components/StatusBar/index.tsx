@@ -1,13 +1,20 @@
 import type { MIDIScriptManager } from "@/types/global";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Status from "./components/Status";
 import styles from "./index.module.css";
 
 const StatusBar = () => {
   const [projectionWindow, setProjectionWindow] = useState<Window | null>(null);
   const [midi, setMidi] = useState<MIDIScriptManager | null>(null);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
+    // React StrictModeによる二重実行を防ぐ
+    if (isInitializedRef.current) {
+      return;
+    }
+    isInitializedRef.current = true;
+
     handleMIDI(true);
   }, []);
 
