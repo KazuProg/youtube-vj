@@ -34,6 +34,7 @@ interface LegacyLibraryAPI {
   actions: {
     up: () => void;
     down: () => void;
+    changeFocus: () => void;
   };
 }
 
@@ -157,6 +158,9 @@ window.Library = {
     },
     down: () => {
       window.library?.navigation.selectNext();
+    },
+    changeFocus: () => {
+      window.library?.navigation.changeFocus();
     },
   },
 };

@@ -1,5 +1,5 @@
 import { clamp } from "@/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { LibraryAPI, VideoItem } from "../../types";
 import { useHistory } from "../usehistory";
 
@@ -8,39 +8,87 @@ interface UseLibraryAPIParams {
 }
 
 interface UseLibraryAPIReturn {
+  playlists: Map<string, VideoItem[]>;
+  selectedPlaylistIndex: number;
+
   videos: VideoItem[];
   selectedVideoIndex: number;
-  focusTo: (absoluteIndex: number) => void;
+
+  addPlaylist: (name: string, videoIds: VideoItem[]) => void;
+  changePlaylistFocus: (index: number, isRelative?: boolean) => void;
+  changeVideoFocus: (index: number, isRelative?: boolean) => void;
 }
+
+type FocusType = "playlist" | "video";
 
 export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLibraryAPIReturn => {
   const { history, addHistory, removeHistory, clearHistory } = useHistory();
-  // LocalStorageから再生履歴を読み取り
-  const libraryAPIRef = useRef<LibraryAPI | null>(null);
 
+  const [playlists, setPlaylists] = useState<Map<string, VideoItem[]>>(
+    new Map([["History", history]])
+  );
+  const [selectedPlaylistIndex, setSelectedPlaylistIndex] = useState<number>(0);
+  const [videos, setVideos] = useState<VideoItem[]>(history);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState<number>(0);
 
-  const focusTo = useCallback(
-    (absoluteIndex: number) => {
-      const maxIndex = (history?.length ?? 0) - 1;
-      setSelectedVideoIndex(clamp(absoluteIndex, 0, maxIndex));
-    },
-    [history]
-  );
+  const [focusedType, setFocusedType] = useState<FocusType>("video");
 
-  const focusBy = useCallback(
-    (relativeIndex: number) => {
-      setSelectedVideoIndex((prevIndex) => {
-        const index = prevIndex + relativeIndex;
-        const maxIndex = (history?.length ?? 0) - 1;
-        return clamp(index, 0, maxIndex);
+  useEffect(() => {
+    setPlaylists((prev) => {
+      const newMap = new Map(prev);
+      newMap.set("History", history);
+      return newMap;
+    });
+  }, [history]);
+
+  useEffect(() => {
+    setVideos(() => {
+      const playlistName = Array.from(playlists.keys())[selectedPlaylistIndex];
+      const _videos = playlists.get(playlistName) ?? [];
+      if (playlistName === "History") {
+        return [..._videos].reverse();
+      }
+      return _videos;
+    });
+  }, [playlists, selectedPlaylistIndex]);
+
+  const addPlaylist = useCallback((name: string, videos: VideoItem[]) => {
+    if (name === "History") {
+      console.error("History is not allowed to be added");
+      return;
+    }
+    setPlaylists((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(name, videos);
+      return newMap;
+    });
+  }, []);
+
+  const changePlaylistFocus = useCallback(
+    (index: number, isRelative = false) => {
+      setSelectedVideoIndex(0);
+      setSelectedPlaylistIndex((prevIndex) => {
+        const maxIndex = playlists.size - 1;
+        const newIndex = isRelative ? prevIndex + index : index;
+        return clamp(newIndex, 0, maxIndex);
       });
     },
-    [history]
+    [playlists]
+  );
+
+  const changeVideoFocus = useCallback(
+    (index: number, isRelative = false) => {
+      setSelectedVideoIndex((prevIndex) => {
+        const maxIndex = (videos?.length ?? 0) - 1;
+        const newIndex = isRelative ? prevIndex + index : index;
+        return clamp(newIndex, 0, maxIndex);
+      });
+    },
+    [videos]
   );
 
   useEffect(() => {
-    libraryAPIRef.current = {
+    const libraryAPI: LibraryAPI = {
       history: {
         add: (videoId: string, title: string) => {
           addHistory(videoId, title);
@@ -55,30 +103,108 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
           return history;
         },
       },
+      playlists: {
+        add: (name: string, videoIds: VideoItem[]) => {
+          addPlaylist(name, videoIds);
+        },
+        remove: (name: string) => {
+          if (name === "History") {
+            console.error("History is not allowed to be removed");
+            return;
+          }
+          setPlaylists((prev) => {
+            const newMap = new Map(prev);
+            newMap.delete(name);
+            return newMap;
+          });
+        },
+        get: (name: string) => {
+          return playlists.get(name) ?? [];
+        },
+        getAllNames: () => {
+          return Array.from(playlists.keys());
+        },
+      },
       navigation: {
+        // Playlist navigation
+        selectNextPlaylist: () => {
+          changePlaylistFocus(1, true);
+        },
+        selectPrevPlaylist: () => {
+          changePlaylistFocus(-1, true);
+        },
+        selectPlaylistTo: (absoluteIndex: number) => {
+          changePlaylistFocus(absoluteIndex, false);
+        },
+
+        // Video navigation
+        selectNextVideo: () => {
+          changeVideoFocus(1, true);
+        },
+        selectPrevVideo: () => {
+          changeVideoFocus(-1, true);
+        },
+        selectVideoTo: (absoluteIndex: number) => {
+          changeVideoFocus(absoluteIndex, false);
+        },
+
+        // Common navigation
         selectNext: () => {
-          focusBy(1);
+          if (focusedType === "video") {
+            libraryAPI.navigation.selectNextVideo();
+          } else {
+            libraryAPI.navigation.selectNextPlaylist();
+          }
         },
         selectPrev: () => {
-          focusBy(-1);
+          if (focusedType === "video") {
+            libraryAPI.navigation.selectPrevVideo();
+          } else {
+            libraryAPI.navigation.selectPrevPlaylist();
+          }
         },
-        selectFirst: () => {
-          focusTo(0);
+        selectTo: (absoluteIndex: number) => {
+          if (focusedType === "video") {
+            libraryAPI.navigation.selectVideoTo(absoluteIndex);
+          } else {
+            libraryAPI.navigation.selectPlaylistTo(absoluteIndex);
+          }
         },
-        selectLast: () => {
-          focusTo((history?.length ?? 0) - 1);
-        },
-        selectTo: (index: number) => {
-          focusTo(index);
+
+        // Focus change
+        changeFocus: () => {
+          setFocusedType((prevType) => {
+            return prevType === "playlist" ? "video" : "playlist";
+          });
         },
       },
     } as LibraryAPI;
-    setGlobalLibrary(libraryAPIRef.current);
-  }, [history, addHistory, removeHistory, clearHistory, setGlobalLibrary, focusTo, focusBy]);
+    setGlobalLibrary(libraryAPI);
+  }, [
+    history,
+    addHistory,
+    removeHistory,
+    clearHistory,
+
+    playlists,
+    addPlaylist,
+
+    changePlaylistFocus,
+    changeVideoFocus,
+    focusedType,
+
+    setGlobalLibrary,
+  ]);
 
   return {
-    videos: [...history].reverse(),
+    playlists,
+    selectedPlaylistIndex,
+
+    videos,
     selectedVideoIndex,
-    focusTo,
+
+    addPlaylist,
+    changePlaylistFocus,
+    changeVideoFocus,
   };
 };
