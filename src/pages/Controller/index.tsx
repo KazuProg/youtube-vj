@@ -6,6 +6,9 @@ import StatusBar from "./components/StatusBar";
 import { ControllerAPIProvider } from "./contexts/ControllerAPIContext";
 import styles from "./index.module.css";
 
+// レガシーAPI をグローバルに設定（自動実行）
+import "./utils/legacyAPI";
+
 const ControllerPage = () => {
   return (
     <ControllerAPIProvider>

@@ -4,9 +4,6 @@ import type { MixerAPI } from "@/pages/Controller/components/Mixer/types";
 import { createContext, useCallback, useContext, useState } from "react";
 import type { MIDIScriptManager } from "../types/MIDIScriptManager";
 
-// レガシーAPI をグローバルに設定（自動実行）
-import "@/utils/legacyAPI";
-
 interface ControllerAPIContextValue {
   deckAPIs: (DeckAPI | null)[];
   setDeckAPI: (deckId: number, deckAPI: DeckAPI | null) => void;
