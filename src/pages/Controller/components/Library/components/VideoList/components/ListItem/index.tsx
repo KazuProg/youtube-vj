@@ -1,4 +1,4 @@
-import { useYouTubeDataContext } from "@/Controller/components/Library/contexts/YouTubeDataContext";
+import { useYouTubeDataContext } from "@/pages/Controller/components/Library/contexts/YouTubeDataContext";
 import { useEffect, useState } from "react";
 import styles from "./index.module.css";
 

@@ -1,6 +1,6 @@
-import type { DeckAPI } from "@/Controller/components/Deck/types";
-import type { LibraryAPI } from "@/Controller/components/Library/types";
-import type { MixerAPI } from "@/Controller/components/Mixer/types";
+import type { DeckAPI } from "@/pages/Controller/components/Deck/types";
+import type { LibraryAPI } from "@/pages/Controller/components/Library/types";
+import type { MixerAPI } from "@/pages/Controller/components/Mixer/types";
 import type { MIDIScriptManager } from "@/types/global";
 import { createContext, useCallback, useContext, useState } from "react";
 

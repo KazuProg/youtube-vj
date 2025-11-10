@@ -1,6 +1,6 @@
-import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
-import { parseYouTubeURL } from "@/Controller/utils";
 import { useTextFileReader } from "@/hooks/useTextFileReader";
+import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
+import { parseYouTubeURL } from "@/pages/Controller/utils";
 import { useCallback } from "react";
 import styles from "./Library.module.css";
 import VideoList from "./components/VideoList";

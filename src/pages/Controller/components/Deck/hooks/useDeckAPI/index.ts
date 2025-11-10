@@ -1,5 +1,5 @@
-import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
 import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
+import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import type { DeckAPI } from "../../types";

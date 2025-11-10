@@ -1,15 +1,14 @@
-import ControllerPage from "@/Controller/page";
-import ProjectionPage from "@/Projection/page";
+import ControllerPage from "@/pages/Controller";
+import ProjectionPage from "@/pages/Projection";
+import { Route, Routes } from "react-router-dom";
 
 function App() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const mode = urlParams.get("mode");
-
-  if (mode === "projection") {
-    return <ProjectionPage />;
-  }
-
-  return <ControllerPage />;
+  return (
+    <Routes>
+      <Route path="/" element={<ControllerPage />} />
+      <Route path="/projection" element={<ProjectionPage />} />
+    </Routes>
+  );
 }
 
 export default App;

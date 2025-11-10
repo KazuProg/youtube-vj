@@ -4,7 +4,7 @@ import Library from "./components/Library";
 import Mixer from "./components/Mixer";
 import StatusBar from "./components/StatusBar";
 import { ControllerAPIProvider } from "./contexts/ControllerAPIContext";
-import styles from "./page.module.css";
+import styles from "./index.module.css";
 
 const ControllerPage = () => {
   return (

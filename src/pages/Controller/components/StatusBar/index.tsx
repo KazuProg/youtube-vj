@@ -1,4 +1,4 @@
-import { useControllerAPIContext } from "@/Controller/contexts/ControllerAPIContext";
+import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import { useEffect, useRef, useState } from "react";
 import Status from "./components/Status";
 import styles from "./index.module.css";
@@ -43,10 +43,8 @@ const StatusBar = () => {
   };
 
   const openProjectionWindow = () => {
-    const projectionUrl = `${window.location.origin}${window.location.pathname}?mode=projection`;
-
     const newWindow = window.open(
-      projectionUrl,
+      "/projection",
       "VJProjection",
       "width=1280,height=720,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=yes"
     );

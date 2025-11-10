@@ -3,7 +3,7 @@ import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import type { MixerData } from "@/types";
 import { useEffect } from "react";
-import styles from "./page.module.css";
+import styles from "./index.module.css";
 
 const ProjectionPage = () => {
   const { data: mixerData } = useStorageSync<MixerData>(LOCAL_STORAGE_KEY.mixer);
