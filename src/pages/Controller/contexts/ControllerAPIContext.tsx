@@ -1,8 +1,8 @@
 import type { DeckAPI } from "@/pages/Controller/components/Deck/types";
 import type { LibraryAPI } from "@/pages/Controller/components/Library/types";
 import type { MixerAPI } from "@/pages/Controller/components/Mixer/types";
-import type { MIDIScriptManager } from "@/types/global";
 import { createContext, useCallback, useContext, useState } from "react";
+import type { MIDIScriptManager } from "../types/MIDIScriptManager";
 
 // レガシーAPI をグローバルに設定（自動実行）
 import "@/utils/legacyAPI";
