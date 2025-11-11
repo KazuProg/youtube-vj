@@ -1,5 +1,5 @@
 import { clamp } from "@/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { LibraryAPI, VideoItem } from "../../types";
 import { useHistory } from "../usehistory";
 
@@ -14,7 +14,7 @@ interface UseLibraryAPIReturn {
   videos: VideoItem[];
   selectedVideoIndex: number;
 
-  addPlaylist: (name: string, videoIds: VideoItem[]) => void;
+  addPlaylist: (name: string, videoIds: VideoItem[], changeFocus?: boolean) => void;
   changePlaylistFocus: (index: number, isRelative?: boolean) => void;
   changeVideoFocus: (index: number, isRelative?: boolean) => void;
 }
@@ -31,6 +31,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
   const [videos, setVideos] = useState<VideoItem[]>(history);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState<number>(0);
 
+  const pendingFocusPlaylistName = useRef<string | null>(null);
   const [focusedType, setFocusedType] = useState<FocusType>("video");
 
   useEffect(() => {
@@ -40,6 +41,18 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
       return newMap;
     });
   }, [history]);
+
+  useEffect(() => {
+    if (pendingFocusPlaylistName.current) {
+      const playlistNames = Array.from(playlists.keys());
+      const index = playlistNames.indexOf(pendingFocusPlaylistName.current);
+      if (index !== -1) {
+        setSelectedVideoIndex(0);
+        setSelectedPlaylistIndex(index);
+        pendingFocusPlaylistName.current = null;
+      }
+    }
+  }, [playlists]);
 
   useEffect(() => {
     setVideos(() => {
@@ -52,11 +65,16 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
     });
   }, [playlists, selectedPlaylistIndex]);
 
-  const addPlaylist = useCallback((name: string, videos: VideoItem[]) => {
+  const addPlaylist = useCallback((name: string, videos: VideoItem[], changeFocus = false) => {
     if (name === "History") {
       console.error("History is not allowed to be added");
       return;
     }
+
+    if (changeFocus) {
+      pendingFocusPlaylistName.current = name;
+    }
+
     setPlaylists((prev) => {
       const newMap = new Map(prev);
       newMap.set(name, videos);
