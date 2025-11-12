@@ -13,6 +13,7 @@ html {
 }
 
 .faderContainer > input {
+  position: absolute;
   -webkit-appearance: none;
   flex-shrink: 0;
   /* Flexbox使用時にwidthが機能しない対策 */
