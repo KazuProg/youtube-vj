@@ -70,7 +70,7 @@ const Mixer = ({ className }: MixerProps) => {
           ref={inputRef}
         />
       </fieldset>
-      <fieldset>
+      <fieldset className={styles.crossfader}>
         <legend>Crossfader</legend>
         <Fader
           min={0}
