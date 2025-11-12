@@ -35,17 +35,15 @@ const _Fader = ({
       style={style}
     >
       <input
+        className={styles.faderInput}
         type="range"
         step={step}
         value={value}
         min={min}
         max={max}
         style={{
-          margin: 0,
-          padding: 0,
           transform: `rotate(${rotateDeg}deg)`,
           width: vertical ? containerSize.height : containerSize.width,
-          height: 0,
         }}
         onChange={(e) => onChange(Number(e.target.value))}
       />
