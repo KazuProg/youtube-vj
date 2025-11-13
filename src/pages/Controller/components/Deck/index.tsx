@@ -113,8 +113,13 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
     [updateSyncData]
   );
 
+  const adjustTime = (relativeTime: number) => {
+    const newTime = getCurrentTime() + relativeTime;
+    deckAPIRef.current?.seekTo(newTime, true);
+  };
+
   return (
-    <div className={`${styles.container} ${className}`}>
+    <div className={`${styles.deck} ${className}`}>
       <fieldset>
         <legend>Preview</legend>
         <VJPlayer
@@ -131,6 +136,62 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
         />
       </fieldset>
       <div className={styles.controlsContainer}>
+        <fieldset>
+          <legend>Adjust</legend>
+          <div className={styles.adjust}>
+            <button
+              type="button"
+              onClick={() => {
+                adjustTime(-5);
+              }}
+            >
+              &lt;
+            </button>
+            <span>5s</span>
+            <button
+              type="button"
+              onClick={() => {
+                adjustTime(5);
+              }}
+            >
+              &gt;
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                adjustTime(-1);
+              }}
+            >
+              &lt;
+            </button>
+            <span>1s</span>
+            <button
+              type="button"
+              onClick={() => {
+                adjustTime(1);
+              }}
+            >
+              &gt;
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                adjustTime(-0.1);
+              }}
+            >
+              &lt;
+            </button>
+            <span>0.1s</span>
+            <button
+              type="button"
+              onClick={() => {
+                adjustTime(0.1);
+              }}
+            >
+              &gt;
+            </button>
+          </div>
+        </fieldset>
         <fieldset className={styles.controlFieldset}>
           <legend>
             <button
@@ -186,47 +247,6 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
           <span className={isMuted ? styles.mutedText : undefined}>{volume.toFixed(0)}%</span>
         </fieldset>
       </div>
-      <fieldset>
-        <legend>Seek</legend>
-        <div className={styles.seekButtons}>
-          <button
-            type="button"
-            onClick={() => {
-              const newTime = getCurrentTime() - 1;
-              deckAPIRef.current?.seekTo(newTime, true);
-            }}
-          >
-            -1
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              const newTime = getCurrentTime() + 1;
-              deckAPIRef.current?.seekTo(newTime, true);
-            }}
-          >
-            +1
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              const newTime = getCurrentTime() - 0.1;
-              deckAPIRef.current?.seekTo(newTime, true);
-            }}
-          >
-            -0.1
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              const newTime = getCurrentTime() + 0.1;
-              deckAPIRef.current?.seekTo(newTime, true);
-            }}
-          >
-            +0.1
-          </button>
-        </div>
-      </fieldset>
     </div>
   );
 };
