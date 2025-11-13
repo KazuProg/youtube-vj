@@ -3,12 +3,7 @@
   flex: 1;
   flex-direction: row;
   border-top: solid 1px #555;
-  position: relative;
   overflow: hidden;
-}
-
-.library.dragging {
-  border: 2px dashed #fff;
 }
 
 .playlist {
@@ -35,17 +30,4 @@
 .playlist > ul li.focused,
 .playlist > ul li:hover {
   background: #fff3;
-}
-
-.dragOverlay {
-  display: grid;
-  position: absolute;
-  place-items: center;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.3);
-  z-index: 10;
-  color: #fff;
-  font-size: 9em;
-  pointer-events: none;
-  user-select: none;
 }

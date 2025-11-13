@@ -1,0 +1,16 @@
+.container {
+  position: relative;
+}
+
+.overlay {
+  border: 2px dashed #fff;
+  display: grid;
+  position: absolute;
+  place-items: center;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 10;
+  color: #fff;
+  font-size: 9em;
+  user-select: none;
+}
