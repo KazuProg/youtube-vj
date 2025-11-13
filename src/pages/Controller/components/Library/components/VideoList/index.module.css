@@ -22,6 +22,11 @@
   width: 1.6rem;
 }
 
+.thTitle {
+  text-align: left;
+  padding-left: 2rem;
+}
+
 .tbody tr {
   cursor: pointer;
 }
