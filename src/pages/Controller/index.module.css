@@ -14,8 +14,7 @@
 }
 
 .mixer {
-  width: 20%;
-  min-width: 120px;
+  width: 160px;
   padding: 8px;
   border-left: 1px solid #555;
   border-right: 1px solid #555;
