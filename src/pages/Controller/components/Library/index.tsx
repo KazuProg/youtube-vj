@@ -1,7 +1,7 @@
 import { useTextFileReader } from "@/hooks/useTextFileReader";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import { parseYouTubeURL } from "@/pages/Controller/utils";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import styles from "./Library.module.css";
 import VideoList from "./components/VideoList";
 import { YouTubeDataProvider } from "./contexts/YouTubeDataContext";
@@ -10,6 +10,7 @@ import type { VideoItem } from "./types";
 
 const Library = () => {
   const { libraryAPI, setLibraryAPI, mixerAPI } = useControllerAPIContext();
+  const [isDragging, setIsDragging] = useState(false);
 
   // useLibraryAPIから履歴データを取得（useStorageSyncの重複を避ける）
   const {
@@ -24,9 +25,9 @@ const Library = () => {
     setGlobalLibrary: setLibraryAPI,
   });
 
-  const { openFileDialog } = useTextFileReader({
-    accept: ".txt",
-    onLoad: (text, filename) => {
+  // ファイル読み込み処理を共通化
+  const handleFileLoad = useCallback(
+    (text: string, filename?: string) => {
       const filenameWithoutExt = filename?.replace(/\.[^/.]+$/, "") ?? "";
       if (!libraryAPI) {
         return;
@@ -42,6 +43,12 @@ const Library = () => {
       const videoItems: VideoItem[] = items.map((id) => ({ id, title: "" }));
       addPlaylist(filenameWithoutExt, videoItems, true);
     },
+    [libraryAPI, addPlaylist]
+  );
+
+  const { openFileDialog } = useTextFileReader({
+    accept: ".txt",
+    onLoad: handleFileLoad,
   });
 
   const handleSelectPlaylist = useCallback(
@@ -59,9 +66,62 @@ const Library = () => {
     [mixerAPI, changeVideoFocus]
   );
 
+  // ドラッグアンドドロップのイベントハンドラー
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // 子要素への移動を考慮（relatedTarget が現在の要素の子要素でない場合のみ非表示）
+    const currentTarget = e.currentTarget;
+    const relatedTarget = e.relatedTarget as Node | null;
+    if (!currentTarget.contains(relatedTarget)) {
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+
+      const files = Array.from(e.dataTransfer.files);
+      const textFile = files.find(
+        (file) => file.type === "text/plain" || file.name.endsWith(".txt")
+      );
+
+      if (!textFile) {
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target?.result as string;
+        if (text) {
+          handleFileLoad(text, textFile.name);
+        }
+      };
+      reader.onerror = () => {
+        console.error("Failed to read file");
+      };
+      reader.readAsText(textFile);
+    },
+    [handleFileLoad]
+  );
+
   return (
     <YouTubeDataProvider>
-      <div className={styles.library}>
+      <div
+        className={`${styles.library} ${isDragging ? styles.dragging : ""}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <div className={styles.playlist}>
           <button type="button" onClick={openFileDialog}>
             Load Playlist
@@ -89,6 +149,7 @@ const Library = () => {
           selectedIndex={selectedVideoIndex}
           onSelect={handleSelectVideo}
         />
+        {isDragging && <div className={styles.dragOverlay}>+</div>}
       </div>
     </YouTubeDataProvider>
   );
