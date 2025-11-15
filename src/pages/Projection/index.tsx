@@ -5,12 +5,11 @@ import type { MixerData } from "@/types";
 import { useEffect } from "react";
 import styles from "./index.module.css";
 
-import "./index.css";
-
 const ProjectionPage = () => {
   const { data: mixerData } = useStorageSync<MixerData>(LOCAL_STORAGE_KEY.mixer);
   useEffect(() => {
     document.title = "📺 VJ投影画面";
+    document.body.style.backgroundColor = "#000";
   }, []);
 
   return (

@@ -6,6 +6,12 @@
   flex-direction: column;
 }
 
+.controllerWindow fieldset {
+  border: none;
+  padding: 0 4px;
+  border-top: groove 1px #555;
+}
+
 .controller {
   flex: 1;
 
