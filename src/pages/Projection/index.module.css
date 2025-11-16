@@ -1,3 +1,48 @@
+.initContainer {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 5vw;
+  padding: 5vw;
+  text-align: center;
+}
+
+.fulModeButton,
+.winModeButton {
+  border-radius: 15px;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.fulModeButton {
+  color: #000;
+  flex: 3;
+  background-color: #0cf;
+  font-weight: bold;
+}
+
+.fulModeButton:hover {
+  transform: scale(1.1);
+}
+
+.winModeButton {
+  color: #fff;
+  flex: 2;
+  background-color: #fff3;
+  color: white;
+  border: 2px solid #fffa;
+}
+
+.winModeButton:hover {
+  background-color: #fff6;
+  border-color: #fff;
+}
+
 .player {
   position: fixed;
   inset: 0;
