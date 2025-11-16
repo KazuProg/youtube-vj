@@ -43,11 +43,7 @@ const StatusBar = () => {
   };
 
   const openProjectionWindow = () => {
-    const newWindow = window.open(
-      "/projection",
-      "VJProjection",
-      "width=1280,height=720,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=yes"
-    );
+    const newWindow = window.open("/projection", "VJProjection", "width=640,height=360");
 
     if (newWindow) {
       setProjectionWindow(newWindow);
