@@ -1,7 +1,9 @@
 import { LOCAL_STORAGE_KEY } from "@/constants";
+import { useState } from "react";
 import Deck from "./components/Deck";
 import Library from "./components/Library";
 import Mixer from "./components/Mixer";
+import Settings from "./components/Settings";
 import StatusBar from "./components/StatusBar";
 import { ControllerAPIProvider } from "./contexts/ControllerAPIContext";
 import styles from "./index.module.css";
@@ -10,6 +12,8 @@ import styles from "./index.module.css";
 import "./utils/legacyAPI";
 
 const ControllerPage = () => {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   return (
     <ControllerAPIProvider>
       <div className={styles.controllerWindow}>
@@ -26,7 +30,8 @@ const ControllerPage = () => {
           </div>
         </div>
         <Library />
-        <StatusBar />
+        <StatusBar onOpenSettings={() => setIsSettingsOpen(true)} />
+        <Settings isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
       </div>
     </ControllerAPIProvider>
   );

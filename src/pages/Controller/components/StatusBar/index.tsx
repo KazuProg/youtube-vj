@@ -3,7 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import Status from "./components/Status";
 import styles from "./index.module.css";
 
-const StatusBar = () => {
+interface StatusBarProps {
+  onOpenSettings?: () => void;
+}
+
+const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
   const [projectionWindow, setProjectionWindow] = useState<Window | null>(null);
   const { midiAPI, setMidiAPI } = useControllerAPIContext();
   const isInitializedRef = useRef(false);
@@ -62,6 +66,7 @@ const StatusBar = () => {
     <div className={styles.statusBar}>
       <Status text="MIDI" status={midiAPI !== null} onClick={() => handleMIDI()} />
       <Status text="Projection" status={projectionWindow !== null} onClick={openProjectionWindow} />
+      {onOpenSettings && <Status text="Settings" status={false} onClick={onOpenSettings} />}
     </div>
   );
 };
