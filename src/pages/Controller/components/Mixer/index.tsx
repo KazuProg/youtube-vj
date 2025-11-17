@@ -67,6 +67,7 @@ const Mixer = ({ className }: MixerProps) => {
           id="input-videoId"
           placeholder="Enter YouTube ID"
           onChange={handleVideoIdChange}
+          onFocus={(e) => e.target.select()}
           ref={inputRef}
         />
       </fieldset>
