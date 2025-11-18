@@ -2,9 +2,9 @@ import Fader from "@/components/Fader";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import type { MixerData } from "@/types";
+import { parseYouTubeURL } from "@/utils/YouTube";
 import { useEffect, useRef } from "react";
 import { useControllerAPIContext } from "../../contexts/ControllerAPIContext";
-import { parseYouTubeURL } from "../../utils";
 import { useMixerAPI } from "./hooks/useMixerAPI";
 import styles from "./index.module.css";
 

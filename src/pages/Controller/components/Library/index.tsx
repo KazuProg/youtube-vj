@@ -1,6 +1,6 @@
 import { useTextFileReader } from "@/hooks/useTextFileReader";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
-import { parseYouTubeURL } from "@/pages/Controller/utils";
+import { parseYouTubeURL } from "@/utils/YouTube";
 import { useCallback } from "react";
 import styles from "./Library.module.css";
 import FileDropZone from "./components/FileDropZone";
