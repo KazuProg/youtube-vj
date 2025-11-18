@@ -25,7 +25,7 @@ const Mixer = ({ className }: MixerProps) => {
     }
   }, []);
 
-  const { mixerAPIRef, preparedVideoId } = useMixerAPI({
+  const { mixerAPIRef, preparedVideo } = useMixerAPI({
     setMixerData,
     setGlobalMixer: setMixerAPI,
   });
@@ -34,15 +34,15 @@ const Mixer = ({ className }: MixerProps) => {
     const parsed = parseYouTubeURL(e.target.value);
     if (parsed && inputRef.current) {
       inputRef.current.value = parsed.id;
-      mixerAPIRef.current?.setPreparedVideoId(parsed.id);
+      mixerAPIRef.current?.setPreparedVideo(parsed);
     }
   };
 
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.value = preparedVideoId;
+      inputRef.current.value = preparedVideo?.id ?? "";
     }
-  }, [preparedVideoId]);
+  }, [preparedVideo]);
 
   return (
     <div className={`${styles.mixer} ${className}`}>
@@ -50,7 +50,12 @@ const Mixer = ({ className }: MixerProps) => {
         <button
           className={styles.loadButton}
           type="button"
-          onClick={() => deckAPIs[0]?.loadVideoById(preparedVideoId)}
+          disabled={!preparedVideo}
+          onClick={() => {
+            if (preparedVideo) {
+              deckAPIs[0]?.loadVideo(preparedVideo);
+            }
+          }}
         >
           Load
         </button>
@@ -60,7 +65,7 @@ const Mixer = ({ className }: MixerProps) => {
         <img
           className={styles.ytThumbnail}
           alt="YouTube Thumbnail"
-          src={`https://img.youtube.com/vi/${preparedVideoId}/default.jpg`}
+          src={`https://img.youtube.com/vi/${preparedVideo?.id}/default.jpg`}
         />
         <input
           type="text"

@@ -64,11 +64,14 @@ window.setCrossfader = (value: number) => {
 };
 
 window.ch1 = {
-  setVideo: (videoId: string) => {
+  setVideo: (videoId: string | undefined) => {
     // レガシースクリプトでは、window.prepareVideoId を使用しているが、
     // 新しいスクリプトでは、window.mixer?.getPreparedVideoId() を使用しているため、
     // 互換性のために、window.prepareVideoId を使用している。
-    window.ch[0]?.loadVideoById(videoId ?? window.mixer?.getPreparedVideoId() ?? "");
+    const video = videoId ?? window.mixer?.getPreparedVideo();
+    if (video) {
+      window.ch[0]?.loadVideo(video);
+    }
   },
   setSpeed: (speed: number) => {
     window.ch[0]?.setPlaybackRate(speed);

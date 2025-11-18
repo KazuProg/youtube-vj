@@ -1,9 +1,16 @@
-export const parseYouTubeURL = (str: string) => {
+import type { YouTubeVideoMetadata } from "@/types";
+
+const parseStartTime = (tParam: string | null): number | undefined => {
+  if (!tParam) {
+    return undefined;
+  }
+  const parsedStart = Number.parseInt(tParam, 10);
+  return Number.isNaN(parsedStart) ? undefined : parsedStart;
+};
+
+export const parseYouTubeURL = (str: string): YouTubeVideoMetadata | null => {
   if (isYouTubeID(str)) {
-    return {
-      id: str,
-      start: null,
-    };
+    return { id: str };
   }
 
   const urls = extractURLs(str);
@@ -12,7 +19,7 @@ export const parseYouTubeURL = (str: string) => {
   }
 
   let id: string | null = null;
-  let start: string | null = null;
+  let start: number | undefined = undefined;
 
   for (const urlStr of urls) {
     const url = new URL(urlStr);
@@ -27,7 +34,7 @@ export const parseYouTubeURL = (str: string) => {
     if (url.pathname.startsWith("/shorts")) {
       id = url.pathname.substring(8, 19);
     }
-    start = params.get("t");
+    start = parseStartTime(params.get("t"));
 
     if (id) {
       break;
@@ -41,7 +48,7 @@ export const parseYouTubeURL = (str: string) => {
   return {
     id,
     start,
-  };
+  } as YouTubeVideoMetadata;
 };
 
 export const isYouTubeID = (text: string) => {

@@ -60,7 +60,7 @@ const Library = () => {
 
   const handleSelectVideo = useCallback(
     (id: string, index: number) => {
-      mixerAPI?.setPreparedVideoId(id);
+      mixerAPI?.setPreparedVideo(id);
       changeVideoFocus(index);
     },
     [mixerAPI, changeVideoFocus]

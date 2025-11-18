@@ -1,5 +1,6 @@
 import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
+import type { YouTubeVideoMetadata } from "@/types";
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import type { DeckAPI } from "../../types";
@@ -91,16 +92,17 @@ export const useDeckAPI = ({
           playbackRate: Number.parseFloat(rate.toFixed(2)),
         });
       },
-      loadVideoById: (newVideoId: string) => {
+      loadVideo: (video: YouTubeVideoMetadata | string) => {
+        const videoObj = typeof video === "string" ? { id: video } : video;
         updateSyncData({
-          videoId: newVideoId,
-          currentTime: 0,
+          videoId: videoObj.id,
+          currentTime: 0, // TODO: start time
           baseTime: Date.now(),
           paused: false,
         });
         hotCuesRef.current.clear();
         onHotCuesChange?.(hotCuesRef.current);
-        libraryAPI?.history.add(newVideoId, newVideoId);
+        libraryAPI?.history.add(videoObj.id, videoObj.id);
       },
       getCurrentTime: () => {
         return vjPlayerRef.current?.getCurrentTime() ?? 0;

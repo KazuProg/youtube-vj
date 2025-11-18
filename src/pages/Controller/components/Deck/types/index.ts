@@ -1,3 +1,5 @@
+import type { YouTubeVideoMetadata } from "@/types";
+
 export interface DeckAPI {
   playVideo: () => void;
   pauseVideo: () => void;
@@ -13,6 +15,6 @@ export interface DeckAPI {
   setVolume: (volume: number) => void;
   setPlaybackRate: (rate: number) => void;
   getCurrentTime: () => number | null;
-  loadVideoById: (videoId: string) => void;
+  loadVideo: (video: YouTubeVideoMetadata | string) => void;
   getDuration: () => number | null;
 }

@@ -1,5 +1,7 @@
+import type { YouTubeVideoMetadata } from "@/types";
+
 export interface MixerAPI {
   setCrossfader: (value: number) => void;
-  setPreparedVideoId: (videoId: string) => void;
-  getPreparedVideoId: () => string;
+  setPreparedVideo: (video: YouTubeVideoMetadata | string) => void;
+  getPreparedVideo: () => YouTubeVideoMetadata | null;
 }

@@ -9,3 +9,8 @@ export type JsonValue =
 export interface MixerData extends Record<string, JsonValue> {
   crossfader: number;
 }
+
+export interface YouTubeVideoMetadata {
+  id: string;
+  start?: number;
+}

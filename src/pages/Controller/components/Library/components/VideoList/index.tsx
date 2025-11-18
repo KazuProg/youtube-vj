@@ -15,7 +15,7 @@ const VideoList = ({ videos, selectedIndex, onSelect }: VideoListProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    mixerAPI?.setPreparedVideoId(videos[selectedIndex].id);
+    mixerAPI?.setPreparedVideo(videos[selectedIndex].id);
   }, [mixerAPI, videos, selectedIndex]);
 
   useEffect(() => {
