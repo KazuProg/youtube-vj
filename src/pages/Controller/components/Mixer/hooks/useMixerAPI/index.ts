@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import type { MixerAPI } from "../../types";
 
 interface UseMixerAPIParams {
-  setMixerData: (mixerData: MixerData | ((prev: MixerData | null) => MixerData)) => void;
+  mixerDataRef: React.MutableRefObject<MixerData | null>;
+  setMixerData: (mixerData: MixerData | null) => void;
   setGlobalMixer: (mixer: MixerAPI | null) => void;
 }
 
-export const useMixerAPI = ({ setMixerData, setGlobalMixer }: UseMixerAPIParams) => {
+export const useMixerAPI = ({ mixerDataRef, setMixerData, setGlobalMixer }: UseMixerAPIParams) => {
   const mixerAPIRef = useRef<MixerAPI | null>(null);
   const [preparedVideo, setPreparedVideo] = useState<YouTubeVideoMetadata | null>(null);
   const preparedVideoRef = useRef<YouTubeVideoMetadata | null>(null);
@@ -20,10 +21,10 @@ export const useMixerAPI = ({ setMixerData, setGlobalMixer }: UseMixerAPIParams)
   useEffect(() => {
     mixerAPIRef.current = {
       setCrossfader: (value: number) => {
-        setMixerData((prev) => ({
-          ...(prev ?? { crossfader: 0 }),
+        setMixerData({
+          ...(mixerDataRef.current ?? { crossfader: 0 }),
           crossfader: value,
-        }));
+        });
       },
       setPreparedVideo: (video: YouTubeVideoMetadata | string) => {
         const videoObj = typeof video === "string" ? { id: video } : video;
@@ -34,7 +35,7 @@ export const useMixerAPI = ({ setMixerData, setGlobalMixer }: UseMixerAPIParams)
       },
     } as MixerAPI;
     setGlobalMixer(mixerAPIRef.current);
-  }, [setMixerData, setGlobalMixer]);
+  }, [setMixerData, setGlobalMixer, mixerDataRef]);
 
   return {
     mixerAPIRef,

@@ -14,8 +14,14 @@ const YouTubePlayer = ({ className, videoId, playerVars, events }: YouTubePlayer
   const playerElementId = useId();
   const playerRef = useRef<YTPlayer | null>(null);
   const isInitializedRef = useRef(false);
+  const eventsRef = useRef(events);
 
   const [error, setError] = useState<string | null>(null);
+
+  // eventsをrefで保持（再初期化を防ぐ）
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
 
   const initializePlayer = useCallback(async () => {
     try {
@@ -29,7 +35,7 @@ const YouTubePlayer = ({ className, videoId, playerVars, events }: YouTubePlayer
       playerRef.current = new window.YT.Player(playerElementId, {
         videoId,
         playerVars,
-        events,
+        events: eventsRef.current,
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
@@ -37,7 +43,7 @@ const YouTubePlayer = ({ className, videoId, playerVars, events }: YouTubePlayer
       setError(errorMessage);
       isInitializedRef.current = false;
     }
-  }, [events, playerElementId, playerVars, videoId]);
+  }, [playerElementId, playerVars, videoId]);
 
   useEffect(() => {
     initializePlayer();

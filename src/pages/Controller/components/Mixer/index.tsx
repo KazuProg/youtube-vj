@@ -14,8 +14,9 @@ interface MixerProps {
 
 const Mixer = ({ className }: MixerProps) => {
   const { deckAPIs, setMixerAPI } = useControllerAPIContext();
-  const { data: mixerData, setData: setMixerData } = useStorageSync<MixerData>(
-    LOCAL_STORAGE_KEY.mixer
+  const { dataRef: mixerDataRef, setData: setMixerData } = useStorageSync<MixerData>(
+    LOCAL_STORAGE_KEY.mixer,
+    null
   );
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -26,6 +27,7 @@ const Mixer = ({ className }: MixerProps) => {
   }, []);
 
   const { mixerAPIRef, preparedVideo } = useMixerAPI({
+    mixerDataRef,
     setMixerData,
     setGlobalMixer: setMixerAPI,
   });
@@ -81,10 +83,10 @@ const Mixer = ({ className }: MixerProps) => {
         <Fader
           min={0}
           max={1}
-          value={mixerData?.crossfader ?? 0}
+          value={mixerDataRef.current?.crossfader ?? 0}
           step={0.01}
           onChange={(value) => {
-            setMixerData({ ...mixerData, crossfader: value });
+            setMixerData({ ...(mixerDataRef.current ?? { crossfader: 0 }), crossfader: value });
           }}
         />
       </fieldset>

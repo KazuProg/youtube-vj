@@ -16,11 +16,14 @@ interface DeckProps {
 
 const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
   const vjPlayerRef = useRef<VJPlayerRef | null>(null);
-  const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(localStorageKey, {
-    defaultValue: INITIAL_SYNC_DATA,
-    overwrite: true,
-  });
-  const syncDataRef = useRef<VJSyncData>(syncData ?? INITIAL_SYNC_DATA);
+  const { dataRef: syncDataRef, setData: setSyncData } = useStorageSync<VJSyncData>(
+    localStorageKey,
+    null,
+    {
+      defaultValue: INITIAL_SYNC_DATA,
+      overwrite: true,
+    }
+  );
 
   // UI用のstate
   const [playbackRate, setPlaybackRate] = useState<number>(1);
@@ -32,13 +35,12 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
     return vjPlayerRef.current?.getCurrentTime() ?? 0;
   };
 
-  useEffect(() => {
-    syncDataRef.current = syncData ?? INITIAL_SYNC_DATA;
-  }, [syncData]);
-
   const updateSyncData = useCallback(
     (partialSyncData: Partial<VJSyncData>) => {
       const previousSyncData = syncDataRef.current;
+      if (previousSyncData === null) {
+        return;
+      }
       // undefinedの値を除外してマージ
       const filteredPartialData = Object.fromEntries(
         Object.entries(partialSyncData).filter(([_, value]) => value !== undefined)
@@ -53,7 +55,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
         setPlaybackRate(newSyncData.playbackRate);
       }
     },
-    [setSyncData]
+    [setSyncData, syncDataRef]
   );
 
   const deckAPIRef = useDeckAPI({
@@ -82,8 +84,37 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
     }
   }, [isMuted, deckAPIRef]);
 
-  const vjPlayerEvents = useMemo(
-    () => ({
+  const vjPlayerEventsRef = useRef({
+    onUnstarted: () => {
+      updateSyncData({
+        currentTime: 0,
+        baseTime: Date.now(),
+      });
+    },
+    onPaused: () => {
+      updateSyncData({
+        currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
+        baseTime: Date.now(),
+        paused: true,
+      });
+    },
+    onUnpaused: () => {
+      updateSyncData({
+        baseTime: Date.now(),
+        paused: false,
+      });
+    },
+    onEnded: () => {
+      updateSyncData({
+        currentTime: 0,
+        baseTime: Date.now(),
+      });
+    },
+  });
+
+  // updateSyncDataが変更されたときにイベントハンドラーを更新
+  useEffect(() => {
+    vjPlayerEventsRef.current = {
       onUnstarted: () => {
         updateSyncData({
           currentTime: 0,
@@ -109,8 +140,17 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
           baseTime: Date.now(),
         });
       },
+    };
+  }, [updateSyncData]);
+
+  const vjPlayerEvents = useMemo(
+    () => ({
+      onUnstarted: () => vjPlayerEventsRef.current.onUnstarted(),
+      onPaused: () => vjPlayerEventsRef.current.onPaused(),
+      onUnpaused: () => vjPlayerEventsRef.current.onUnpaused(),
+      onEnded: () => vjPlayerEventsRef.current.onEnded(),
     }),
-    [updateSyncData]
+    []
   );
 
   const adjustTime = (relativeTime: number) => {

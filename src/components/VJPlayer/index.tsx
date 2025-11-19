@@ -1,4 +1,4 @@
-import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/constants";
+import { DEFAULT_VALUES } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import YouTubePlayer from "./components/YouTubePlayer";
@@ -32,8 +32,7 @@ interface VJPlayerProps {
 const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ({ className, events, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
     const playerRef = useRef<YTPlayer | null>(null);
-    const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
-    const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(syncKey);
+    const beforeSyncDataRef = useRef<VJSyncData | null>(null);
 
     // プレイヤーインターフェースの作成
     const playerInterface = useCallback(
@@ -93,42 +92,16 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     // カスタムフックの使用
     const { getCurrentTime, setDuration, notifySyncData } = usePlayerSync(playerInterface());
 
-    const handleReady = useCallback((event: YTPlayerEvent) => {
-      const player = event.target;
-      try {
-        player.mute();
-        playerRef.current = player;
-
-        if (syncDataRef.current) {
-          player.loadVideoById(syncDataRef.current.videoId);
-          handleSyncData(syncDataRef.current);
-        }
-      } catch (error) {
-        console.error("[VJPlayer] Failed to initialize player:", error);
-      }
-    }, []);
-
-    // 初期同期データの設定（一度だけ実行）
-    const hasInitializedRef = useRef(false);
-    useEffect(() => {
-      if (syncData && !hasInitializedRef.current) {
-        syncDataRef.current = syncData;
-        hasInitializedRef.current = true;
-      }
-    }, [syncData]);
-
     const handleSyncData = useCallback(
       (syncData: VJSyncData) => {
         const player = playerRef.current;
-        const beforeSyncData = syncDataRef.current;
+        const beforeSyncData = beforeSyncDataRef.current;
 
         if (!player) {
           return;
         }
 
-        const changedVideoId = syncData.videoId !== beforeSyncData.videoId;
-
-        syncDataRef.current = syncData;
+        const changedVideoId = syncData.videoId !== beforeSyncData?.videoId;
 
         if (changedVideoId) {
           player.loadVideoById(syncData.videoId);
@@ -141,21 +114,55 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         }
 
         notifySyncData(syncData);
+        beforeSyncDataRef.current = syncData;
       },
       [notifySyncData]
     );
 
-    useEffect(() => {
-      if (syncData) {
-        handleSyncData(syncData);
-      }
-    }, [syncData, handleSyncData]);
+    const onChangeSyncData = useCallback(
+      (syncData: VJSyncData | null) => {
+        if (syncData) {
+          handleSyncData(syncData);
+        }
+      },
+      [handleSyncData]
+    );
+
+    const { dataRef: syncDataRef, setData: setSyncData } = useStorageSync<VJSyncData>(
+      syncKey,
+      onChangeSyncData
+    );
+
+    const handleReady = useCallback(
+      (event: YTPlayerEvent) => {
+        const player = event.target;
+        try {
+          player.mute();
+          playerRef.current = player;
+
+          if (syncDataRef.current) {
+            player.loadVideoById(syncDataRef.current.videoId);
+            handleSyncData(syncDataRef.current);
+          }
+        } catch (error) {
+          console.error("[VJPlayer] Failed to initialize player:", error);
+        }
+      },
+      [handleSyncData, syncDataRef]
+    );
 
     useEffect(() => {
       return () => {
         playerRef.current = null;
       };
     }, []);
+
+    const eventsRef = useRef(events);
+
+    // eventsをrefで保持（再初期化を防ぐ）
+    useEffect(() => {
+      eventsRef.current = events;
+    }, [events]);
 
     const handleStateChange = useCallback(
       (e: YTPlayerEvent) => {
@@ -165,22 +172,22 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         }
 
         if (playerState === YT_PLAYER_STATE.UNSTARTED) {
-          events?.onUnstarted?.();
+          eventsRef.current?.onUnstarted?.();
         }
 
         if (playerState === YT_PLAYER_STATE.PAUSED && !syncDataRef.current?.paused) {
-          events?.onPaused?.();
+          eventsRef.current?.onPaused?.();
         }
 
         if (playerState !== YT_PLAYER_STATE.PAUSED && syncDataRef.current?.paused) {
-          events?.onUnpaused?.();
+          eventsRef.current?.onUnpaused?.();
         }
 
         if (playerState === YT_PLAYER_STATE.ENDED) {
-          events?.onEnded?.();
+          eventsRef.current?.onEnded?.();
         }
       },
-      [setDuration, events]
+      [setDuration, syncDataRef]
     );
 
     useImperativeHandle(

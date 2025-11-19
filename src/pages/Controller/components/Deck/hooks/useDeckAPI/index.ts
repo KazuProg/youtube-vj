@@ -7,7 +7,7 @@ import type { DeckAPI } from "../../types";
 
 interface UseDeckAPIParams {
   vjPlayerRef: RefObject<VJPlayerRef | null>;
-  syncDataRef: RefObject<VJSyncData>;
+  syncDataRef: RefObject<VJSyncData | null> | React.MutableRefObject<VJSyncData | null>;
   updateSyncData: (partialSyncData: Partial<VJSyncData>) => void;
   deckId: number;
   onHotCuesChange?: (hotCues: Map<number, number>) => void;
