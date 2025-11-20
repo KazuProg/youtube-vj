@@ -7,7 +7,6 @@ import { useTimeSync } from "../useTimeSync";
 /** プレイヤー同期用のインターフェース */
 export interface PlayerSyncInterface {
   getCurrentTime: () => number | null;
-  getPlaybackRate: () => number | null;
   setPlaybackRate: (rate: number) => void;
   seekTo: (time: number) => void;
   getDuration: () => number | null;
@@ -39,11 +38,8 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
   // 再生速度調整フック
   const { calculateAdjustmentRate, applyPlaybackRateAdjustment, syncPlaybackRate, isAdjusting } =
     usePlaybackRateAdjustment({
-      playerInterface: {
-        getPlaybackRate: playerInterface.getPlaybackRate,
-        setPlaybackRate: playerInterface.setPlaybackRate,
-      },
       syncDataRef,
+      setPlaybackRate: playerInterface.setPlaybackRate,
     });
 
   /**

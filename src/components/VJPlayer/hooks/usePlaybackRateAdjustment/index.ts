@@ -3,14 +3,9 @@ import { useCallback, useRef } from "react";
 import type { RefObject } from "react";
 import type { VJSyncData } from "../../types";
 
-interface PlaybackRateInterface {
-  getPlaybackRate: () => number | null;
-  setPlaybackRate: (rate: number) => void;
-}
-
 interface UsePlaybackRateAdjustmentParams {
-  playerInterface: PlaybackRateInterface;
   syncDataRef: RefObject<VJSyncData>;
+  setPlaybackRate: (rate: number) => void;
 }
 
 /**
@@ -18,8 +13,8 @@ interface UsePlaybackRateAdjustmentParams {
  * 時間差に基づく動的な速度調整ロジックを担当
  */
 export const usePlaybackRateAdjustment = ({
-  playerInterface,
   syncDataRef,
+  setPlaybackRate,
 }: UsePlaybackRateAdjustmentParams) => {
   const lastAppliedRateRef = useRef<number>(1.0);
   const isAdjustingRateRef = useRef<boolean>(false);
@@ -70,7 +65,7 @@ export const usePlaybackRateAdjustment = ({
 
         if (Math.abs(adjustmentRate - lastAppliedRate) >= SYNC_CONFIG.rateChangeThreshold) {
           isAdjustingRateRef.current = true;
-          playerInterface.setPlaybackRate(adjustmentRate);
+          setPlaybackRate(adjustmentRate);
           lastAppliedRateRef.current = adjustmentRate;
 
           setTimeout(() => {
@@ -82,7 +77,7 @@ export const usePlaybackRateAdjustment = ({
         isAdjustingRateRef.current = false;
       }
     },
-    [playerInterface]
+    [setPlaybackRate]
   );
 
   /**
@@ -95,12 +90,12 @@ export const usePlaybackRateAdjustment = ({
 
     try {
       const syncData = syncDataRef.current;
-      playerInterface.setPlaybackRate(syncData.playbackRate);
+      setPlaybackRate(syncData.playbackRate);
       lastAppliedRateRef.current = syncData.playbackRate;
     } catch (error) {
       console.warn("[usePlaybackRateAdjustment] Failed to set playback rate:", error);
     }
-  }, [playerInterface, syncDataRef]);
+  }, [setPlaybackRate, syncDataRef]);
 
   /**
    * 速度調整中かどうかを判定

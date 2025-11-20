@@ -49,18 +49,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
             return null;
           }
         },
-        getPlaybackRate: () => {
-          const player = playerRef.current;
-          if (!player) {
-            return null;
-          }
-          try {
-            return player.getPlaybackRate();
-          } catch (error) {
-            console.error("[VJPlayer] Failed to get playback rate:", error);
-            return null;
-          }
-        },
         setPlaybackRate: (rate: number) => {
           const player = playerRef.current;
           if (player && player.getPlayerState() === YT_PLAYER_STATE.PLAYING) {
