@@ -38,16 +38,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     const playerInterface = useCallback(
       (): PlayerSyncInterface => ({
         getCurrentTime: () => {
-          const player = playerRef.current;
-          if (!player) {
-            return null;
-          }
-          try {
-            return player.getCurrentTime();
-          } catch (error) {
-            console.error("[VJPlayer] Failed to get current time:", error);
-            return null;
-          }
+          return playerRef.current?.getCurrentTime() ?? null;
+        },
+        getDuration: () => {
+          return playerRef.current?.getDuration() ?? null;
         },
         setPlaybackRate: (rate: number) => {
           const player = playerRef.current;
@@ -59,18 +53,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           const player = playerRef.current;
           if (player && player.getPlayerState() === YT_PLAYER_STATE.PLAYING) {
             player.seekTo(time, true);
-          }
-        },
-        getDuration: () => {
-          const player = playerRef.current;
-          if (!player) {
-            return null;
-          }
-          try {
-            return player.getDuration();
-          } catch (error) {
-            console.error("[VJPlayer] Failed to get duration:", error);
-            return null;
           }
         },
       }),

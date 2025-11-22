@@ -7,9 +7,9 @@ import { useTimeSync } from "../useTimeSync";
 /** プレイヤー同期用のインターフェース */
 export interface PlayerSyncInterface {
   getCurrentTime: () => number | null;
+  getDuration: () => number | null;
   setPlaybackRate: (rate: number) => void;
   seekTo: (time: number) => void;
-  getDuration: () => number | null;
 }
 
 /** カスタムフックの戻り値 */
