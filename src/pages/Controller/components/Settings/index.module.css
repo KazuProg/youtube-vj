@@ -93,3 +93,75 @@
   flex: 1;
   color: white;
 }
+
+.settingItem {
+  margin-bottom: 24px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  text-align: left;
+}
+
+.inputGroup {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.input {
+  flex: 1;
+  padding: 10px 12px;
+  background-color: rgb(24, 24, 24);
+  border: 1px solid rgb(85, 85, 85);
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: rgb(100, 150, 255);
+}
+
+.input::placeholder {
+  color: rgb(150, 150, 150);
+}
+
+.saveButton {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+  white-space: nowrap;
+  background-color: rgb(100, 150, 255);
+  color: white;
+}
+
+.saveButton:hover {
+  background-color: rgb(80, 130, 235);
+}
+
+.saveButton:active {
+  background-color: rgb(60, 110, 215);
+}
+
+.footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgb(85, 85, 85);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.footer .saveButton {
+  min-width: 80px;
+}
