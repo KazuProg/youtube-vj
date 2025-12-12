@@ -1,6 +1,7 @@
 import { LOCAL_STORAGE_KEY } from "@/constants";
+import { useStorageSync } from "@/hooks/useStorageSync";
 import type { SettingsData } from "@/types";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styles from "./index.module.css";
 
 interface SettingsProps {
@@ -11,23 +12,27 @@ interface SettingsProps {
 const Settings = ({ isOpen, onClose }: SettingsProps) => {
   const [apiKey, setApiKey] = useState<string>("");
 
-  // LocalStorageから既存の設定を読み込む
+  const onChangeSettings = useCallback((data: unknown) => {
+    const settings = data as SettingsData | null;
+    setApiKey(settings?.youtubeDataAPIKey || "");
+  }, []);
+
+  const { dataRef: settingsRef, setData: setSettings } = useStorageSync(
+    LOCAL_STORAGE_KEY.settings,
+    onChangeSettings
+  ) as {
+    dataRef: React.MutableRefObject<SettingsData | null>;
+    setData: (data: SettingsData | null) => void;
+    clearData: () => void;
+  };
+
+  // 設定画面が開かれたときに初期値を設定
   useEffect(() => {
     if (isOpen) {
-      try {
-        const savedSettings = localStorage.getItem(LOCAL_STORAGE_KEY.settings);
-        if (savedSettings) {
-          const settings: SettingsData = JSON.parse(savedSettings);
-          setApiKey(settings.youtubeDataAPIKey || "");
-        } else {
-          setApiKey("");
-        }
-      } catch (error) {
-        console.error("Failed to load settings:", error);
-        setApiKey("");
-      }
+      const currentSettings = settingsRef.current;
+      setApiKey(currentSettings?.youtubeDataAPIKey || "");
     }
-  }, [isOpen]);
+  }, [isOpen, settingsRef]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -59,14 +64,10 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
   };
 
   const handleSaveSettings = () => {
-    try {
-      const trimmedKey = apiKey.trim();
-      const settings: SettingsData = trimmedKey ? { youtubeDataAPIKey: trimmedKey } : {};
-      localStorage.setItem(LOCAL_STORAGE_KEY.settings, JSON.stringify(settings));
-      onClose();
-    } catch (error) {
-      console.error("Failed to save settings:", error);
-    }
+    const trimmedKey = apiKey.trim();
+    const settings: SettingsData = trimmedKey ? { youtubeDataAPIKey: trimmedKey } : {};
+    setSettings(settings);
+    onClose();
   };
 
   return (
