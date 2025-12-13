@@ -1,3 +1,6 @@
+import { LOCAL_STORAGE_KEY } from "@/constants";
+import { useStorageSync } from "@/hooks/useStorageSync";
+import type { SettingsData } from "@/types";
 import { clamp } from "@/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LibraryAPI, VideoItem } from "../../types";
@@ -17,6 +20,8 @@ interface UseLibraryAPIReturn {
   addPlaylist: (name: string, videoIds: VideoItem[], changeFocus?: boolean) => void;
   changePlaylistFocus: (index: number, isRelative?: boolean) => void;
   changeVideoFocus: (index: number, isRelative?: boolean) => void;
+
+  searchYouTube: (query: string) => void;
 }
 
 type FocusType = "playlist" | "video";
@@ -24,8 +29,15 @@ type FocusType = "playlist" | "video";
 export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLibraryAPIReturn => {
   const { history, addHistory, removeHistory, clearHistory } = useHistory();
 
+  const { dataRef: settingsRef } = useStorageSync(LOCAL_STORAGE_KEY.settings) as {
+    dataRef: React.MutableRefObject<SettingsData | null>;
+  };
+
   const [playlists, setPlaylists] = useState<Map<string, VideoItem[]>>(
-    new Map([["History", history]])
+    new Map([
+      ["History", history],
+      ["Search", []],
+    ])
   );
   const [selectedPlaylistIndex, setSelectedPlaylistIndex] = useState<number>(0);
   const [videos, setVideos] = useState<VideoItem[]>(history);
@@ -214,6 +226,33 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
     setGlobalLibrary,
   ]);
 
+  const searchYouTube = useCallback(
+    async (query: string) => {
+      const apiKey = settingsRef.current?.youtubeDataAPIKey;
+      if (!apiKey) {
+        console.warn("YouTube API key is not set. Please configure it in settings.");
+        return;
+      }
+
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&part=snippet&q=${query}&type=video&maxResults=50`
+      );
+      const data = await response.json();
+      const videos = data.items.map(
+        (item: { id: { videoId: string }; snippet: { title: string } }) => ({
+          id: item.id.videoId,
+          title: item.snippet.title,
+        })
+      );
+      setPlaylists((prev) => {
+        const newMap = new Map(prev);
+        newMap.set("Search", videos);
+        return newMap;
+      });
+    },
+    [settingsRef]
+  );
+
   return {
     playlists,
     selectedPlaylistIndex,
@@ -224,5 +263,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
     addPlaylist,
     changePlaylistFocus,
     changeVideoFocus,
+
+    searchYouTube,
   };
 };

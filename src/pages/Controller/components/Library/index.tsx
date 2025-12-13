@@ -1,7 +1,7 @@
 import { useTextFileReader } from "@/hooks/useTextFileReader";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import { parseYouTubeURL } from "@/utils/YouTube";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import styles from "./Library.module.css";
 import FileDropZone from "./components/FileDropZone";
 import VideoList from "./components/VideoList";
@@ -21,9 +21,11 @@ const Library = () => {
     addPlaylist,
     changePlaylistFocus,
     changeVideoFocus,
+    searchYouTube,
   } = useLibraryAPI({
     setGlobalLibrary: setLibraryAPI,
   });
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // ファイル読み込み処理を共通化
   const handleFileLoad = useCallback(
@@ -66,6 +68,24 @@ const Library = () => {
     [mixerAPI, changeVideoFocus]
   );
 
+  const handleSearchSubmit = useCallback(() => {
+    if (searchQuery.trim()) {
+      searchYouTube(searchQuery);
+    }
+  }, [searchQuery, searchYouTube]);
+
+  const handleSearchKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        if (!e.nativeEvent.isComposing) {
+          e.preventDefault();
+          handleSearchSubmit();
+        }
+      }
+    },
+    [handleSearchSubmit]
+  );
+
   return (
     <YouTubeDataProvider>
       <FileDropZone accept=".txt" onFileLoad={handleFileLoad} className={styles.library}>
@@ -96,6 +116,18 @@ const Library = () => {
           selectedIndex={selectedVideoIndex}
           onSelect={handleSelectVideo}
         />
+        {Array.from(playlists.keys())[selectedPlaylistIndex] === "Search" && (
+          <input
+            className={styles.search}
+            type="text"
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
+            onKeyDown={handleSearchKeyDown}
+            value={searchQuery}
+            placeholder="検索..."
+          />
+        )}
       </FileDropZone>
     </YouTubeDataProvider>
   );
