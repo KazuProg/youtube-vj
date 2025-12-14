@@ -2,12 +2,12 @@ import type { JsonValue } from "@/types";
 
 export interface VideoItem extends Record<string, JsonValue> {
   id: string;
-  title: string;
+  title: string | null;
 }
 
 export interface LibraryAPI {
   history: {
-    add: (videoId: string, title: string) => void;
+    add: (videoId: string, title: string | null) => void;
     remove: (index: number) => void;
     clear: () => void;
     get: () => VideoItem[];

@@ -5,7 +5,7 @@ import type { VideoItem } from "../../types";
 
 interface UseHistoryReturn {
   history: VideoItem[];
-  addHistory: (videoId: string, title: string) => void;
+  addHistory: (videoId: string, title: string | null) => void;
   removeHistory: (index: number) => void;
   clearHistory: () => void;
 }
@@ -21,7 +21,7 @@ export const useHistory = (): UseHistoryReturn => {
   );
 
   const addHistory = useCallback(
-    (videoId: string, title: string) => {
+    (videoId: string, title: string | null) => {
       const prevItems = historyRef.current ?? [];
       // 直近（最後）のIDと同じだったら追加しない
       const lastItem = prevItems[prevItems.length - 1];

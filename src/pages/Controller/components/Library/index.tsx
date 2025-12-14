@@ -42,7 +42,7 @@ const Library = () => {
         .filter(Boolean)
         .map((line) => parseYouTubeURL(line)?.id)
         .filter((id): id is string => id !== undefined);
-      const videoItems: VideoItem[] = items.map((id) => ({ id, title: "" }));
+      const videoItems: VideoItem[] = items.map((id) => ({ id, title: null }));
       addPlaylist(filenameWithoutExt, videoItems, true);
     },
     [libraryAPI, addPlaylist]

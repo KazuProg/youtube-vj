@@ -45,6 +45,7 @@ const VideoList = ({ videos, selectedIndex, onSelect }: VideoListProps) => {
           {videos.map((item: VideoItem, index: number) => (
             <ListItem
               id={item.id}
+              title={item.title}
               key={`${item.id}-${index}`}
               onSelect={onSelect}
               className={selectedIndex === index ? styles.selected : ""}
