@@ -25,18 +25,28 @@ export const usePlaybackRateAdjustment = ({
    * @returns 速度調整値
    */
   const getRateAdjustment = useCallback((timeDiff: number): number => {
+    const sign = timeDiff === 0 ? 0 : timeDiff > 0 ? 1 : -1;
     const absTimeDiff = Math.abs(timeDiff);
 
-    // seekThreshold に基づく調整値の計算
-    // 時間差が大きいほど大きな調整値を返す
-    const adjustment = (absTimeDiff / SYNC_CONFIG.seekThreshold) * SYNC_CONFIG.maxAdjustment;
+    const deadZone = SYNC_CONFIG.playbackDeadZone;
+    const fullDiff = SYNC_CONFIG.playbackFullDiff;
+    const maxAdjustment = SYNC_CONFIG.maxAdjustment;
 
-    if (timeDiff > 0) {
-      // プレイヤーが進みすぎている場合、速度を下げる（負の調整値）
-      return -Math.min(adjustment, SYNC_CONFIG.maxAdjustment);
+    if (sign === 0 || absTimeDiff <= deadZone) {
+      return 0;
     }
-    // プレイヤーが遅れている場合、速度を上げる（正の調整値）
-    return Math.min(adjustment, SYNC_CONFIG.maxAdjustment);
+
+    let magnitude: number;
+
+    if (absTimeDiff >= fullDiff) {
+      magnitude = maxAdjustment;
+    } else {
+      const normalized = (absTimeDiff - deadZone) / (fullDiff - deadZone); // 0〜1
+      const eased = normalized ** SYNC_CONFIG.playbackCurveExponent;
+      magnitude = maxAdjustment * eased;
+    }
+
+    return sign > 0 ? -magnitude : magnitude;
   }, []);
 
   /**

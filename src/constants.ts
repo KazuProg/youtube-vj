@@ -31,11 +31,17 @@ export const SYNC_CONFIG = {
   /** 同期完了の閾値（秒） */
   syncThreshold: 0.01,
   /** 速度調整の最大調整値 */
-  maxAdjustment: 0.5,
+  maxAdjustment: 1,
   /** 速度調整値の変更閾値 */
   rateChangeThreshold: 0.05,
   /** 速度調整のタイムアウト（ms） */
   rateAdjustmentTimeout: 2000,
+  /** 再生速度調整用のデッドゾーン（秒）: これ未満の時間差は無視する */
+  playbackDeadZone: 0.05,
+  /** 再生速度調整が最大に達する時間差（秒） */
+  playbackFullDiff: 0.5,
+  /** 再生速度調整カーブの指数（0〜1, 小さいほど急峻） */
+  playbackCurveExponent: 0.7,
   /** 再生速度の最小値 */
   minPlaybackRate: 0.25,
   /** 再生速度の最大値 */
