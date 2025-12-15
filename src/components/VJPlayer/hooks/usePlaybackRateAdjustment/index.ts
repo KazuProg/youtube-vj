@@ -5,7 +5,7 @@ import type { VJSyncData } from "../../types";
 
 interface UsePlaybackRateAdjustmentParams {
   syncDataRef: RefObject<VJSyncData>;
-  setPlaybackRate: (rate: number) => void;
+  setPlaybackRate: (rate: number) => boolean;
 }
 
 /**
@@ -75,8 +75,9 @@ export const usePlaybackRateAdjustment = ({
 
         if (Math.abs(adjustmentRate - lastAppliedRate) >= SYNC_CONFIG.rateChangeThreshold) {
           isAdjustingRateRef.current = true;
-          setPlaybackRate(adjustmentRate);
-          lastAppliedRateRef.current = adjustmentRate;
+          if (setPlaybackRate(adjustmentRate)) {
+            lastAppliedRateRef.current = adjustmentRate;
+          }
 
           setTimeout(() => {
             isAdjustingRateRef.current = false;

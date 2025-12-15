@@ -8,7 +8,7 @@ import { useTimeSync } from "../useTimeSync";
 export interface PlayerSyncInterface {
   getCurrentTime: () => number | null;
   getDuration: () => number | null;
-  setPlaybackRate: (rate: number) => void;
+  setPlaybackRate: (rate: number) => boolean;
   seekTo: (time: number) => void;
 }
 

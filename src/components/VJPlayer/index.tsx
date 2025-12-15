@@ -47,7 +47,9 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           const player = playerRef.current;
           if (player && player.getPlayerState() === YT_PLAYER_STATE.PLAYING) {
             player.setPlaybackRate(rate);
+            return true;
           }
+          return false;
         },
         seekTo: (time: number) => {
           const player = playerRef.current;
