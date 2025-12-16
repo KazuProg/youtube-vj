@@ -1,8 +1,11 @@
+import { LOCAL_STORAGE_KEY } from "@/constants";
+import { useStorageSync } from "@/hooks/useStorageSync";
 import type { DeckAPI } from "@/pages/Controller/components/Deck/types";
 import type { LibraryAPI } from "@/pages/Controller/components/Library/types";
 import type { MixerAPI } from "@/pages/Controller/components/Mixer/types";
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { MIDIScriptManager } from "../types/MIDIScriptManager";
+import type { SettingsData } from "../types/settings";
 
 interface ControllerAPIContextValue {
   deckAPIs: (DeckAPI | null)[];
@@ -13,6 +16,9 @@ interface ControllerAPIContextValue {
   setLibraryAPI: (library: LibraryAPI | null) => void;
   midiAPI: MIDIScriptManager | null;
   setMidiAPI: (midi: MIDIScriptManager | null) => void;
+
+  settings: SettingsData | null;
+  setSettings: (settings: SettingsData | null) => void;
 }
 
 const ControllerAPIContext = createContext<ControllerAPIContextValue | null>(null);
@@ -23,8 +29,8 @@ export const ControllerAPIProvider = ({
   children: React.ReactNode;
 }) => {
   const [deckAPIs, setDeckAPIs] = useState<(DeckAPI | null)[]>([]);
-  const [libraryAPI, _setLibraryAPI] = useState<LibraryAPI | null>(null);
   const [mixerAPI, _setMixerAPI] = useState<MixerAPI | null>(null);
+  const [libraryAPI, _setLibraryAPI] = useState<LibraryAPI | null>(null);
   const [midiAPI, setMidiAPI] = useState<MIDIScriptManager | null>(null);
 
   const setDeckAPI = useCallback((deckId: number, deckAPI: DeckAPI | null) => {
@@ -48,6 +54,19 @@ export const ControllerAPIProvider = ({
     window.library = library;
   }, []);
 
+  const [settings, setSettings] = useState<SettingsData | null>(null);
+
+  const { setData: _setSettings } = useStorageSync<SettingsData | null>(
+    LOCAL_STORAGE_KEY.settings,
+    (data) => {
+      setSettings(data as SettingsData | null);
+    }
+  );
+
+  useEffect(() => {
+    _setSettings(settings);
+  }, [_setSettings, settings]);
+
   return (
     <ControllerAPIContext.Provider
       value={{
@@ -59,6 +78,9 @@ export const ControllerAPIProvider = ({
         setLibraryAPI,
         midiAPI,
         setMidiAPI,
+
+        settings,
+        setSettings,
       }}
     >
       {children}

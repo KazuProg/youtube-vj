@@ -14,7 +14,3 @@ export interface YouTubeVideoMetadata {
   id: string;
   start?: number;
 }
-
-export interface SettingsData {
-  youtubeDataAPIKey?: string;
-}

@@ -1,7 +1,5 @@
-import { LOCAL_STORAGE_KEY } from "@/constants";
-import { useStorageSync } from "@/hooks/useStorageSync";
-import type { SettingsData } from "@/types";
-import { useCallback, useEffect, useState } from "react";
+import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
+import { useEffect } from "react";
 import styles from "./index.module.css";
 
 interface SettingsProps {
@@ -10,29 +8,7 @@ interface SettingsProps {
 }
 
 const Settings = ({ isOpen, onClose }: SettingsProps) => {
-  const [apiKey, setApiKey] = useState<string>("");
-
-  const onChangeSettings = useCallback((data: unknown) => {
-    const settings = data as SettingsData | null;
-    setApiKey(settings?.youtubeDataAPIKey || "");
-  }, []);
-
-  const { dataRef: settingsRef, setData: setSettings } = useStorageSync(
-    LOCAL_STORAGE_KEY.settings,
-    onChangeSettings
-  ) as {
-    dataRef: React.MutableRefObject<SettingsData | null>;
-    setData: (data: SettingsData | null) => void;
-    clearData: () => void;
-  };
-
-  // 設定画面が開かれたときに初期値を設定
-  useEffect(() => {
-    if (isOpen) {
-      const currentSettings = settingsRef.current;
-      setApiKey(currentSettings?.youtubeDataAPIKey || "");
-    }
-  }, [isOpen, settingsRef]);
+  const { settings, setSettings } = useControllerAPIContext();
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -63,11 +39,11 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
     }
   };
 
-  const handleSaveSettings = () => {
-    const trimmedKey = apiKey.trim();
-    const settings: SettingsData = trimmedKey ? { youtubeDataAPIKey: trimmedKey } : {};
-    setSettings(settings);
-    onClose();
+  const handleChangeYoutubeDataAPIKey = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSettings({
+      ...settings,
+      youtubeDataAPIKey: e.target.value.trim() || null,
+    });
   };
 
   return (
@@ -96,17 +72,12 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
                 id="youtube-api-key"
                 type="password"
                 className={styles.input}
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                value={settings?.youtubeDataAPIKey ?? ""}
+                onChange={handleChangeYoutubeDataAPIKey}
                 placeholder="APIキーを入力してください"
               />
             </div>
           </div>
-        </div>
-        <div className={styles.footer}>
-          <button type="button" className={styles.saveButton} onClick={handleSaveSettings}>
-            保存
-          </button>
         </div>
       </div>
     </>

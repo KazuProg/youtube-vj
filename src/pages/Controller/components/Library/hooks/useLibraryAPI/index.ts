@@ -1,6 +1,4 @@
-import { LOCAL_STORAGE_KEY } from "@/constants";
-import { useStorageSync } from "@/hooks/useStorageSync";
-import type { SettingsData } from "@/types";
+import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import { clamp } from "@/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LibraryAPI, VideoItem } from "../../types";
@@ -29,9 +27,7 @@ type FocusType = "playlist" | "video";
 export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLibraryAPIReturn => {
   const { history, addHistory, removeHistory, clearHistory } = useHistory();
 
-  const { dataRef: settingsRef } = useStorageSync(LOCAL_STORAGE_KEY.settings) as {
-    dataRef: React.MutableRefObject<SettingsData | null>;
-  };
+  const { settings } = useControllerAPIContext();
 
   const [playlists, setPlaylists] = useState<Map<string, VideoItem[]>>(
     new Map([
@@ -228,7 +224,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
 
   const searchYouTube = useCallback(
     async (query: string) => {
-      const apiKey = settingsRef.current?.youtubeDataAPIKey;
+      const apiKey = settings?.youtubeDataAPIKey;
       if (!apiKey) {
         console.warn("YouTube API key is not set. Please configure it in settings.");
         return;
@@ -250,7 +246,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
         return newMap;
       });
     },
-    [settingsRef]
+    [settings]
   );
 
   return {
