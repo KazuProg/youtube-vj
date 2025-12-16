@@ -54,14 +54,13 @@ export const ControllerAPIProvider = ({
     window.library = library;
   }, []);
 
-  const [settings, setSettings] = useState<SettingsData | null>(null);
-
-  const { setData: _setSettings } = useStorageSync<SettingsData | null>(
+  const { setData: _setSettings, dataRef: settingsRef } = useStorageSync<SettingsData | null>(
     LOCAL_STORAGE_KEY.settings,
     (data) => {
       setSettings(data as SettingsData | null);
     }
   );
+  const [settings, setSettings] = useState<SettingsData | null>(settingsRef.current);
 
   useEffect(() => {
     _setSettings(settings);
