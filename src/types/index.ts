@@ -1,14 +1,7 @@
-export type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonValue[]
-  | { [key: string]: JsonValue };
+import type { JsonValue } from "./json";
+import type { MixerData } from "./mixerData";
 
-export interface MixerData extends Record<string, JsonValue> {
-  crossfader: number;
-}
+export type { JsonValue, MixerData };
 
 export interface YouTubeVideoMetadata {
   id: string;

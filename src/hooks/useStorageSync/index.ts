@@ -76,12 +76,14 @@ const localStorageAdapter: StorageAdapter = {
   },
 };
 
-export const useStorageSync = <T extends JsonValue = JsonValue>(
+export const useStorageSync = <T>(
   syncKey: string,
-  onChange?: ((data: T | null) => void) | null,
+  onChange?: ((data: T) => void) | null,
   configParam?: {
     overwrite?: boolean;
-    defaultValue?: T | null;
+    defaultValue?: {
+      [K in keyof T]: T[K] extends JsonValue ? T[K] : never;
+    };
     storage?: StorageAdapter;
   }
 ) => {
@@ -93,12 +95,12 @@ export const useStorageSync = <T extends JsonValue = JsonValue>(
   };
 
   // useStateの代わりにuseRefを使用（再レンダリングを防ぐ）
-  const dataRef = useRef<T | null>(
+  const dataRef = useRef<T>(
     (() => {
       const loaded = config.overwrite
         ? config.defaultValue
         : (config.storage.load(syncKey) ?? config.defaultValue);
-      return loaded as T | null;
+      return loaded as T;
     })()
   );
 
@@ -111,13 +113,13 @@ export const useStorageSync = <T extends JsonValue = JsonValue>(
   // 外部からの変更を監視（refを更新するが、再レンダリングは発生しない）
   useEffect(() => {
     return config.storage.onChange(syncKey, (newData: object | null) => {
-      dataRef.current = newData as T | null;
-      onChangeRef.current?.(newData as T | null);
+      dataRef.current = newData as T;
+      onChangeRef.current?.(newData as T);
     });
   }, [config.storage, syncKey]);
 
   const setData = useCallback(
-    (newData: T | null) => {
+    (newData: T) => {
       dataRef.current = newData;
       config.storage.save(syncKey, newData as object | null);
       // onChange function called by custom event
@@ -126,10 +128,10 @@ export const useStorageSync = <T extends JsonValue = JsonValue>(
   );
 
   const clearData = useCallback(() => {
-    dataRef.current = null;
+    dataRef.current = config.defaultValue as T;
     config.storage.clear(syncKey);
-    onChangeRef.current?.(null);
-  }, [syncKey, config.storage]);
+    onChangeRef.current?.(config.defaultValue as T);
+  }, [syncKey, config.storage, config.defaultValue]);
 
   return {
     dataRef,

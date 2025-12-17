@@ -1,9 +1,7 @@
-import type { JsonValue } from "@/types";
-
-export interface VideoItem extends Record<string, JsonValue> {
+export type VideoItem = {
   id: string;
   title: string | null;
-}
+};
 
 export interface LibraryAPI {
   history: {

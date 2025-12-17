@@ -16,7 +16,8 @@ const Mixer = ({ className }: MixerProps) => {
   const { deckAPIs, setMixerAPI } = useControllerAPIContext();
   const { dataRef: mixerDataRef, setData: setMixerData } = useStorageSync<MixerData>(
     LOCAL_STORAGE_KEY.mixer,
-    null
+    null,
+    { defaultValue: { crossfader: 0 } }
   );
   const inputRef = useRef<HTMLInputElement>(null);
 

@@ -5,7 +5,7 @@ import type { MixerAPI } from "../../types";
 
 interface UseMixerAPIParams {
   mixerDataRef: React.MutableRefObject<MixerData | null>;
-  setMixerData: (mixerData: MixerData | null) => void;
+  setMixerData: (mixerData: MixerData) => void;
   setGlobalMixer: (mixer: MixerAPI | null) => void;
 }
 
