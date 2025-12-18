@@ -28,8 +28,8 @@ export interface UsePlayerSyncReturn {
  * @returns 同期制御用の関数群
  */
 export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSyncReturn => {
-  const animationFrameIdRef = useRef<number | null>(null);
   const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
+  const isSyncingRef = useRef<boolean>(false);
 
   // 時間同期フック
   const { getExpectedCurrentTime, setDuration } = useTimeSync(syncDataRef);
@@ -44,7 +44,7 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
   /**
    * メインの同期処理（再帰的に requestAnimationFrame で呼び出される）
    */
-  const performSync = useCallback(() => {
+  const _sync = useCallback(() => {
     const expectedCurrentTime = getExpectedCurrentTime();
     if (expectedCurrentTime === null) {
       return;
@@ -65,7 +65,7 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
         // 差分が閾値以下の場合、設定された速度をそのまま使用
         if (!isAdjusting()) {
           syncPlaybackRate();
-          animationFrameIdRef.current = null;
+          isSyncingRef.current = false;
         }
       } else if (absTimeDiff >= SYNC_CONFIG.seekThreshold) {
         // 差分が閾値以上の場合は強制シーク
@@ -78,14 +78,6 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
     } catch (error) {
       console.warn("[usePlayerSync] Failed to sync:", error);
     }
-
-    // 次のフレームで再帰的に呼び出し
-    if (animationFrameIdRef.current === null) {
-      animationFrameIdRef.current = requestAnimationFrame(() => {
-        animationFrameIdRef.current = null;
-        performSync();
-      });
-    }
   }, [
     getExpectedCurrentTime,
     playerInterface,
@@ -95,47 +87,49 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
     isAdjusting,
   ]);
 
-  // 定期的な同期の開始
   useEffect(() => {
+    let animationFrameId = 0;
+    const loop = () => {
+      if (isSyncingRef.current) {
+        _sync();
+      }
+      animationFrameId = requestAnimationFrame(loop);
+    };
+    animationFrameId = requestAnimationFrame(loop);
+
+    // 定期的に同期処理を開始する
     const interval = setInterval(() => {
-      performSync();
+      isSyncingRef.current = true;
     }, SYNC_CONFIG.interval);
 
     return () => {
+      cancelAnimationFrame(animationFrameId);
       clearInterval(interval);
-
-      if (animationFrameIdRef.current) {
-        cancelAnimationFrame(animationFrameIdRef.current);
-        animationFrameIdRef.current = null;
-      }
     };
-  }, [performSync]);
+  }, [_sync]);
 
   /**
    * 同期データの通知
    * タイミング関連のデータが変更された場合に同期処理を開始する
    */
-  const notifySyncData = useCallback(
-    (syncData: VJSyncData) => {
-      const beforeSyncData = syncDataRef.current;
+  const notifySyncData = useCallback((syncData: VJSyncData) => {
+    const beforeSyncData = syncDataRef.current;
 
-      const needTimingSync =
-        syncData.baseTime !== beforeSyncData.baseTime ||
-        syncData.currentTime !== beforeSyncData.currentTime ||
-        syncData.playbackRate !== beforeSyncData.playbackRate;
+    const needTimingSync =
+      syncData.baseTime !== beforeSyncData.baseTime ||
+      syncData.currentTime !== beforeSyncData.currentTime ||
+      syncData.playbackRate !== beforeSyncData.playbackRate;
 
-      syncDataRef.current = syncData;
-      if (needTimingSync) {
-        performSync();
-      }
-    },
-    [performSync]
-  );
+    syncDataRef.current = syncData;
+    if (needTimingSync) {
+      isSyncingRef.current = true;
+    }
+  }, []);
 
   return {
     getCurrentTime: getExpectedCurrentTime,
     setDuration,
     notifySyncData,
-    isSyncing: animationFrameIdRef.current !== null,
+    isSyncing: isSyncingRef.current,
   };
 };
