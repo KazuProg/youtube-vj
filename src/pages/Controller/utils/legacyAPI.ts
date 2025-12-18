@@ -112,13 +112,13 @@ window.ch1 = {
     window.ch[0]?.seekTo(Number(currentTime) + _time, false);
   },
   loopStart: () => {
-    console.warn("loopStart is not implemented");
+    window.ch[0]?.setLoopStart();
   },
   loopEnd: () => {
-    console.warn("loopEnd is not implemented");
+    window.ch[0]?.setLoopEnd();
   },
   loopClear: () => {
-    console.warn("loopClear is not implemented");
+    window.ch[0]?.clearLoop();
   },
   play: () => {
     window.ch[0]?.playVideo();

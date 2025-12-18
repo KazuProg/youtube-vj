@@ -9,6 +9,9 @@ export interface DeckAPI {
   jumpToHotCue: (cueId: number) => void;
   deleteHotCue: (cueId: number) => void;
   hasHotCue: (cueId: number) => boolean;
+  setLoopStart: (time?: number) => void;
+  setLoopEnd: (time?: number) => void;
+  clearLoop: () => void;
   mute: () => void;
   unMute: () => void;
   isMuted: () => boolean;

@@ -70,6 +70,24 @@ export const useDeckAPI = ({
       hasHotCue: (cueId: number) => {
         return hotCuesRef.current.has(cueId);
       },
+      setLoopStart: (time?: number) => {
+        const targetTime = time ?? vjPlayerRef.current?.getCurrentTime() ?? 0;
+        updateSyncData({
+          loopStart: targetTime,
+        });
+      },
+      setLoopEnd: (time?: number) => {
+        const targetTime = time ?? vjPlayerRef.current?.getCurrentTime() ?? 0;
+        updateSyncData({
+          loopEnd: targetTime,
+        });
+      },
+      clearLoop: () => {
+        updateSyncData({
+          loopStart: null,
+          loopEnd: null,
+        });
+      },
       mute: () => {
         vjPlayerRef.current?.getPlayer()?.mute();
         onMuteChange?.(true);
@@ -99,6 +117,8 @@ export const useDeckAPI = ({
           currentTime: 0, // TODO: start time
           baseTime: Date.now(),
           paused: false,
+          loopStart: null,
+          loopEnd: null,
         });
         hotCuesRef.current.clear();
         onHotCuesChange?.(hotCuesRef.current);

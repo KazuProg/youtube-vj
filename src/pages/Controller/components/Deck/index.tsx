@@ -28,6 +28,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
   // UI用のstate
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [hotCues, setHotCues] = useState<Map<number, number>>(new Map());
+  const [loopMarkers, setLoopMarkers] = useState<number[]>([]);
   const [volume, setVolume] = useState<number>(100);
   const [isMuted, setIsMuted] = useState<boolean>(true);
 
@@ -54,6 +55,10 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
       if (previousSyncData?.playbackRate !== newSyncData.playbackRate) {
         setPlaybackRate(newSyncData.playbackRate);
       }
+
+      setLoopMarkers(
+        [newSyncData.loopStart, newSyncData.loopEnd].filter((v): v is number => v !== null)
+      );
     },
     [setSyncData, syncDataRef]
   );
@@ -172,6 +177,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
           currentTimeFunc={getCurrentTime}
           durationFunc={() => deckAPIRef.current?.getDuration() ?? 0}
           hotCues={hotCues}
+          loopMarkers={loopMarkers}
           onSeek={(time: number) => deckAPIRef.current?.seekTo(time, true)}
         />
       </fieldset>

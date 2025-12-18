@@ -88,10 +88,39 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
   ]);
 
   useEffect(() => {
+    const _isNeedLoopAdjust = () => {
+      const syncData = syncDataRef.current;
+      if (syncData.loopStart == null || syncData.loopEnd == null) {
+        return false;
+      }
+      const expectedCurrentTime = getExpectedCurrentTime();
+      if (expectedCurrentTime === null) {
+        return false;
+      }
+      return syncData.loopEnd < expectedCurrentTime;
+    };
+
+    const _calculateLoopAdjustTime = () => {
+      const syncData = syncDataRef.current;
+      if (syncData.loopStart == null || syncData.loopEnd == null) {
+        throw new Error("loopStart or loopEnd is not set");
+      }
+      return (syncData.loopEnd - syncData.loopStart) * 1000 * (1 / syncData.playbackRate);
+    };
+
     let animationFrameId = 0;
     const loop = () => {
-      if (isSyncingRef.current) {
-        _sync();
+      const syncData = syncDataRef.current;
+
+      if (!syncData.paused) {
+        if (_isNeedLoopAdjust()) {
+          syncData.baseTime += _calculateLoopAdjustTime();
+          isSyncingRef.current = true;
+        }
+
+        if (isSyncingRef.current) {
+          _sync();
+        }
       }
       animationFrameId = requestAnimationFrame(loop);
     };
@@ -106,7 +135,7 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
       cancelAnimationFrame(animationFrameId);
       clearInterval(interval);
     };
-  }, [_sync]);
+  }, [_sync, getExpectedCurrentTime]);
 
   /**
    * 同期データの通知

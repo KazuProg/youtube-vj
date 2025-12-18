@@ -50,3 +50,18 @@
   transform: translateX(-50%);
   position: absolute;
 }
+
+.loop {
+  position: absolute;
+  top: 1em;
+  left: 0;
+  right: 0;
+  height: 0.7em;
+  font-size: 0.7em;
+  line-height: 0.7em;
+}
+
+.loopMarker {
+  transform: translateX(-50%);
+  position: absolute;
+}

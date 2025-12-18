@@ -6,6 +6,8 @@ export type VJSyncData = {
   currentTime: number;
   baseTime: number;
   paused: boolean;
+  loopStart: number | null;
+  loopEnd: number | null;
 };
 
 export interface VJPlayerRef {

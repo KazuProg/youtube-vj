@@ -6,10 +6,11 @@ interface SeekBarProps {
   currentTimeFunc: () => number;
   durationFunc: () => number;
   hotCues: Map<number, number>;
+  loopMarkers: number[];
   onSeek: (time: number) => void;
 }
 
-const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, onSeek }: SeekBarProps) => {
+const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }: SeekBarProps) => {
   const [isHovering, setIsHovering] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
   const [displayTime, setDisplayTime] = useState(currentTimeFunc());
@@ -74,6 +75,17 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, onSeek }: SeekBarProp
             style={{ left: `${(time / duration) * 100}%` }}
           >
             {cueId}
+          </span>
+        ))}
+      </div>
+      <div className={styles.loop}>
+        {loopMarkers.map((marker) => (
+          <span
+            key={marker}
+            className={styles.loopMarker}
+            style={{ left: `${(marker / duration) * 100}%` }}
+          >
+            |
           </span>
         ))}
       </div>
