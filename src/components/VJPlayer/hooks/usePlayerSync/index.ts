@@ -17,7 +17,6 @@ export interface UsePlayerSyncReturn {
   getCurrentTime: () => number | null;
   setDuration: (duration: number | null) => void;
   notifySyncData: (syncData: VJSyncData) => void;
-  performSync: () => void;
   isSyncing: boolean;
 }
 
@@ -137,7 +136,6 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
     getCurrentTime: getExpectedCurrentTime,
     setDuration,
     notifySyncData,
-    performSync,
     isSyncing: animationFrameIdRef.current !== null,
   };
 };
