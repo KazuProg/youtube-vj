@@ -17,7 +17,6 @@ export const usePlaybackRateAdjustment = ({
   setPlaybackRate,
 }: UsePlaybackRateAdjustmentParams) => {
   const lastAppliedRateRef = useRef<number>(1.0);
-  const isAdjustingRateRef = useRef<boolean>(false);
 
   /**
    * 時間差に基づく速度調整値の計算
@@ -74,18 +73,12 @@ export const usePlaybackRateAdjustment = ({
         const lastAppliedRate = lastAppliedRateRef.current;
 
         if (Math.abs(adjustmentRate - lastAppliedRate) >= SYNC_CONFIG.rateChangeThreshold) {
-          isAdjustingRateRef.current = true;
           if (setPlaybackRate(adjustmentRate)) {
             lastAppliedRateRef.current = adjustmentRate;
           }
-
-          setTimeout(() => {
-            isAdjustingRateRef.current = false;
-          }, SYNC_CONFIG.rateAdjustmentTimeout);
         }
       } catch (error) {
         console.warn("[usePlaybackRateAdjustment] Failed to set playback rate:", error);
-        isAdjustingRateRef.current = false;
       }
     },
     [setPlaybackRate]
@@ -95,10 +88,6 @@ export const usePlaybackRateAdjustment = ({
    * 同期データに設定された再生速度を適用する
    */
   const syncPlaybackRate = useCallback(() => {
-    if (isAdjustingRateRef.current) {
-      return;
-    }
-
     try {
       const syncData = syncDataRef.current;
       setPlaybackRate(syncData.playbackRate);
@@ -108,17 +97,9 @@ export const usePlaybackRateAdjustment = ({
     }
   }, [setPlaybackRate, syncDataRef]);
 
-  /**
-   * 速度調整中かどうかを判定
-   */
-  const isAdjusting = useCallback((): boolean => {
-    return isAdjustingRateRef.current;
-  }, []);
-
   return {
     calculateAdjustmentRate,
     applyPlaybackRateAdjustment,
     syncPlaybackRate,
-    isAdjusting,
   };
 };

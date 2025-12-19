@@ -35,7 +35,7 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
   const { getExpectedCurrentTime, setDuration } = useTimeSync(syncDataRef);
 
   // 再生速度調整フック
-  const { calculateAdjustmentRate, applyPlaybackRateAdjustment, syncPlaybackRate, isAdjusting } =
+  const { calculateAdjustmentRate, applyPlaybackRateAdjustment, syncPlaybackRate } =
     usePlaybackRateAdjustment({
       syncDataRef,
       setPlaybackRate: playerInterface.setPlaybackRate,
@@ -63,10 +63,8 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
 
       if (absTimeDiff <= SYNC_CONFIG.syncThreshold) {
         // 差分が閾値以下の場合、設定された速度をそのまま使用
-        if (!isAdjusting()) {
-          syncPlaybackRate();
-          isSyncingRef.current = false;
-        }
+        syncPlaybackRate();
+        isSyncingRef.current = false;
       } else if (absTimeDiff >= SYNC_CONFIG.seekThreshold) {
         // 差分が閾値以上の場合は強制シーク
         playerInterface.seekTo(expectedCurrentTime);
@@ -84,7 +82,6 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
     syncPlaybackRate,
     calculateAdjustmentRate,
     applyPlaybackRateAdjustment,
-    isAdjusting,
   ]);
 
   useEffect(() => {
