@@ -52,11 +52,3 @@
   width: 50px;
   height: 150px;
 }
-
-.mutedButton {
-  color: #f88;
-}
-
-.mutedText {
-  text-decoration: line-through;
-}

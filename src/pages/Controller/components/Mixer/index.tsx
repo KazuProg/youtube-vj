@@ -27,7 +27,7 @@ const Mixer = ({ className }: MixerProps) => {
     }
   }, []);
 
-  const { mixerAPIRef, preparedVideo } = useMixerAPI({
+  const { mixerAPIRef, preparedVideo, monitorCueStates } = useMixerAPI({
     mixerDataRef,
     setMixerData,
     setGlobalMixer: setMixerAPI,
@@ -78,6 +78,18 @@ const Mixer = ({ className }: MixerProps) => {
           onFocus={(e) => e.target.select()}
           ref={inputRef}
         />
+      </fieldset>
+      <fieldset className={styles.cueButtons}>
+        <legend>Monitor</legend>
+        <button
+          type="button"
+          className={`${styles.cueButton} ${monitorCueStates[0] ? styles.active : ""}`}
+          onClick={() => {
+            deckAPIs[0]?.isMuted() ? deckAPIs[0]?.unMute() : deckAPIs[0]?.mute();
+          }}
+        >
+          CUE
+        </button>
       </fieldset>
       <fieldset className={styles.crossfader}>
         <legend>Crossfader</legend>

@@ -4,6 +4,7 @@ import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
 import { INITIAL_SYNC_DATA } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useControllerAPIContext } from "../../contexts/ControllerAPIContext";
 import SeekBar from "./components/SeekBar";
 import { useDeckAPI } from "./hooks/useDeckAPI";
 import styles from "./index.module.css";
@@ -24,13 +25,12 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
       overwrite: true,
     }
   );
+  const { mixerAPI } = useControllerAPIContext();
 
   // UI用のstate
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [hotCues, setHotCues] = useState<Map<number, number>>(new Map());
   const [loopMarkers, setLoopMarkers] = useState<number[]>([]);
-  const [volume, setVolume] = useState<number>(100);
-  const [isMuted, setIsMuted] = useState<boolean>(true);
 
   const getCurrentTime = (): number => {
     return vjPlayerRef.current?.getCurrentTime() ?? 0;
@@ -63,31 +63,25 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
     [setSyncData, syncDataRef]
   );
 
+  const handleMuteChange = useCallback(
+    (isMuted: boolean) => {
+      mixerAPI?.setMonitorCueState(deckId, !isMuted);
+    },
+    [mixerAPI, deckId]
+  );
+
   const deckAPIRef = useDeckAPI({
     vjPlayerRef,
     syncDataRef,
     updateSyncData,
     deckId,
     onHotCuesChange: setHotCues,
-    onVolumeChange: setVolume,
-    onMuteChange: setIsMuted,
+    onMuteChange: handleMuteChange,
   });
-
-  useEffect(() => {
-    deckAPIRef.current?.setVolume(volume);
-  }, [volume, deckAPIRef]);
 
   useEffect(() => {
     deckAPIRef.current?.setPlaybackRate(playbackRate);
   }, [playbackRate, deckAPIRef]);
-
-  useEffect(() => {
-    if (isMuted) {
-      deckAPIRef.current?.mute();
-    } else {
-      deckAPIRef.current?.unMute();
-    }
-  }, [isMuted, deckAPIRef]);
 
   const vjPlayerEventsRef = useRef({
     onUnstarted: () => {
@@ -264,33 +258,6 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
             onChange={setPlaybackRate}
           />
           <span>{playbackRate.toFixed(2)}x</span>
-        </fieldset>
-        <fieldset className={styles.controlFieldset}>
-          <legend>
-            <button
-              type="button"
-              className={isMuted ? styles.mutedButton : undefined}
-              onClick={() => setIsMuted(!isMuted)}
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === " " || e.key === "Enter") {
-                  setIsMuted(!isMuted);
-                }
-              }}
-            >
-              Volume
-            </button>
-          </legend>
-          <Fader
-            min={0}
-            max={100}
-            value={volume}
-            step={1}
-            vertical={true}
-            className={styles.fader}
-            onChange={setVolume}
-          />
-          <span className={isMuted ? styles.mutedText : undefined}>{volume.toFixed(0)}%</span>
         </fieldset>
       </div>
     </div>

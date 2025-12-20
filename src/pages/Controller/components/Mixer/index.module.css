@@ -42,6 +42,30 @@
   color: white;
 }
 
+.cueButtons {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  margin-bottom: 10px;
+  padding: 0 !important;
+}
+
+.cueButton {
+  color: #aaa;
+  padding: 4px 12px;
+  background: rgb(34, 34, 34);
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(85, 85, 85);
+  border-image: initial;
+  border-radius: 4px;
+}
+
+.cueButton.active {
+  color: #fff;
+  background: #555;
+}
+
 .crossfader {
   margin: 0;
   padding: 0;
