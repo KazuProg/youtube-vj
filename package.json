@@ -20,6 +20,7 @@
     "qa:fix": "npm run format:write && npm run lint:fix && npm run type-check"
   },
   "dependencies": {
+    "@11ty/eleventy": "^3.1.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.9.5",
