@@ -176,7 +176,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
         />
       </fieldset>
       <div className={styles.controlsContainer}>
-        <fieldset>
+        <fieldset className={styles.controlFieldset}>
           <legend>Adjust</legend>
           <div className={styles.adjust}>
             <button
