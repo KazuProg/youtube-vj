@@ -26,7 +26,7 @@ const ProjectionPage = () => {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    document.title = "📺 VJ投影画面";
+    document.title = "YouTube-VJ Projection Window";
     document.body.style.backgroundColor = "#000";
   }, []);
 
