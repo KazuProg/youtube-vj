@@ -1,3 +1,38 @@
+.termsContainer {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.termsPopup {
+  background-color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  width: 60%;
+  max-width: 600px;
+  position: relative;
+}
+
+.termsIframe {
+  width: 100%;
+  height: 50vh;
+  min-height: 300px;
+  background: #fff;
+}
+
+.termsAgreeBtn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
 .controllerWindow {
   width: 100%;
   height: 100%;

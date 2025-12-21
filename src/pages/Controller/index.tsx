@@ -32,6 +32,25 @@ const ControllerPageContent = () => {
 };
 
 const ControllerPage = () => {
+  const [displayTerms, setDisplayTerms] = useState(true);
+
+  const handleTermsAgree = () => {
+    setDisplayTerms(false);
+  };
+
+  if (displayTerms) {
+    return (
+      <div className={styles.termsContainer}>
+        <div className={styles.termsPopup}>
+          <iframe className={styles.termsIframe} title="利用規約" src="/docs/terms.html" />
+          <button className={styles.termsAgreeBtn} type="button" onClick={handleTermsAgree}>
+            同意する
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <ControllerAPIProvider>
       <ControllerPageContent />
