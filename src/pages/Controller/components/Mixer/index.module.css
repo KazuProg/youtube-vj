@@ -52,13 +52,6 @@
 
 .cueButton {
   color: #aaa;
-  padding: 4px 12px;
-  background: rgb(34, 34, 34);
-  border-width: 1px;
-  border-style: solid;
-  border-color: rgb(85, 85, 85);
-  border-image: initial;
-  border-radius: 4px;
 }
 
 .cueButton.active {

@@ -8,6 +8,8 @@ import StatusBar from "./components/StatusBar";
 import { ControllerAPIProvider } from "./contexts/ControllerAPIContext";
 import styles from "./index.module.css";
 
+import "./index.css";
+
 // レガシーAPI をグローバルに設定（自動実行）
 import "./utils/legacyAPI";
 
