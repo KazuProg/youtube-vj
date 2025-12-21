@@ -20,6 +20,7 @@ const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
     isInitializedRef.current = true;
 
     handleMIDI(true);
+    openProjectionWindow();
   }, []);
 
   const handleLibrary = () => {
