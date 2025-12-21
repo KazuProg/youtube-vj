@@ -63,6 +63,18 @@ const Mixer = ({ className }: MixerProps) => {
         >
           Load
         </button>
+        <button
+          className={styles.loadButton}
+          type="button"
+          disabled={!preparedVideo}
+          onClick={() => {
+            if (preparedVideo) {
+              deckAPIs[1]?.loadVideo(preparedVideo);
+            }
+          }}
+        >
+          Load
+        </button>
       </div>
       <fieldset className={styles.loadTrack}>
         <legend>Load Track</legend>
@@ -87,6 +99,15 @@ const Mixer = ({ className }: MixerProps) => {
           className={`${styles.cueButton} ${monitorCueStates[0] ? styles.active : ""}`}
           onClick={() => {
             deckAPIs[0]?.isMuted() ? deckAPIs[0]?.unMute() : deckAPIs[0]?.mute();
+          }}
+        >
+          CUE
+        </button>
+        <button
+          type="button"
+          className={`${styles.cueButton} ${monitorCueStates[1] ? styles.active : ""}`}
+          onClick={() => {
+            deckAPIs[1]?.isMuted() ? deckAPIs[1]?.unMute() : deckAPIs[1]?.mute();
           }}
         >
           CUE

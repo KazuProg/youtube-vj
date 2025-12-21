@@ -2,7 +2,7 @@ import VJPlayer from "@/components/VJPlayer";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import type { MixerData } from "@/types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./index.module.css";
 
 const ProjectionPage = () => {
@@ -30,6 +30,32 @@ const ProjectionPage = () => {
     document.body.style.backgroundColor = "#000";
   }, []);
 
+  const { ch0Opacity, ch0ZIndex, ch1Opacity, ch1ZIndex } = useMemo(() => {
+    const ch0OpacityBase = 1; // ch0_opacity
+    const ch1OpacityBase = 1; // ch1_opacity
+
+    const cfWeight = 1 - Math.abs((crossfader - 0.5) * 2);
+    const ch0Weight = ch0OpacityBase * (0.5 < crossfader ? cfWeight : 1);
+    const ch1Weight = ch1OpacityBase * (crossfader < 0.5 ? cfWeight : 1);
+    console.log(ch0Weight, ch1Weight);
+
+    const ch0IsFront = ch0Weight >= ch1Weight;
+    const ch1IsFront = ch0Weight < ch1Weight;
+
+    const ch0ZIndexValue = ch0IsFront ? 1 : 0;
+    const ch1ZIndexValue = ch1IsFront ? 1 : 0;
+
+    const ch0OpacityValue = (ch0IsFront ? 1 - ch1Weight / 2 : 1) * ch0Weight;
+    const ch1OpacityValue = (ch1IsFront ? 1 - ch0Weight / 2 : 1) * ch1Weight;
+
+    return {
+      ch0Opacity: ch0OpacityValue,
+      ch0ZIndex: ch0ZIndexValue,
+      ch1Opacity: ch1OpacityValue,
+      ch1ZIndex: ch1ZIndexValue,
+    };
+  }, [crossfader]);
+
   if (!initialized) {
     const init = (fullscreen: boolean) => {
       if (fullscreen) {
@@ -55,13 +81,26 @@ const ProjectionPage = () => {
   }
 
   return (
-    <div
-      style={{
-        opacity: Math.min((1 - crossfader) * 2, 1),
-      }}
-    >
-      <VJPlayer className={styles.player} syncKey={LOCAL_STORAGE_KEY.leftDeck} />
-    </div>
+    <>
+      <div
+        style={{
+          position: "relative",
+          opacity: ch0Opacity,
+          zIndex: ch0ZIndex,
+        }}
+      >
+        <VJPlayer className={styles.player} syncKey={LOCAL_STORAGE_KEY.leftDeck} />
+      </div>
+      <div
+        style={{
+          position: "relative",
+          opacity: ch1Opacity,
+          zIndex: ch1ZIndex,
+        }}
+      >
+        <VJPlayer className={styles.player} syncKey={LOCAL_STORAGE_KEY.rightDeck} />
+      </div>
+    </>
   );
 };
 

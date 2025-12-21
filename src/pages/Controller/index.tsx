@@ -22,14 +22,7 @@ const ControllerPageContent = () => {
       <div className={styles.controller}>
         <Deck className={styles.deck} localStorageKey={LOCAL_STORAGE_KEY.leftDeck} deckId={0} />
         <Mixer className={styles.mixer} />
-        <div
-          className={styles.deck}
-          style={{
-            width: "40vw" /* Dummy Deck */,
-          }}
-        >
-          (RightDeck)
-        </div>
+        <Deck className={styles.deck} localStorageKey={LOCAL_STORAGE_KEY.rightDeck} deckId={1} />
       </div>
       {settings.openLibrary && <Library />}
       <StatusBar onOpenSettings={() => setIsSettingsOpen(true)} />

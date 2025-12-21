@@ -42,6 +42,7 @@ interface LegacyLibraryAPI {
 declare global {
   interface Window {
     ch1: LegacyDeckAPI | null;
+    ch2: LegacyDeckAPI | null;
     selCh: LegacyDeckAPI | null;
     changeVideo: (videoId: string) => void;
     switchVideo: (videoId: string) => void;
@@ -148,6 +149,97 @@ window.ch1 = {
   },
   setVolume: (volume: number) => {
     window.ch[0]?.setVolume(volume);
+  },
+  fadeoutVolume: (_time: number) => {
+    console.warn("fadeoutVolume is not implemented");
+  },
+};
+
+window.ch2 = {
+  setVideo: (videoId: string | undefined) => {
+    // レガシースクリプトでは、window.prepareVideoId を使用しているが、
+    // 新しいスクリプトでは、window.mixer?.getPreparedVideoId() を使用しているため、
+    // 互換性のために、window.prepareVideoId を使用している。
+    const video = videoId ?? window.mixer?.getPreparedVideo();
+    if (video) {
+      window.ch[1]?.loadVideo(video);
+    }
+  },
+  setSpeed: (speed: number) => {
+    window.ch[1]?.setPlaybackRate(speed);
+  },
+  setTime: (time: number) => {
+    window.ch[1]?.seekTo(time, false);
+  },
+  setFilter: (_filter: string) => {
+    console.warn("setFilter is not implemented");
+  },
+  hotcue: (cueId: number) => {
+    if (window.ch[1]?.hasHotCue(cueId)) {
+      window.ch[1]?.jumpToHotCue(cueId);
+    } else {
+      window.ch[1]?.setHotCue(cueId);
+    }
+  },
+  addHotcue: (cueId: number) => {
+    window.ch[1]?.setHotCue(cueId);
+  },
+  playHotcue: (cueId: number) => {
+    window.ch[1]?.jumpToHotCue(cueId);
+  },
+  removeHotcue: (cueId: number) => {
+    window.ch[1]?.deleteHotCue(cueId);
+  },
+  suspendPreview: () => {
+    console.warn("suspendPreview is not implemented");
+  },
+  resumePreview: () => {
+    console.warn("resumePreview is not implemented");
+  },
+  adjustTiming: (_time: number) => {
+    const currentTime = window.ch[1]?.getCurrentTime();
+    if (currentTime === undefined) {
+      return;
+    }
+    window.ch[1]?.seekTo(Number(currentTime) + _time, false);
+  },
+  loopStart: () => {
+    window.ch[1]?.setLoopStart();
+  },
+  loopEnd: () => {
+    window.ch[1]?.setLoopEnd();
+  },
+  loopClear: () => {
+    window.ch[1]?.clearLoop();
+  },
+  play: () => {
+    window.ch[1]?.playVideo();
+  },
+  pause: () => {
+    window.ch[1]?.pauseVideo();
+  },
+  togglePlayPause: () => {
+    if (window.ch[1]?.isPlaying()) {
+      window.ch[1]?.pauseVideo();
+    } else {
+      window.ch[1]?.playVideo();
+    }
+  },
+  mute: () => {
+    window.ch[1]?.mute();
+  },
+  unmute: () => {
+    window.ch[1]?.unMute();
+  },
+  toggleMuteUnmute: () => {
+    if (window.ch[1]?.isMuted()) {
+      window.ch[1]?.unMute();
+    } else {
+      window.ch[1]?.mute();
+    }
+  },
+  setVolume: (volume: number) => {
+    window.ch[1]?.setVolume(volume);
   },
   fadeoutVolume: (_time: number) => {
     console.warn("fadeoutVolume is not implemented");
