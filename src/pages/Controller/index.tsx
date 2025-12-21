@@ -31,7 +31,7 @@ const ControllerPageContent = () => {
           (RightDeck)
         </div>
       </div>
-      {settings?.openLibrary && <Library />}
+      {settings.openLibrary && <Library />}
       <StatusBar onOpenSettings={() => setIsSettingsOpen(true)} />
       <Settings isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>

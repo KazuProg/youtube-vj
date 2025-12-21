@@ -41,7 +41,7 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
 
   const handleChangeYoutubeDataAPIKey = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSettings({
-      openLibrary: settings?.openLibrary ?? false,
+      ...settings,
       youtubeDataAPIKey: e.target.value.trim() || null,
     });
   };
@@ -72,7 +72,7 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
                 id="youtube-api-key"
                 type="password"
                 className={styles.input}
-                value={settings?.youtubeDataAPIKey ?? ""}
+                value={settings.youtubeDataAPIKey ?? ""}
                 onChange={handleChangeYoutubeDataAPIKey}
                 placeholder="APIキーを入力してください"
               />

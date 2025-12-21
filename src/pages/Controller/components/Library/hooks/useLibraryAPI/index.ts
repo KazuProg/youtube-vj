@@ -224,7 +224,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
 
   const searchYouTube = useCallback(
     async (query: string) => {
-      const apiKey = settings?.youtubeDataAPIKey;
+      const apiKey = settings.youtubeDataAPIKey;
       if (!apiKey) {
         console.warn("YouTube API key is not set. Please configure it in settings.");
         return;

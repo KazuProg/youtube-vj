@@ -4,6 +4,7 @@ import type { DeckAPI } from "@/pages/Controller/components/Deck/types";
 import type { LibraryAPI } from "@/pages/Controller/components/Library/types";
 import type { MixerAPI } from "@/pages/Controller/components/Mixer/types";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { DEFAULT_SETTINGS } from "../constants";
 import type { MIDIScriptManager } from "../types/MIDIScriptManager";
 import type { SettingsData } from "../types/settings";
 
@@ -17,8 +18,8 @@ interface ControllerAPIContextValue {
   midiAPI: MIDIScriptManager | null;
   setMidiAPI: (midi: MIDIScriptManager | null) => void;
 
-  settings: SettingsData | null;
-  setSettings: (settings: SettingsData | null) => void;
+  settings: SettingsData;
+  setSettings: (settings: SettingsData) => void;
 }
 
 const ControllerAPIContext = createContext<ControllerAPIContextValue | null>(null);
@@ -54,13 +55,14 @@ export const ControllerAPIProvider = ({
     window.library = library;
   }, []);
 
-  const { setData: _setSettings, dataRef: settingsRef } = useStorageSync<SettingsData | null>(
+  const { setData: _setSettings, dataRef: settingsRef } = useStorageSync<SettingsData>(
     LOCAL_STORAGE_KEY.settings,
-    (data) => {
-      setSettings(data as SettingsData | null);
+    (data) => setSettings(data),
+    {
+      defaultValue: DEFAULT_SETTINGS,
     }
   );
-  const [settings, setSettings] = useState<SettingsData | null>(settingsRef.current);
+  const [settings, setSettings] = useState<SettingsData>(settingsRef.current);
 
   useEffect(() => {
     _setSettings(settings);

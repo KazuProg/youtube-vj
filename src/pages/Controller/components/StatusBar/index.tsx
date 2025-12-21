@@ -24,8 +24,8 @@ const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
 
   const handleLibrary = () => {
     setSettings({
-      openLibrary: !(settings?.openLibrary ?? false),
-      youtubeDataAPIKey: settings?.youtubeDataAPIKey ?? null,
+      ...settings,
+      openLibrary: !settings.openLibrary,
     });
   };
 
@@ -71,11 +71,7 @@ const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
 
   return (
     <div className={styles.statusBar}>
-      <Status
-        text="Library"
-        status={settings?.openLibrary ?? false}
-        onClick={() => handleLibrary()}
-      />
+      <Status text="Library" status={settings.openLibrary} onClick={() => handleLibrary()} />
       <Status text="MIDI" status={midiAPI !== null} onClick={() => handleMIDI()} />
       <Status text="Projection" status={projectionWindow !== null} onClick={openProjectionWindow} />
       {onOpenSettings && <Status text="Settings" status={false} onClick={onOpenSettings} />}
