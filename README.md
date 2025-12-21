@@ -1,160 +1,161 @@
-# YouTube VJ Web App
+# YouTube-VJ
 
-YouTube iframe API を活用した VJ (Video Jockey) Web アプリケーションです。
+![YouTube-VJ](./favicon.ico)
 
-## 🎯 特徴
+**YouTube-VJ**は、YouTube の iframe API を活用した Web ベースの VJ アプリケーションです。DJ ミキサーのような 2 デッキ構成で、YouTube 動画を使ったライブパフォーマンスが可能です。
 
-- **YouTube 動画制御**: 再生、一時停止、速度変更、音量調整
-- **外部制御**: `forwardRef`を使用した親子コンポーネント間の通信
-- **型安全**: TypeScript による型チェック
-- **高品質コード**: Biome によるリント・フォーマット
+## 🎵 主な機能
 
-## 🛠️ 技術スタック
+### 🎛️ 2 デッキ構成
 
-- **React 19** + **TypeScript**
-- **Vite** - 高速ビルドツール
-- **Biome** - 高速リンター・フォーマッター
-- **Husky** + **lint-staged** - Git hooks による品質管理
-- **react-youtube** - YouTube iframe API
+- **左右 2 つのデッキ**で YouTube 動画を同時に操作
+- **クロスフェーダー**による滑らかな映像切り替え
+- **独立した音量・透明度調整**
 
-## 🚀 開発環境セットアップ
+### ⚡ リアルタイム制御
 
-```bash
-# 依存関係インストール
-npm install
+- **再生位置の自由な変更**（シークバー操作）
+- **再生速度調整**（0.25 倍〜2.00 倍）
+- **タイミング微調整**（±0.1 秒単位）
+- **ホットキュー機能**
+- **ループ再生**
 
-# 開発サーバー起動
-npm run dev
+### 🖥️ デュアルウィンドウ
 
-# ビルド
-npm run build
-```
+- **コントローラー画面**：操作用インターフェース
+- **投影ウィンドウ**：観客向け映像出力
+- **全画面表示対応**
 
-## 📋 利用可能なコマンド
+### 🎹 MIDI コントローラー対応
 
-### 開発・ビルド
+- **Web MIDI API**を使用した MIDI デバイス接続
+- **カスタムスクリプト**による柔軟なマッピング
 
-```bash
-npm run dev      # 開発サーバー起動
-npm run build    # プロダクションビルド
-npm run preview  # ビルド結果のプレビュー
-```
+### 📚 ライブラリ機能
 
-### コード品質
+- **プレイリスト管理**
+- **動画検索・フィルタリング**
+- **ドラッグ&ドロップ**によるプレイリスト読み込み
 
-```bash
-npm run check        # Biome: リント + フォーマット チェック
-npm run check:fix    # Biome: 自動修正
-npm run lint         # リントのみ
-npm run format       # フォーマットのみ
-npm run type-check   # TypeScript型チェック
-```
+### 🔧 Chrome 拡張機能
 
-## 🔧 Git Hooks による品質管理
+- **YouTube 画面からワンクリック**で動画をロード
+- **自動 ID 入力**機能
 
-### Pre-commit Hook
+## 🚀 使い方
 
-コミット前に自動実行される品質チェック：
+### 基本操作
 
-- **Biome**: リント・フォーマット自動修正
-- **TypeScript**: 型チェック
+#### 動画の読み込み
 
-### Commit-msg Hook
+1. **YouTube 動画 ID**を入力欄に入力
+2. **Load**ボタンで左右のデッキに読み込み
+3. **Chrome 拡張機能**を使用すれば YouTube 動画 ID 入力する手間が省けます
 
-**[Conventional Commits](https://www.conventionalcommits.org/)** 準拠のコミットメッセージ形式チェック：
+#### VJ 操作
 
-```
-<type>(<scope>): <description>
+- **再生/一時停止**：スペースキーまたは K キー
+- **シーク**：シークバーをクリック
+- **速度調整**：Speed フェーダー
+- **クロスフェード**：中央のクロスフェーダー
+- **ホットキュー**：数字キー（0-9）
 
-例:
-feat: add user authentication
-feat(auth): implement login functionality
-fix: resolve memory leak in video player
-docs: update API documentation
-style: fix indentation in components
-```
+#### 投影
 
-#### 標準タイプ（Conventional Commits 準拠）
+- **Ctrl + P**で投影ウィンドウを開く
+- **全画面表示**または**ウィンドウモード**を選択
 
-- `feat` - 新機能の追加
-- `fix` - バグ修正
-- `docs` - ドキュメントのみの変更
-- `style` - コードの意味に影響しない変更（フォーマット等）
-- `refactor` - バグ修正でも機能追加でもないコード変更
-- `perf` - パフォーマンスを向上させるコード変更
-- `test` - テストの追加や既存テストの修正
-- `chore` - ビルドプロセスや補助ツール・ライブラリの変更
-- `ci` - CI 設定ファイルとスクリプトの変更
-- `build` - ビルドシステムや外部依存関係に影響する変更
+### MIDI コントローラー設定
 
-## 🎮 YouTube Player API
+1. **MIDI デバイスを接続**
+2. **MIDI Control**ボタンをクリック
+3. **アクセス許可**を与える
+4. **カスタムスクリプト**でマッピングを設定
 
-### 基本制御
+#### 利用可能なテンプレート
 
-- `play()` - 再生
-- `pause()` - 一時停止
-- `mute()` / `unmute()` - ミュート制御
-- `setSpeed(rate)` - 再生速度変更 (0.25x, 0.5x, 1x, 2x)
-- `setVolume(volume)` - 音量調整 (0-100)
+- クロスフェーダー
+- 各デッキの再生/一時停止
+- 音量・速度調整
+- ホットキュー
+- ループ機能
+- ライブラリ操作
 
-### 使用例
+## ⌨️ キーボードショートカット
 
-```tsx
-const playerRef = useRef<YouTubePlayerRef>(null);
+### 基本操作
 
-// 再生
-playerRef.current?.play();
+| キー       | 機能                  |
+| ---------- | --------------------- |
+| `Ctrl + P` | 投影ウィンドウを開く  |
+| `Ctrl + 1` | 左デッキを選択        |
+| `Ctrl + 2` | 右デッキを選択        |
+| `Esc`      | デッキ選択解除        |
+| `/`        | ID 入力欄にフォーカス |
+| `s`        | 自動クロスフェーダー  |
+| `Ctrl + M` | MIDI 設定             |
 
-// 2倍速に変更
-playerRef.current?.setSpeed(2);
-```
+### デッキ選択時
 
-## 🧪 開発のヒント
+| キー            | 機能               |
+| --------------- | ------------------ |
+| `Space` / `K`   | 再生/一時停止      |
+| `Shift + Space` | プレビュー一時停止 |
+| `M`             | ミュート切り替え   |
+| `←` / `→`       | 5 秒戻る/進む      |
+| `J` / `L`       | 10 秒戻る/進む     |
+| `,` / `.`       | 0.1 秒戻る/進む    |
+| `<` / `>`       | 速度調整           |
+| `↑` / `↓`       | 透明度調整         |
+| `0-9`           | ホットキュー       |
+| `Shift + 0-9`   | ホットキュー削除   |
 
-1. **品質チェック**: `npm run check` でコミット前に品質確認
-2. **型安全**: TypeScript の型エラーは必ず修正
-3. **コミット形式**: [Conventional Commits](https://www.conventionalcommits.org/) 準拠
-4. **自動修正**: Biome が自動でフォーマット・リント修正
+詳細は[キーボードショートカット一覧](./docs/keyboard-shortcut.html)をご覧ください。
 
-## 🤖 開発環境自動化
+## 🔧 設定
 
-### Cursor 開発環境
+### YouTube API 設定
 
-このプロジェクトは Cursor IDE で最適化されており、以下の自動化ルールが設定されています：
+- **API キー**：YouTube Data API v3 のキーを設定
+- **リクエスト数**：API 使用量の管理
 
-- **自動コミットワークフロー**: 「コミットして」で Conventional Commits 準拠の自動コミット
-- **ドキュメント同期**: コード変更時に関連ドキュメントの更新を自動提案
-- **安全なコマンド実行**: 破壊的操作を防ぐ安全対策
+### その他設定
 
-### 自動コミット機能
+- **フェードアウト音量**：クロスフェード時の音量調整
+- **ライブラリ表示**：起動時のライブラリ表示設定
 
-```bash
-# 手動ステージング後、自動でコミット
-git add <files>
-# チャットで「コミットして」と入力
-```
+## 📦 Chrome 拡張機能
 
-**特徴:**
+YouTube 画面から直接動画を YouTube-VJ に送信できる拡張機能が利用可能です。
 
-- 既存のステージング済みファイルのみ処理
-- 自動的な`git add`は実行されない（安全性重視）
-- Conventional Commits 準拠のメッセージ自動生成
+1. **拡張機能をインストール**
 
-### 🔄 旧ルールから新ルールへの移行ガイド
+   - `YouTube-VJ_extension.zip`を展開
+   - Chrome 拡張機能の開発者モードで読み込み
 
-| 旧ルール        | 新ルール（Conventional Commits）                              | 例                                                           |
-| --------------- | ------------------------------------------------------------- | ------------------------------------------------------------ |
-| `upd: 機能改良` | `feat: 新機能追加` または `fix: バグ修正`                     | `upd: improve button` → `feat: enhance button functionality` |
-| `rm: 削除`      | `refactor: リファクタリング` または `chore: 不要ファイル削除` | `rm: old components` → `refactor: remove unused components`  |
-| `add: 追加`     | `feat: 新機能追加`                                            | `add: new utils` → `feat: add utility functions`             |
+2. **使用方法**
+   - YouTube 動画ページで拡張機能アイコンをクリック
+   - 自動的に YouTube-VJ に動画 ID が送信される
 
-## 📁 プロジェクト構造
+詳細は[Chrome 拡張機能ガイド](./docs/chrome-extension.html)をご覧ください。
 
-```
-src/
-├── components/
-│   ├── YouTubePlayer.tsx      # YouTube プレイヤーコンポーネント
-│   └── YouTubeController.tsx  # 制御パネルコンポーネント
-├── App.tsx                    # アプリケーションルート
-└── main.tsx                   # エントリーポイント
-```
+## 📝 ライセンス
+
+本プロジェクトは[カスタムライセンス](./LICENSE.md)の下で公開されています。
+
+### 重要な注意事項
+
+- **YouTube 利用規約の遵守**が必要です
+- **著作権保護されたコンテンツ**の使用には十分注意してください
+
+## 🤝 コントリビューション
+
+バグ報告や機能要望は[GitHub Issues](https://github.com/KazuProg/YouTube-VJ/issues)までお願いします。
+
+## 👨‍💻 開発者
+
+**KazuProg** - [GitHub](https://github.com/KazuProg)
+
+---
+
+**YouTube-VJ**で素晴らしい VJ パフォーマンスをお楽しみください！🎉
