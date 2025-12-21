@@ -9,7 +9,7 @@ interface StatusBarProps {
 
 const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
   const [projectionWindow, setProjectionWindow] = useState<Window | null>(null);
-  const { midiAPI, setMidiAPI } = useControllerAPIContext();
+  const { midiAPI, setMidiAPI, settings, setSettings } = useControllerAPIContext();
   const isInitializedRef = useRef(false);
 
   useEffect(() => {
@@ -21,6 +21,13 @@ const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
 
     handleMIDI(true);
   }, []);
+
+  const handleLibrary = () => {
+    setSettings({
+      openLibrary: !(settings?.openLibrary ?? false),
+      youtubeDataAPIKey: settings?.youtubeDataAPIKey ?? null,
+    });
+  };
 
   const handleMIDI = (startup = false) => {
     if (startup && localStorage.getItem("midi") === null) {
@@ -64,6 +71,11 @@ const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
 
   return (
     <div className={styles.statusBar}>
+      <Status
+        text="Library"
+        status={settings?.openLibrary ?? false}
+        onClick={() => handleLibrary()}
+      />
       <Status text="MIDI" status={midiAPI !== null} onClick={() => handleMIDI()} />
       <Status text="Projection" status={projectionWindow !== null} onClick={openProjectionWindow} />
       {onOpenSettings && <Status text="Settings" status={false} onClick={onOpenSettings} />}

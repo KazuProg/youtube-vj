@@ -41,7 +41,7 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
 
   const handleChangeYoutubeDataAPIKey = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSettings({
-      ...settings,
+      openLibrary: settings?.openLibrary ?? false,
       youtubeDataAPIKey: e.target.value.trim() || null,
     });
   };
