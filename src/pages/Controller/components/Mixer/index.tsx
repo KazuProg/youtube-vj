@@ -3,7 +3,7 @@ import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import type { MixerData } from "@/types";
 import { parseYouTubeURL } from "@/utils/YouTube";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useControllerAPIContext } from "../../contexts/ControllerAPIContext";
 import { useMixerAPI } from "./hooks/useMixerAPI";
 import styles from "./index.module.css";
@@ -16,9 +16,10 @@ const Mixer = ({ className }: MixerProps) => {
   const { deckAPIs, setMixerAPI } = useControllerAPIContext();
   const { dataRef: mixerDataRef, setData: setMixerData } = useStorageSync<MixerData>(
     LOCAL_STORAGE_KEY.mixer,
-    null,
+    (data) => _setMixerData(data),
     { defaultValue: { crossfader: 0 } }
   );
+  const [mixerData, _setMixerData] = useState<MixerData>(mixerDataRef.current);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -96,10 +97,10 @@ const Mixer = ({ className }: MixerProps) => {
         <Fader
           min={0}
           max={1}
-          value={mixerDataRef.current?.crossfader ?? 0}
+          value={mixerData.crossfader ?? 0}
           step={0.01}
           onChange={(value) => {
-            setMixerData({ ...(mixerDataRef.current ?? { crossfader: 0 }), crossfader: value });
+            setMixerData({ ...mixerData, crossfader: value });
           }}
         />
       </fieldset>
