@@ -233,20 +233,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
           </div>
         </fieldset>
         <fieldset className={styles.controlFieldset}>
-          <legend>
-            <button
-              type="button"
-              onClick={() => setPlaybackRate(1)}
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === " " || e.key === "Enter") {
-                  setPlaybackRate(1);
-                }
-              }}
-            >
-              Speed
-            </button>
-          </legend>
+          <legend>Speed</legend>
           <Fader
             min={0.5}
             max={1.5}
