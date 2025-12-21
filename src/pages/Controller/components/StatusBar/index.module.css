@@ -10,3 +10,7 @@
   align-items: center;
   justify-content: flex-end;
 }
+
+.statusBar > *:nth-child(1) {
+  margin-right: auto;
+}

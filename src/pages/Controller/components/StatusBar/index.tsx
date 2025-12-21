@@ -4,7 +4,7 @@ import Status from "./components/Status";
 import styles from "./index.module.css";
 
 interface StatusBarProps {
-  onOpenSettings?: () => void;
+  onOpenSettings: () => void;
 }
 
 const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
@@ -72,10 +72,10 @@ const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
 
   return (
     <div className={styles.statusBar}>
+      <Status text="Settings" status={null} onClick={onOpenSettings} />
       <Status text="Library" status={settings.openLibrary} onClick={() => handleLibrary()} />
       <Status text="MIDI" status={midiAPI !== null} onClick={() => handleMIDI()} />
       <Status text="Projection" status={projectionWindow !== null} onClick={openProjectionWindow} />
-      {onOpenSettings && <Status text="Settings" status={false} onClick={onOpenSettings} />}
     </div>
   );
 };
