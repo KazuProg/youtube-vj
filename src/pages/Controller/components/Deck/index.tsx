@@ -244,7 +244,15 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
             className={styles.fader}
             onChange={setPlaybackRate}
           />
-          <span>{playbackRate.toFixed(2)}x</span>
+          <input
+            className={styles.speedInput}
+            type="number"
+            min={0.25}
+            max={2}
+            step={0.01}
+            value={playbackRate.toFixed(2)}
+            onChange={(e) => setPlaybackRate(Number(e.target.value))}
+          />
         </fieldset>
       </div>
     </div>
