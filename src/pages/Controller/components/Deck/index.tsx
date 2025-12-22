@@ -233,7 +233,17 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
           </div>
         </fieldset>
         <fieldset className={styles.controlFieldset}>
-          <legend>Speed</legend>
+          <legend>
+            <button
+              className={styles.speedButton}
+              type="button"
+              onClick={() => {
+                setPlaybackRate(1);
+              }}
+            >
+              Speed
+            </button>
+          </legend>
           <Fader
             min={0.5}
             max={1.5}
