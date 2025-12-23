@@ -5,7 +5,7 @@ export type VideoItem = {
 
 export interface LibraryAPI {
   history: {
-    add: (videoId: string, title: string | null) => void;
+    add: (videoId: string) => void;
     remove: (index: number) => void;
     clear: () => void;
     get: () => VideoItem[];

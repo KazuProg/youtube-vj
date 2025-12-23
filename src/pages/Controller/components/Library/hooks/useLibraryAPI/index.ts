@@ -25,30 +25,34 @@ interface UseLibraryAPIReturn {
 type FocusType = "playlist" | "video";
 
 export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLibraryAPIReturn => {
-  const { history, addHistory, removeHistory, clearHistory } = useHistory();
-
   const { settings } = useControllerAPIContext();
+
+  const handleHistoryChange = useCallback((history: string[]) => {
+    setPlaylists((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(
+        "History",
+        history.map((videoId) => ({ id: videoId, title: null }))
+      );
+      return newMap;
+    });
+  }, []);
+
+  const { history, addHistory, removeHistory, clearHistory } = useHistory(handleHistoryChange);
 
   const [playlists, setPlaylists] = useState<Map<string, VideoItem[]>>(
     new Map([
-      ["History", history],
+      ["History", history.map((videoId) => ({ id: videoId, title: null }))],
       ["Search", []],
     ])
   );
+
   const [selectedPlaylistIndex, setSelectedPlaylistIndex] = useState<number>(0);
-  const [videos, setVideos] = useState<VideoItem[]>(history);
+  const [videos, setVideos] = useState<VideoItem[]>(playlists.get("History") || []);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState<number>(0);
 
   const pendingFocusPlaylistName = useRef<string | null>(null);
   const [focusedType, setFocusedType] = useState<FocusType>("video");
-
-  useEffect(() => {
-    setPlaylists((prev) => {
-      const newMap = new Map(prev);
-      newMap.set("History", history);
-      return newMap;
-    });
-  }, [history]);
 
   useEffect(() => {
     if (pendingFocusPlaylistName.current) {
@@ -116,8 +120,8 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
   useEffect(() => {
     const libraryAPI: LibraryAPI = {
       history: {
-        add: (videoId: string, title: string) => {
-          addHistory(videoId, title);
+        add: (videoId: string) => {
+          addHistory(videoId);
         },
         remove: (index: number) => {
           removeHistory(index);
@@ -126,7 +130,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
           clearHistory();
         },
         get: () => {
-          return history;
+          return playlists.get("History") ?? [];
         },
       },
       playlists: {
@@ -207,7 +211,6 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
     } as LibraryAPI;
     setGlobalLibrary(libraryAPI);
   }, [
-    history,
     addHistory,
     removeHistory,
     clearHistory,

@@ -1,36 +1,34 @@
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { useCallback } from "react";
-import type { VideoItem } from "../../types";
 
 interface UseHistoryReturn {
-  history: VideoItem[];
-  addHistory: (videoId: string, title: string | null) => void;
+  history: string[];
+  addHistory: (videoId: string) => void;
   removeHistory: (index: number) => void;
   clearHistory: () => void;
 }
 
-export const useHistory = (): UseHistoryReturn => {
+export const useHistory = (onChange?: (history: string[]) => void): UseHistoryReturn => {
   // LocalStorageから再生履歴を読み取り
-  const { dataRef: historyRef, setData: setHistory } = useStorageSync<VideoItem[]>(
+  const { dataRef: historyRef, setData: setHistory } = useStorageSync<string[]>(
     LOCAL_STORAGE_KEY.history,
-    null,
+    onChange,
     {
       defaultValue: [],
     }
   );
 
   const addHistory = useCallback(
-    (videoId: string, title: string | null) => {
+    (videoId: string) => {
       const prevItems = historyRef.current ?? [];
       // 直近（最後）のIDと同じだったら追加しない
       const lastItem = prevItems[prevItems.length - 1];
-      if (lastItem?.id === videoId) {
+      if (lastItem === videoId) {
         return;
       }
       // 新しいアイテムを後ろに追加（時系列順に保持）
-      const newItem: VideoItem = { id: videoId, title };
-      setHistory([...prevItems, newItem]);
+      setHistory([...prevItems, videoId]);
     },
     [setHistory, historyRef]
   );

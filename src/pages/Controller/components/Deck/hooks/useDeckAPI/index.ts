@@ -122,7 +122,7 @@ export const useDeckAPI = ({
         });
         hotCuesRef.current.clear();
         onHotCuesChange?.(hotCuesRef.current);
-        libraryAPI?.history.add(videoObj.id, videoObj.id);
+        libraryAPI?.history.add(videoObj.id);
       },
       getCurrentTime: () => {
         return vjPlayerRef.current?.getCurrentTime() ?? 0;
