@@ -52,6 +52,13 @@ export const useDeckAPI = ({
           currentTime: seconds,
         });
       },
+      adjustTiming: (relativeTime: number) => {
+        const currentTime = vjPlayerRef.current?.getCurrentTime() ?? 0;
+        updateSyncData({
+          baseTime: Date.now(),
+          currentTime: currentTime + relativeTime,
+        });
+      },
       setHotCue: (cueId: number, time?: number) => {
         const targetTime = time ?? vjPlayerRef.current?.getCurrentTime() ?? 0;
         hotCuesRef.current.set(cueId, targetTime);

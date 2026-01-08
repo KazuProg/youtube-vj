@@ -152,11 +152,6 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
     []
   );
 
-  const adjustTime = (relativeTime: number) => {
-    const newTime = getCurrentTime() + relativeTime;
-    deckAPIRef.current?.seekTo(newTime, true);
-  };
-
   return (
     <div className={`${styles.deck} ${className}`}>
       <fieldset>
@@ -179,55 +174,25 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
         <fieldset className={styles.controlFieldset}>
           <legend>Adjust</legend>
           <div className={styles.adjust}>
-            <button
-              type="button"
-              onClick={() => {
-                adjustTime(-5);
-              }}
-            >
+            <button type="button" onClick={() => deckAPIRef.current?.adjustTiming(-5)}>
               &lt;
             </button>
             <span>5s</span>
-            <button
-              type="button"
-              onClick={() => {
-                adjustTime(5);
-              }}
-            >
+            <button type="button" onClick={() => deckAPIRef.current?.adjustTiming(5)}>
               &gt;
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                adjustTime(-1);
-              }}
-            >
+            <button type="button" onClick={() => deckAPIRef.current?.adjustTiming(-1)}>
               &lt;
             </button>
             <span>1s</span>
-            <button
-              type="button"
-              onClick={() => {
-                adjustTime(1);
-              }}
-            >
+            <button type="button" onClick={() => deckAPIRef.current?.adjustTiming(1)}>
               &gt;
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                adjustTime(-0.1);
-              }}
-            >
+            <button type="button" onClick={() => deckAPIRef.current?.adjustTiming(-0.1)}>
               &lt;
             </button>
             <span>0.1s</span>
-            <button
-              type="button"
-              onClick={() => {
-                adjustTime(0.1);
-              }}
-            >
+            <button type="button" onClick={() => deckAPIRef.current?.adjustTiming(0.1)}>
               &gt;
             </button>
           </div>

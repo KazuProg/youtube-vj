@@ -5,6 +5,7 @@ export interface DeckAPI {
   pauseVideo: () => void;
   isPlaying: () => boolean;
   seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+  adjustTiming: (relativeTime: number) => void;
   setHotCue: (cueId: number, time?: number) => void;
   jumpToHotCue: (cueId: number) => void;
   deleteHotCue: (cueId: number) => void;
