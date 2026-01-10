@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc -b && vite build",
+    "generate:midi-template": "node scripts/generate-midi-template.js",
+    "build": "npm run generate:midi-template && tsc -b && vite build",
     "build-docs": "eleventy --config=.eleventy.cjs",
     "lint": "biome lint src/",
     "lint:fix": "biome lint --write src/",

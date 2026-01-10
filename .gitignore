@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Generated files
+src/pages/Controller/utils/generated/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

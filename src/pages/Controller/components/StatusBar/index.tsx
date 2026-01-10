@@ -1,8 +1,8 @@
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
+import midiScriptTemplate from "@/pages/Controller/utils/midi-script-template";
 import { useEffect, useRef, useState } from "react";
 import Status from "./components/Status";
 import styles from "./index.module.css";
-
 interface StatusBarProps {
   onOpenSettings: () => void;
 }
@@ -50,7 +50,7 @@ const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
           setMidiAPI(null);
         });
     } else {
-      midiAPI.openCustomScriptEditor();
+      midiAPI.openCustomScriptEditor(midiScriptTemplate);
     }
   };
 

@@ -1,5 +1,10 @@
+export interface MidiScriptTemplate {
+  name: string;
+  code: string;
+}
+
 export interface MIDIScriptManager {
-  openCustomScriptEditor: () => void;
+  openCustomScriptEditor: (template: MidiScriptTemplate[]) => void;
   requestAccess: () => Promise<void>;
 }
 
