@@ -2,8 +2,7 @@ const _midiScriptTemplate = [
   {
     name: "Crossfader",
     code: () => {
-      const val = value / 0x7f;
-      mixer.setCrossfader((val - 0.5) * 2);
+      mixer.setCrossfader(value / 0x7f);
     },
   },
   {
