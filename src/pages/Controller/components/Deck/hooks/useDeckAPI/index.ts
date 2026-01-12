@@ -31,10 +31,12 @@ export const useDeckAPI = ({
   useEffect(() => {
     deckAPIRef.current = {
       playVideo: () => {
-        updateSyncData({
-          baseTime: Date.now(),
-          paused: false,
-        });
+        if (syncDataRef.current?.paused) {
+          updateSyncData({
+            baseTime: Date.now(),
+            paused: false,
+          });
+        }
       },
       pauseVideo: () => {
         updateSyncData({
