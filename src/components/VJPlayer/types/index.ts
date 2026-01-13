@@ -8,6 +8,7 @@ export type VJSyncData = {
   paused: boolean;
   loopStart: number | null;
   loopEnd: number | null;
+  filters: Record<string, string>;
 };
 
 export interface VJPlayerRef {

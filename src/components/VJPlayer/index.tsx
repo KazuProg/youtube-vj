@@ -21,6 +21,7 @@ interface VJPlayerEvents {
   onPaused?: () => void;
   onUnpaused?: () => void;
   onEnded?: () => void;
+  onFiltersChange?: (filters: Record<string, string>) => void;
 }
 
 interface VJPlayerProps {
@@ -83,6 +84,10 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           player.pauseVideo();
         } else {
           player.playVideo();
+        }
+
+        if (syncData.filters !== beforeSyncData?.filters) {
+          eventsRef.current?.onFiltersChange?.(syncData.filters);
         }
 
         notifySyncData(syncData);

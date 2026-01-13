@@ -23,6 +23,7 @@ export const INITIAL_SYNC_DATA = {
   paused: false,
   loopStart: null,
   loopEnd: null,
+  filters: {},
 } as const;
 
 /** プレイヤー同期関連の定数 */

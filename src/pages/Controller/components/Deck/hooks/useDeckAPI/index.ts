@@ -119,6 +119,14 @@ export const useDeckAPI = ({
           playbackRate: Number.parseFloat(rate.toFixed(2)),
         });
       },
+      setFilters: (filters: Record<string, string>) => {
+        updateSyncData({
+          filters: {
+            ...syncDataRef.current?.filters,
+            ...filters,
+          },
+        });
+      },
       loadVideo: (video: YouTubeVideoMetadata | string) => {
         const videoObj = typeof video === "string" ? { id: video } : video;
         updateSyncData({

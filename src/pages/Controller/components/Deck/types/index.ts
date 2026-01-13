@@ -18,6 +18,7 @@ export interface DeckAPI {
   isMuted: () => boolean;
   setVolume: (volume: number) => void;
   setPlaybackRate: (rate: number) => void;
+  setFilters: (filters: Record<string, string>) => void;
   getCurrentTime: () => number | null;
   loadVideo: (video: YouTubeVideoMetadata | string) => void;
   getDuration: () => number | null;
