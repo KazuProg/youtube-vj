@@ -28,7 +28,7 @@ const Mixer = ({ className }: MixerProps) => {
     }
   }, []);
 
-  const { mixerAPIRef, preparedVideo, monitorCueStates } = useMixerAPI({
+  const { mixerAPIRef, preparedVideo, monitorCueStates, opacityValues } = useMixerAPI({
     mixerDataRef,
     setMixerData,
     setGlobalMixer: setMixerAPI,
@@ -112,6 +112,31 @@ const Mixer = ({ className }: MixerProps) => {
         >
           CUE
         </button>
+      </fieldset>
+      <fieldset className={styles.opacityFaders}>
+        <legend>Opacity</legend>
+        <Fader
+          vertical={true}
+          style={{ height: "120px" }}
+          min={0}
+          max={1}
+          value={opacityValues[0] ?? 1}
+          step={0.01}
+          onChange={(value) => {
+            deckAPIs[0]?.setFilters({ opacity: `${value}` });
+          }}
+        />
+        <Fader
+          vertical={true}
+          style={{ height: "120px" }}
+          min={0}
+          max={1}
+          value={opacityValues[1] ?? 1}
+          step={0.01}
+          onChange={(value) => {
+            deckAPIs[1]?.setFilters({ opacity: `${value}` });
+          }}
+        />
       </fieldset>
       <fieldset className={styles.crossfader}>
         <legend>Crossfader</legend>

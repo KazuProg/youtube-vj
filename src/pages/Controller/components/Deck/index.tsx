@@ -70,6 +70,13 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
     [mixerAPI, deckId]
   );
 
+  const handleOpacityChange = useCallback(
+    (opacity: number) => {
+      mixerAPI?.setOpacityValue(deckId, opacity);
+    },
+    [mixerAPI, deckId]
+  );
+
   const deckAPIRef = useDeckAPI({
     vjPlayerRef,
     syncDataRef,
@@ -77,6 +84,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
     deckId,
     onHotCuesChange: setHotCues,
     onMuteChange: handleMuteChange,
+    onOpacityChange: handleOpacityChange,
   });
 
   useEffect(() => {

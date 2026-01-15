@@ -1,6 +1,7 @@
 import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import type { YouTubeVideoMetadata } from "@/types";
+import { normalizeNumericValue } from "@/utils";
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import type { DeckAPI } from "../../types";
@@ -13,6 +14,7 @@ interface UseDeckAPIParams {
   onHotCuesChange?: (hotCues: Map<number, number>) => void;
   onVolumeChange?: (volume: number) => void;
   onMuteChange?: (isMuted: boolean) => void;
+  onOpacityChange?: (opacity: number) => void;
 }
 
 export const useDeckAPI = ({
@@ -23,6 +25,7 @@ export const useDeckAPI = ({
   onHotCuesChange,
   onVolumeChange,
   onMuteChange,
+  onOpacityChange,
 }: UseDeckAPIParams) => {
   const deckAPIRef = useRef<DeckAPI | null>(null);
   const { setDeckAPI, libraryAPI } = useControllerAPIContext();
@@ -126,6 +129,7 @@ export const useDeckAPI = ({
             ...filters,
           },
         });
+        onOpacityChange?.("opacity" in filters ? normalizeNumericValue(filters.opacity) : 1);
       },
       loadVideo: (video: YouTubeVideoMetadata | string) => {
         const videoObj = typeof video === "string" ? { id: video } : video;
@@ -159,6 +163,7 @@ export const useDeckAPI = ({
     onHotCuesChange,
     onVolumeChange,
     onMuteChange,
+    onOpacityChange,
   ]);
 
   return deckAPIRef;

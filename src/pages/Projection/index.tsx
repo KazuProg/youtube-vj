@@ -32,12 +32,9 @@ const ProjectionPage = () => {
   }, []);
 
   const { ch0Opacity, ch0ZIndex, ch1Opacity, ch1ZIndex } = useMemo(() => {
-    const ch0OpacityBase = ch0Filters.opacity
-      ? Number(ch0Filters.opacity.replace("%", "")) / 100
-      : 1;
-    const ch1OpacityBase = ch1Filters.opacity
-      ? Number(ch1Filters.opacity.replace("%", "")) / 100
-      : 1;
+    // filters.opacityはDeckAPIで数値に変換済みのため、ここでは数値として扱う
+    const ch0OpacityBase = Number(ch0Filters.opacity ?? 1);
+    const ch1OpacityBase = Number(ch1Filters.opacity ?? 1);
 
     const ch0Weight = ch0OpacityBase * (1 - crossfader);
     const ch1Weight = ch1OpacityBase * crossfader;

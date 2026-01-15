@@ -42,7 +42,8 @@
   color: white;
 }
 
-.cueButtons {
+.cueButtons,
+.opacityFaders {
   display: flex;
   justify-content: space-between;
   flex-direction: row;

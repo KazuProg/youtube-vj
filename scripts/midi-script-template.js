@@ -237,6 +237,14 @@ const _midiScriptTemplate = [
     },
   },
   {
+    name: "Ch1_filterOpacity",
+    code: () => {
+      ch[0].setFilters({
+        opacity: value / 0x7f,
+      });
+    },
+  },
+  {
     name: "Ch2_Load",
     code: () => {
       if (data2 === 0x7f) {
@@ -457,6 +465,14 @@ const _midiScriptTemplate = [
       if (value === 0x7f) {
         ch[1].loopClear();
       }
+    },
+  },
+  {
+    name: "Ch2_filterOpacity",
+    code: () => {
+      ch[1].setFilters({
+        opacity: value / 0x7f,
+      });
     },
   },
   {

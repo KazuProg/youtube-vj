@@ -14,6 +14,7 @@ export const useMixerAPI = ({ mixerDataRef, setMixerData, setGlobalMixer }: UseM
   const [preparedVideo, setPreparedVideo] = useState<YouTubeVideoMetadata | null>(null);
   const preparedVideoRef = useRef<YouTubeVideoMetadata | null>(null);
   const [monitorCueStates, setMonitorCueStates] = useState<Record<number, boolean>>({});
+  const [opacityValues, setOpacityValues] = useState<Record<number, number>>({});
 
   useEffect(() => {
     preparedVideoRef.current = preparedVideo;
@@ -37,6 +38,9 @@ export const useMixerAPI = ({ mixerDataRef, setMixerData, setGlobalMixer }: UseM
       setMonitorCueState: (deckId: number, state: boolean) => {
         setMonitorCueStates((prev) => ({ ...prev, [deckId]: state }));
       },
+      setOpacityValue: (deckId: number, value: number) => {
+        setOpacityValues((prev) => ({ ...prev, [deckId]: value }));
+      },
     } as MixerAPI;
     setGlobalMixer(mixerAPIRef.current);
   }, [setMixerData, setGlobalMixer, mixerDataRef]);
@@ -45,5 +49,6 @@ export const useMixerAPI = ({ mixerDataRef, setMixerData, setGlobalMixer }: UseM
     mixerAPIRef,
     preparedVideo,
     monitorCueStates,
+    opacityValues,
   };
 };

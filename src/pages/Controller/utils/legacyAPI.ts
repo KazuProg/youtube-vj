@@ -9,7 +9,7 @@ interface LegacyDeckAPI {
   setVideo: (videoId: string) => void;
   setSpeed: (speed: number) => void;
   setTime: (time: number) => void;
-  setFilter: (filter: string) => void;
+  setFilter: (filters: Record<string, string>) => void;
   hotcue: (cueId: number) => void;
   addHotcue: (cueId: number) => void;
   playHotcue: (cueId: number) => void;
@@ -80,8 +80,8 @@ window.ch1 = {
   setTime: (time: number) => {
     window.ch[0]?.seekTo(time, false);
   },
-  setFilter: (_filter: string) => {
-    console.warn("setFilter is not implemented");
+  setFilter: (filters: Record<string, string>) => {
+    window.ch[0]?.setFilters(filters);
   },
   hotcue: (cueId: number) => {
     if (window.ch[0]?.hasHotCue(cueId)) {
@@ -171,8 +171,8 @@ window.ch2 = {
   setTime: (time: number) => {
     window.ch[1]?.seekTo(time, false);
   },
-  setFilter: (_filter: string) => {
-    console.warn("setFilter is not implemented");
+  setFilter: (filters: Record<string, string>) => {
+    window.ch[1]?.setFilters(filters);
   },
   hotcue: (cueId: number) => {
     if (window.ch[1]?.hasHotCue(cueId)) {
