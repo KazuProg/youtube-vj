@@ -102,9 +102,9 @@ const _midiScriptTemplate = [
     name: "Ch1_Adjust",
     code: () => {
       if (value < 0x40) {
-        ch1.adjustTiming(+0.005 * value);
+        ch[0].adjustTiming(+0.005 * value);
       } else {
-        ch1.adjustTiming(-0.005 * (0x80 - value));
+        ch[0].adjustTiming(-0.005 * (0x80 - value));
       }
     },
   },
@@ -112,7 +112,7 @@ const _midiScriptTemplate = [
     name: "Ch1_Adjust_ToTop",
     code: () => {
       if (data2 === 0x7f) {
-        ch1.setTime(0);
+        ch[0].setTime(0);
       }
     },
   },
@@ -120,7 +120,7 @@ const _midiScriptTemplate = [
     name: "Ch1_Adjust_-1s",
     code: () => {
       if (data2 === 0x7f) {
-        ch1.adjustTiming(-1);
+        ch[0].adjustTiming(-1);
       }
     },
   },
@@ -128,7 +128,7 @@ const _midiScriptTemplate = [
     name: "Ch1_Adjust_+1s",
     code: () => {
       if (data2 === 0x7f) {
-        ch1.adjustTiming(+1);
+        ch[0].adjustTiming(+1);
       }
     },
   },
@@ -138,7 +138,7 @@ const _midiScriptTemplate = [
       const index = 1;
 
       if (value === 0x7f) {
-        ch1.hotcue(index);
+        ch[0].hotcue(index);
       }
     },
   },
@@ -148,7 +148,7 @@ const _midiScriptTemplate = [
       const index = 2;
 
       if (value === 0x7f) {
-        ch1.hotcue(index);
+        ch[0].hotcue(index);
       }
     },
   },
@@ -158,7 +158,7 @@ const _midiScriptTemplate = [
       const index = 3;
 
       if (value === 0x7f) {
-        ch1.hotcue(index);
+        ch[0].hotcue(index);
       }
     },
   },
@@ -168,7 +168,7 @@ const _midiScriptTemplate = [
       const index = 4;
 
       if (value === 0x7f) {
-        ch1.hotcue(index);
+        ch[0].hotcue(index);
       }
     },
   },
@@ -178,7 +178,7 @@ const _midiScriptTemplate = [
       const index = 1;
 
       if (value === 0x7f) {
-        ch1.removeHotcue(index);
+        ch[0].removeHotcue(index);
       }
     },
   },
@@ -188,7 +188,7 @@ const _midiScriptTemplate = [
       const index = 2;
 
       if (value === 0x7f) {
-        ch1.removeHotcue(index);
+        ch[0].removeHotcue(index);
       }
     },
   },
@@ -198,7 +198,7 @@ const _midiScriptTemplate = [
       const index = 3;
 
       if (value === 0x7f) {
-        ch1.removeHotcue(index);
+        ch[0].removeHotcue(index);
       }
     },
   },
@@ -208,7 +208,7 @@ const _midiScriptTemplate = [
       const index = 4;
 
       if (value === 0x7f) {
-        ch1.removeHotcue(index);
+        ch[0].removeHotcue(index);
       }
     },
   },
@@ -216,7 +216,7 @@ const _midiScriptTemplate = [
     name: "Ch1_LoopStart",
     code: () => {
       if (value === 0x7f) {
-        ch1.loopStart();
+        ch[0].loopStart();
       }
     },
   },
@@ -224,7 +224,7 @@ const _midiScriptTemplate = [
     name: "Ch1_LoopEnd",
     code: () => {
       if (value === 0x7f) {
-        ch1.loopEnd();
+        ch[0].loopEnd();
       }
     },
   },
@@ -232,7 +232,7 @@ const _midiScriptTemplate = [
     name: "Ch1_LoopClear",
     code: () => {
       if (value === 0x7f) {
-        ch1.loopClear();
+        ch[0].loopClear();
       }
     },
   },
@@ -240,7 +240,7 @@ const _midiScriptTemplate = [
     name: "Ch2_Load",
     code: () => {
       if (data2 === 0x7f) {
-        ch2.setVideo(prepareVideoId);
+        ch[1].setVideo(prepareVideoId);
       }
     },
   },
@@ -248,7 +248,7 @@ const _midiScriptTemplate = [
     name: "Ch2_Play",
     code: () => {
       if (data2 === 0x7f) {
-        ch2.play();
+        ch[1].play();
       }
     },
   },
@@ -256,7 +256,7 @@ const _midiScriptTemplate = [
     name: "Ch2_Pause",
     code: () => {
       if (data2 === 0x7f) {
-        ch2.pause();
+        ch[1].pause();
       }
     },
   },
@@ -264,7 +264,7 @@ const _midiScriptTemplate = [
     name: "Ch2_Play/Pause",
     code: () => {
       if (data2 === 0x7f) {
-        ch2.togglePlayPause();
+        ch[1].togglePlayPause();
       }
     },
   },
@@ -272,7 +272,7 @@ const _midiScriptTemplate = [
     name: "Ch2_Mute",
     code: () => {
       if (data2 === 0x7f) {
-        ch2.mute();
+        ch[1].mute();
       }
     },
   },
@@ -280,7 +280,7 @@ const _midiScriptTemplate = [
     name: "Ch2_Unmute",
     code: () => {
       if (data2 === 0x7f) {
-        ch2.unmute();
+        ch[1].unmute();
       }
     },
   },
@@ -288,7 +288,7 @@ const _midiScriptTemplate = [
     name: "Ch2_Mute/Unmute",
     code: () => {
       if (data2 === 0x7f) {
-        ch2.toggleMuteUnmute();
+        ch[1].toggleMuteUnmute();
       }
     },
   },
@@ -297,7 +297,7 @@ const _midiScriptTemplate = [
     code: () => {
       const val = value / 0x7f;
 
-      ch2.setVolume(Math.round(val * 100));
+      ch[1].setVolume(Math.round(val * 100));
     },
   },
   {
@@ -310,14 +310,14 @@ const _midiScriptTemplate = [
       } else {
         speed = val * 2;
       }
-      ch2.setSpeed(speed);
+      ch[1].setSpeed(speed);
     },
   },
   {
     name: "Ch2_Speed_x1.00",
     code: () => {
       if (data2 === 0x7f) {
-        ch2.setSpeed(1.0);
+        ch[1].setSpeed(1.0);
       }
     },
   },
@@ -325,9 +325,9 @@ const _midiScriptTemplate = [
     name: "Ch2_Adjust",
     code: () => {
       if (value < 0x40) {
-        ch2.adjustTiming(+0.005 * value);
+        ch[1].adjustTiming(+0.005 * value);
       } else {
-        ch2.adjustTiming(-0.005 * (0x80 - value));
+        ch[1].adjustTiming(-0.005 * (0x80 - value));
       }
     },
   },
@@ -335,7 +335,7 @@ const _midiScriptTemplate = [
     name: "Ch2_Adjust_ToTop",
     code: () => {
       if (data2 === 0x7f) {
-        ch2.setTime(0);
+        ch[1].setTime(0);
       }
     },
   },
@@ -343,7 +343,7 @@ const _midiScriptTemplate = [
     name: "Ch2_Adjust_-1s",
     code: () => {
       if (data2 === 0x7f) {
-        ch2.adjustTiming(-1);
+        ch[1].adjustTiming(-1);
       }
     },
   },
@@ -351,7 +351,7 @@ const _midiScriptTemplate = [
     name: "Ch2_Adjust_+1s",
     code: () => {
       if (data2 === 0x7f) {
-        ch2.adjustTiming(+1);
+        ch[1].adjustTiming(+1);
       }
     },
   },
@@ -361,7 +361,7 @@ const _midiScriptTemplate = [
       const index = 1;
 
       if (value === 0x7f) {
-        ch2.hotcue(index);
+        ch[1].hotcue(index);
       }
     },
   },
@@ -371,7 +371,7 @@ const _midiScriptTemplate = [
       const index = 2;
 
       if (value === 0x7f) {
-        ch2.hotcue(index);
+        ch[1].hotcue(index);
       }
     },
   },
@@ -381,7 +381,7 @@ const _midiScriptTemplate = [
       const index = 3;
 
       if (value === 0x7f) {
-        ch2.hotcue(index);
+        ch[1].hotcue(index);
       }
     },
   },
@@ -391,7 +391,7 @@ const _midiScriptTemplate = [
       const index = 4;
 
       if (value === 0x7f) {
-        ch2.hotcue(index);
+        ch[1].hotcue(index);
       }
     },
   },
@@ -401,7 +401,7 @@ const _midiScriptTemplate = [
       const index = 1;
 
       if (value === 0x7f) {
-        ch2.removeHotcue(index);
+        ch[1].removeHotcue(index);
       }
     },
   },
@@ -411,7 +411,7 @@ const _midiScriptTemplate = [
       const index = 2;
 
       if (value === 0x7f) {
-        ch2.removeHotcue(index);
+        ch[1].removeHotcue(index);
       }
     },
   },
@@ -421,7 +421,7 @@ const _midiScriptTemplate = [
       const index = 3;
 
       if (value === 0x7f) {
-        ch2.removeHotcue(index);
+        ch[1].removeHotcue(index);
       }
     },
   },
@@ -431,7 +431,7 @@ const _midiScriptTemplate = [
       const index = 4;
 
       if (value === 0x7f) {
-        ch2.removeHotcue(index);
+        ch[1].removeHotcue(index);
       }
     },
   },
@@ -439,7 +439,7 @@ const _midiScriptTemplate = [
     name: "Ch2_LoopStart",
     code: () => {
       if (value === 0x7f) {
-        ch2.loopStart();
+        ch[1].loopStart();
       }
     },
   },
@@ -447,7 +447,7 @@ const _midiScriptTemplate = [
     name: "Ch2_LoopEnd",
     code: () => {
       if (value === 0x7f) {
-        ch2.loopEnd();
+        ch[1].loopEnd();
       }
     },
   },
@@ -455,7 +455,7 @@ const _midiScriptTemplate = [
     name: "Ch2_LoopClear",
     code: () => {
       if (value === 0x7f) {
-        ch2.loopClear();
+        ch[1].loopClear();
       }
     },
   },
