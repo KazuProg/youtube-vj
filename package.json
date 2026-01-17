@@ -5,22 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "generate:midi-template": "node scripts/generate-midi-template.js",
-    "build": "npm run generate:midi-template && tsc -b && vite build",
-    "build-docs": "eleventy --config=.eleventy.cjs",
-    "package-chrome-extension": "node scripts/package-chrome-extension.js",
-    "lint": "biome lint src/",
-    "lint:fix": "biome lint --write src/",
-    "format": "biome format src/",
-    "format:write": "biome format --write src/",
-    "check": "biome check src/",
-    "check:fix": "biome check --apply src/",
-    "type-check": "tsc --noEmit --skipLibCheck --project tsconfig.app.json",
-    "type-check:watch": "tsc --noEmit --watch --skipLibCheck --project tsconfig.app.json",
     "preview": "vite preview",
     "prepare": "husky",
-    "qa": "npm run type-check && npm run lint && npm run build",
-    "qa:fix": "npm run format:write && npm run lint:fix && npm run type-check"
+
+    "prebuild": "npm run generate:midi-template && npm run docs && npm run package",
+    "build": "tsc -b && vite build",
+    "generate:midi-template": "node scripts/generate-midi-template.js",
+    "docs": "eleventy --config=.eleventy.cjs",
+    "package": "node scripts/package-chrome-extension.js",
+
+    "check": "biome check src/",
+    "fix": "biome check --write --no-errors-on-unmatched src/",
+    "type-check": "tsc --noEmit --skipLibCheck --project tsconfig.app.json",
+    "qa": "npm run fix && npm run type-check && npm run build"
   },
   "dependencies": {
     "@11ty/eleventy": "^3.1.2",
@@ -42,11 +39,7 @@
     "vite": "^6.3.5"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": ["biome check --write", "biome lint --write"],
-    "*.{json,css}": ["biome format --write"],
-    "*.{ts,tsx}": [
-      "bash -c 'echo \"🔍 TypeScript型チェック中...\"'",
-      "bash -c 'cd \"$INIT_CWD\" && npx tsc --noEmit --skipLibCheck --project tsconfig.app.json'"
-    ]
+    "*.{js,jsx,ts,tsx,json,css}": ["biome check --write --no-errors-on-unmatched"],
+    "*.{ts,tsx}": ["bash -c 'tsc --noEmit --skipLibCheck --project tsconfig.app.json'"]
   }
 }
