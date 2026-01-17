@@ -1,0 +1,12 @@
+html {
+  padding: 10px;
+}
+
+button {
+  width: 115px;
+  background: #fc7777;
+  padding: 10px;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+}
