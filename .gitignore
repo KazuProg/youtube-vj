@@ -14,6 +14,7 @@ dist-ssr
 
 # Generated files
 public/docs/
+public/YouTube-VJ_Plus.zip
 src/pages/Controller/utils/generated/
 
 # Editor directories and files

@@ -8,7 +8,7 @@ const __dirname = dirname(__filename);
 
 try {
   const chromeExtensionDir = join(__dirname, "../chrome-extension");
-  const distDir = join(__dirname, "../dist");
+  const distDir = join(__dirname, "../public");
   const outputPath = join(distDir, "YouTube-VJ_Plus.zip");
 
   mkdirSync(distDir, { recursive: true });
