@@ -162,8 +162,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
 
   return (
     <div className={`${styles.deck} ${className}`}>
-      <fieldset>
-        <legend>Preview</legend>
+      <div>
         <VJPlayer
           className={styles.player}
           ref={vjPlayerRef}
@@ -177,7 +176,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
           loopMarkers={loopMarkers}
           onSeek={(time: number) => deckAPIRef.current?.seekTo(time, true)}
         />
-      </fieldset>
+      </div>
       <div className={styles.controlsContainer}>
         <fieldset className={styles.controlFieldset}>
           <legend>Adjust</legend>

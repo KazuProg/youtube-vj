@@ -1,5 +1,6 @@
 fieldset {
   border: none;
+  margin-bottom: 10px;
   padding: 0 4px;
   border-top: groove 1px #555;
 }
@@ -7,14 +8,11 @@ fieldset {
 button {
   color: white;
   padding: 4px 12px;
-  background: rgb(34, 34, 34);
-  border-width: 1px;
-  border-style: solid;
-  border-color: rgb(85, 85, 85);
-  border-image: initial;
+  background: #222;
+  border: 1px solid #555;
   border-radius: 4px;
 }
 
 button:hover {
-  background: rgb(51, 51, 51);
+  background: #333;
 }
