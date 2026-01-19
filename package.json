@@ -7,13 +7,11 @@
     "dev": "vite --host",
     "preview": "vite preview",
     "prepare": "husky",
-
     "prebuild": "npm run generate:midi-template && npm run docs && npm run package",
     "build": "tsc -b && vite build",
     "generate:midi-template": "node scripts/generate-midi-template.js",
     "docs": "eleventy --config=.eleventy.cjs",
     "package": "node scripts/package-chrome-extension.js",
-
     "check": "biome check src/",
     "fix": "biome check --write --no-errors-on-unmatched src/",
     "type-check": "tsc --noEmit --skipLibCheck --project tsconfig.app.json",
@@ -28,6 +26,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
