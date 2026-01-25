@@ -1,7 +1,7 @@
 {
   "name": "youtube-vj",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -39,7 +39,11 @@
     "vite": "^6.3.5"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css}": ["biome check --write --no-errors-on-unmatched"],
-    "*.{ts,tsx}": ["bash -c 'tsc --noEmit --skipLibCheck --project tsconfig.app.json'"]
+    "*.{js,jsx,ts,tsx,json,css}": [
+      "biome check --write --no-errors-on-unmatched"
+    ],
+    "*.{ts,tsx}": [
+      "bash -c 'tsc --noEmit --skipLibCheck --project tsconfig.app.json'"
+    ]
   }
 }
