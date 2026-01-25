@@ -141,6 +141,7 @@ export const useDeckAPI = ({
           loopStart: null,
           loopEnd: null,
         });
+        deckAPIRef.current?.unMute();
         hotCuesRef.current.clear();
         onHotCuesChange?.(hotCuesRef.current);
         libraryAPI?.history.add(videoObj.id);
