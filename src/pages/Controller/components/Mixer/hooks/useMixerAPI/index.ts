@@ -13,7 +13,7 @@ export const useMixerAPI = ({ mixerDataRef, setMixerData, setGlobalMixer }: UseM
   const mixerAPIRef = useRef<MixerAPI | null>(null);
   const [preparedVideo, setPreparedVideo] = useState<YouTubeVideoMetadata | null>(null);
   const preparedVideoRef = useRef<YouTubeVideoMetadata | null>(null);
-  const [monitorCueStates, setMonitorCueStates] = useState<Record<number, boolean>>({});
+  const [isAudioOn, setIsAudioOn] = useState<Record<number, boolean>>({});
   const [opacityValues, setOpacityValues] = useState<Record<number, number>>({});
 
   useEffect(() => {
@@ -35,8 +35,8 @@ export const useMixerAPI = ({ mixerDataRef, setMixerData, setGlobalMixer }: UseM
       getPreparedVideo: () => {
         return preparedVideoRef.current;
       },
-      setMonitorCueState: (deckId: number, state: boolean) => {
-        setMonitorCueStates((prev) => ({ ...prev, [deckId]: state }));
+      setIsAudioOn: (deckId: number, state: boolean) => {
+        setIsAudioOn((prev) => ({ ...prev, [deckId]: state }));
       },
       setOpacityValue: (deckId: number, value: number) => {
         setOpacityValues((prev) => ({ ...prev, [deckId]: value }));
@@ -48,7 +48,7 @@ export const useMixerAPI = ({ mixerDataRef, setMixerData, setGlobalMixer }: UseM
   return {
     mixerAPIRef,
     preparedVideo,
-    monitorCueStates,
+    isAudioOn,
     opacityValues,
   };
 };

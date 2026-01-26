@@ -65,7 +65,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
 
   const handleMuteChange = useCallback(
     (isMuted: boolean) => {
-      mixerAPI?.setMonitorCueState(deckId, !isMuted);
+      mixerAPI?.setIsAudioOn(deckId, !isMuted);
     },
     [mixerAPI, deckId]
   );

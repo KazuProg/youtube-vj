@@ -32,7 +32,7 @@
   color: white;
 }
 
-.cueButtons,
+.audioButtons,
 .opacityFaders {
   display: flex;
   justify-content: space-between;
@@ -40,12 +40,15 @@
   padding: 0 !important;
 }
 
-.cueButton {
+.audioButton {
+  width: 40%;
   color: #aaa;
   margin: auto;
+  padding-left: 0;
+  padding-right: 0;
 }
 
-.cueButton.active {
+.audioButton.active {
   color: #fff;
   background: #555;
 }
