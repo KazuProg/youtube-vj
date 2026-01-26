@@ -28,7 +28,7 @@ const Mixer = ({ className }: MixerProps) => {
     }
   }, []);
 
-  const { mixerAPIRef, preparedVideo, monitorCueStates, opacityValues } = useMixerAPI({
+  const { mixerAPIRef, preparedVideo, isAudioOn, opacityValues } = useMixerAPI({
     mixerDataRef,
     setMixerData,
     setGlobalMixer: setMixerAPI,
@@ -92,25 +92,25 @@ const Mixer = ({ className }: MixerProps) => {
           ref={inputRef}
         />
       </fieldset>
-      <fieldset className={styles.cueButtons}>
-        <legend>Monitor</legend>
+      <fieldset className={styles.audioButtons}>
+        <legend>Audio</legend>
         <button
           type="button"
-          className={`${styles.cueButton} ${monitorCueStates[0] ? styles.active : ""}`}
+          className={`${styles.audioButton} ${isAudioOn[0] ? styles.active : ""}`}
           onClick={() => {
             deckAPIs[0]?.isMuted() ? deckAPIs[0]?.unMute() : deckAPIs[0]?.mute();
           }}
         >
-          CUE
+          {isAudioOn[0] ? "ON" : "OFF"}
         </button>
         <button
           type="button"
-          className={`${styles.cueButton} ${monitorCueStates[1] ? styles.active : ""}`}
+          className={`${styles.audioButton} ${isAudioOn[1] ? styles.active : ""}`}
           onClick={() => {
             deckAPIs[1]?.isMuted() ? deckAPIs[1]?.unMute() : deckAPIs[1]?.mute();
           }}
         >
-          CUE
+          {isAudioOn[1] ? "ON" : "OFF"}
         </button>
       </fieldset>
       <fieldset className={styles.opacityFaders}>
