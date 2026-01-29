@@ -9,7 +9,10 @@ const _midiScriptTemplate = [
     name: "Ch1_Load",
     code: () => {
       if (value === 0x7f) {
-        ch[0].loadVideo(mixer.getPreparedVideo());
+        const preparedVideo = mixer.getPreparedVideo();
+        if (preparedVideo) {
+          ch[0].loadVideo(preparedVideo);
+        }
       }
     },
   },
@@ -82,6 +85,7 @@ const _midiScriptTemplate = [
     code: () => {
       // x0.25～x2.00
       const val = value / 0x7f;
+      let speed;
       if (value < 0x40) {
         speed = 0.25 + val * 1.5;
       } else {
@@ -93,7 +97,7 @@ const _midiScriptTemplate = [
   {
     name: "Ch1_Speed_x1.00",
     code: () => {
-      if (data2 === 0x7f) {
+      if (value === 0x7f) {
         ch[0].setPlaybackRate(1.0);
       }
     },
@@ -111,15 +115,15 @@ const _midiScriptTemplate = [
   {
     name: "Ch1_Adjust_ToTop",
     code: () => {
-      if (data2 === 0x7f) {
-        ch[0].setTime(0);
+      if (value === 0x7f) {
+        ch[0].seekTo(0);
       }
     },
   },
   {
     name: "Ch1_Adjust_-1s",
     code: () => {
-      if (data2 === 0x7f) {
+      if (value === 0x7f) {
         ch[0].adjustTiming(-1);
       }
     },
@@ -127,7 +131,7 @@ const _midiScriptTemplate = [
   {
     name: "Ch1_Adjust_+1s",
     code: () => {
-      if (data2 === 0x7f) {
+      if (value === 0x7f) {
         ch[0].adjustTiming(+1);
       }
     },
@@ -138,7 +142,11 @@ const _midiScriptTemplate = [
       const index = 1;
 
       if (value === 0x7f) {
-        ch[0].hotcue(index);
+        if (ch[0].hasHotCue(index)) {
+          ch[0].jumpToHotCue(index);
+        } else {
+          ch[0].setHotCue(index);
+        }
       }
     },
   },
@@ -148,7 +156,11 @@ const _midiScriptTemplate = [
       const index = 2;
 
       if (value === 0x7f) {
-        ch[0].hotcue(index);
+        if (ch[0].hasHotCue(index)) {
+          ch[0].jumpToHotCue(index);
+        } else {
+          ch[0].setHotCue(index);
+        }
       }
     },
   },
@@ -158,7 +170,11 @@ const _midiScriptTemplate = [
       const index = 3;
 
       if (value === 0x7f) {
-        ch[0].hotcue(index);
+        if (ch[0].hasHotCue(index)) {
+          ch[0].jumpToHotCue(index);
+        } else {
+          ch[0].setHotCue(index);
+        }
       }
     },
   },
@@ -168,7 +184,11 @@ const _midiScriptTemplate = [
       const index = 4;
 
       if (value === 0x7f) {
-        ch[0].hotcue(index);
+        if (ch[0].hasHotCue(index)) {
+          ch[0].jumpToHotCue(index);
+        } else {
+          ch[0].setHotCue(index);
+        }
       }
     },
   },
@@ -178,7 +198,7 @@ const _midiScriptTemplate = [
       const index = 1;
 
       if (value === 0x7f) {
-        ch[0].removeHotcue(index);
+        ch[0].deleteHotCue(index);
       }
     },
   },
@@ -188,7 +208,7 @@ const _midiScriptTemplate = [
       const index = 2;
 
       if (value === 0x7f) {
-        ch[0].removeHotcue(index);
+        ch[0].deleteHotCue(index);
       }
     },
   },
@@ -198,7 +218,7 @@ const _midiScriptTemplate = [
       const index = 3;
 
       if (value === 0x7f) {
-        ch[0].removeHotcue(index);
+        ch[0].deleteHotCue(index);
       }
     },
   },
@@ -208,7 +228,7 @@ const _midiScriptTemplate = [
       const index = 4;
 
       if (value === 0x7f) {
-        ch[0].removeHotcue(index);
+        ch[0].deleteHotCue(index);
       }
     },
   },
@@ -216,7 +236,7 @@ const _midiScriptTemplate = [
     name: "Ch1_LoopStart",
     code: () => {
       if (value === 0x7f) {
-        ch[0].loopStart();
+        ch[0].setLoopStart();
       }
     },
   },
@@ -224,7 +244,7 @@ const _midiScriptTemplate = [
     name: "Ch1_LoopEnd",
     code: () => {
       if (value === 0x7f) {
-        ch[0].loopEnd();
+        ch[0].setLoopEnd();
       }
     },
   },
@@ -232,7 +252,7 @@ const _midiScriptTemplate = [
     name: "Ch1_LoopClear",
     code: () => {
       if (value === 0x7f) {
-        ch[0].loopClear();
+        ch[0].clearLoop();
       }
     },
   },
@@ -240,46 +260,53 @@ const _midiScriptTemplate = [
     name: "Ch1_filterOpacity",
     code: () => {
       ch[0].setFilters({
-        opacity: value / 0x7f,
+        opacity: String(value / 0x7f),
       });
     },
   },
   {
     name: "Ch2_Load",
     code: () => {
-      if (data2 === 0x7f) {
-        ch[1].setVideo(prepareVideoId);
+      if (value === 0x7f) {
+        const preparedVideo = mixer.getPreparedVideo();
+        if (preparedVideo) {
+          ch[1].loadVideo(preparedVideo);
+        }
       }
     },
   },
   {
     name: "Ch2_Play",
     code: () => {
-      if (data2 === 0x7f) {
-        ch[1].play();
+      if (value === 0x7f) {
+        ch[1].playVideo();
       }
     },
   },
   {
     name: "Ch2_Pause",
     code: () => {
-      if (data2 === 0x7f) {
-        ch[1].pause();
+      if (value === 0x7f) {
+        ch[1].pauseVideo();
       }
     },
   },
   {
     name: "Ch2_Play/Pause",
     code: () => {
-      if (data2 === 0x7f) {
-        ch[1].togglePlayPause();
+      if (value === 0x7f) {
+        if (ch[1].isPlaying()) {
+          ch[1].pauseVideo();
+        } else {
+          ch[1].playVideo();
+        }
       }
     },
   },
   {
     name: "Ch2_Mute",
     code: () => {
-      if (data2 === 0x7f) {
+      if (value === 0x7f) {
         ch[1].mute();
       }
     },
@@ -287,16 +314,20 @@ const _midiScriptTemplate = [
   {
     name: "Ch2_Unmute",
     code: () => {
-      if (data2 === 0x7f) {
-        ch[1].unmute();
+      if (value === 0x7f) {
+        ch[1].unMute();
       }
     },
   },
   {
     name: "Ch2_Mute/Unmute",
     code: () => {
-      if (data2 === 0x7f) {
-        ch[1].toggleMuteUnmute();
+      if (value === 0x7f) {
+        if (ch[1].isMuted()) {
+          ch[1].unMute();
+        } else {
+          ch[1].mute();
+        }
       }
     },
   },
@@ -313,19 +344,20 @@ const _midiScriptTemplate = [
     code: () => {
       // x0.25～x2.00
       const val = value / 0x7f;
+      let speed;
       if (value < 0x40) {
         speed = 0.25 + val * 1.5;
       } else {
         speed = val * 2;
       }
-      ch[1].setSpeed(speed);
+      ch[1].setPlaybackRate(speed);
     },
   },
   {
     name: "Ch2_Speed_x1.00",
     code: () => {
-      if (data2 === 0x7f) {
-        ch[1].setSpeed(1.0);
+      if (value === 0x7f) {
+        ch[1].setPlaybackRate(1.0);
       }
     },
   },
@@ -342,15 +374,15 @@ const _midiScriptTemplate = [
   {
     name: "Ch2_Adjust_ToTop",
     code: () => {
-      if (data2 === 0x7f) {
-        ch[1].setTime(0);
+      if (value === 0x7f) {
+        ch[1].seekTo(0);
       }
     },
   },
   {
     name: "Ch2_Adjust_-1s",
     code: () => {
-      if (data2 === 0x7f) {
+      if (value === 0x7f) {
         ch[1].adjustTiming(-1);
       }
     },
@@ -358,7 +390,7 @@ const _midiScriptTemplate = [
   {
     name: "Ch2_Adjust_+1s",
     code: () => {
-      if (data2 === 0x7f) {
+      if (value === 0x7f) {
         ch[1].adjustTiming(+1);
       }
     },
@@ -369,7 +401,11 @@ const _midiScriptTemplate = [
       const index = 1;
 
       if (value === 0x7f) {
-        ch[1].hotcue(index);
+        if (ch[1].hasHotCue(index)) {
+          ch[1].jumpToHotCue(index);
+        } else {
+          ch[1].setHotCue(index);
+        }
       }
     },
   },
@@ -379,7 +415,11 @@ const _midiScriptTemplate = [
       const index = 2;
 
       if (value === 0x7f) {
-        ch[1].hotcue(index);
+        if (ch[1].hasHotCue(index)) {
+          ch[1].jumpToHotCue(index);
+        } else {
+          ch[1].setHotCue(index);
+        }
       }
     },
   },
@@ -389,7 +429,11 @@ const _midiScriptTemplate = [
       const index = 3;
 
       if (value === 0x7f) {
-        ch[1].hotcue(index);
+        if (ch[1].hasHotCue(index)) {
+          ch[1].jumpToHotCue(index);
+        } else {
+          ch[1].setHotCue(index);
+        }
       }
     },
   },
@@ -399,7 +443,11 @@ const _midiScriptTemplate = [
       const index = 4;
 
       if (value === 0x7f) {
-        ch[1].hotcue(index);
+        if (ch[1].hasHotCue(index)) {
+          ch[1].jumpToHotCue(index);
+        } else {
+          ch[1].setHotCue(index);
+        }
       }
     },
   },
@@ -409,7 +457,7 @@ const _midiScriptTemplate = [
       const index = 1;
 
       if (value === 0x7f) {
-        ch[1].removeHotcue(index);
+        ch[1].deleteHotCue(index);
       }
     },
   },
@@ -419,7 +467,7 @@ const _midiScriptTemplate = [
       const index = 2;
 
       if (value === 0x7f) {
-        ch[1].removeHotcue(index);
+        ch[1].deleteHotCue(index);
       }
     },
   },
@@ -429,7 +477,7 @@ const _midiScriptTemplate = [
       const index = 3;
 
       if (value === 0x7f) {
-        ch[1].removeHotcue(index);
+        ch[1].deleteHotCue(index);
       }
     },
   },
@@ -439,7 +487,7 @@ const _midiScriptTemplate = [
       const index = 4;
 
       if (value === 0x7f) {
-        ch[1].removeHotcue(index);
+        ch[1].deleteHotCue(index);
       }
     },
   },
@@ -447,7 +495,7 @@ const _midiScriptTemplate = [
     name: "Ch2_LoopStart",
     code: () => {
       if (value === 0x7f) {
-        ch[1].loopStart();
+        ch[1].setLoopStart();
       }
     },
   },
@@ -455,7 +503,7 @@ const _midiScriptTemplate = [
     name: "Ch2_LoopEnd",
     code: () => {
       if (value === 0x7f) {
-        ch[1].loopEnd();
+        ch[1].setLoopEnd();
       }
     },
   },
@@ -463,7 +511,7 @@ const _midiScriptTemplate = [
     name: "Ch2_LoopClear",
     code: () => {
       if (value === 0x7f) {
-        ch[1].loopClear();
+        ch[1].clearLoop();
       }
     },
   },
@@ -471,7 +519,7 @@ const _midiScriptTemplate = [
     name: "Ch2_filterOpacity",
     code: () => {
       ch[1].setFilters({
-        opacity: value / 0x7f,
+        opacity: String(value / 0x7f),
       });
     },
   },
