@@ -51,7 +51,7 @@ export const useDeckAPI = ({
       isPlaying: () => {
         return syncDataRef.current?.paused === false;
       },
-      seekTo: (seconds: number, _allowSeekAhead: boolean) => {
+      seekTo: (seconds: number) => {
         updateSyncData({
           baseTime: Date.now(),
           currentTime: seconds,
@@ -72,7 +72,7 @@ export const useDeckAPI = ({
       jumpToHotCue: (cueId: number) => {
         const targetTime = hotCuesRef.current.get(cueId);
         if (targetTime !== undefined) {
-          deckAPIRef.current?.seekTo(targetTime, true);
+          deckAPIRef.current?.seekTo(targetTime);
         }
       },
       deleteHotCue: (cueId: number) => {

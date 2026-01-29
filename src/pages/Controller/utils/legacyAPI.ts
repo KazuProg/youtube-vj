@@ -78,7 +78,7 @@ window.ch1 = {
     window.ch[0]?.setPlaybackRate(speed);
   },
   setTime: (time: number) => {
-    window.ch[0]?.seekTo(time, false);
+    window.ch[0]?.seekTo(time);
   },
   setFilter: (filters: Record<string, string>) => {
     window.ch[0]?.setFilters(filters);
@@ -110,7 +110,7 @@ window.ch1 = {
     if (currentTime === undefined) {
       return;
     }
-    window.ch[0]?.seekTo(Number(currentTime) + _time, false);
+    window.ch[0]?.seekTo(Number(currentTime) + _time);
   },
   loopStart: () => {
     window.ch[0]?.setLoopStart();
@@ -169,7 +169,7 @@ window.ch2 = {
     window.ch[1]?.setPlaybackRate(speed);
   },
   setTime: (time: number) => {
-    window.ch[1]?.seekTo(time, false);
+    window.ch[1]?.seekTo(time);
   },
   setFilter: (filters: Record<string, string>) => {
     window.ch[1]?.setFilters(filters);
@@ -201,7 +201,7 @@ window.ch2 = {
     if (currentTime === undefined) {
       return;
     }
-    window.ch[1]?.seekTo(Number(currentTime) + _time, false);
+    window.ch[1]?.seekTo(Number(currentTime) + _time);
   },
   loopStart: () => {
     window.ch[1]?.setLoopStart();
