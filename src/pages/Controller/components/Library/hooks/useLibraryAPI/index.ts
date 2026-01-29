@@ -40,12 +40,15 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
 
   const { history, addHistory, removeHistory, clearHistory } = useHistory(handleHistoryChange);
 
-  const [playlists, setPlaylists] = useState<Map<string, VideoItem[]>>(
-    new Map([
+  const [playlists, setPlaylists] = useState<Map<string, VideoItem[]>>(() => {
+    const initialPlaylists = new Map([
       ["History", history.map((videoId) => ({ id: videoId, title: null }))],
-      ["Search", []],
-    ])
-  );
+    ]);
+    if (settings.youtubeDataAPIKey) {
+      initialPlaylists.set("Search", []);
+    }
+    return initialPlaylists;
+  });
 
   const [selectedPlaylistIndex, setSelectedPlaylistIndex] = useState<number>(0);
   const [videos, setVideos] = useState<VideoItem[]>(playlists.get("History") || []);
@@ -77,9 +80,29 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
     });
   }, [playlists, selectedPlaylistIndex]);
 
+  useEffect(() => {
+    setPlaylists((prev) => {
+      const newMap = new Map(prev);
+      const hasSearch = newMap.has("Search");
+      const hasApiKey = !!settings.youtubeDataAPIKey;
+
+      if (hasApiKey && !hasSearch) {
+        newMap.set("Search", []);
+      } else if (!hasApiKey && hasSearch) {
+        const prevPlaylistNames = Array.from(prev.keys());
+        const searchIndex = prevPlaylistNames.indexOf("Search");
+        if (searchIndex !== -1 && selectedPlaylistIndex === searchIndex) {
+          setSelectedPlaylistIndex(0);
+        }
+        newMap.delete("Search");
+      }
+      return newMap;
+    });
+  }, [settings.youtubeDataAPIKey, selectedPlaylistIndex]);
+
   const addPlaylist = useCallback((name: string, videos: VideoItem[], changeFocus = false) => {
-    if (name === "History") {
-      console.error("History is not allowed to be added");
+    if (name === "History" || name === "Search") {
+      console.error(`${name} is not allowed to be added. It is a system-managed playlist.`);
       return;
     }
 
@@ -138,8 +161,8 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
           addPlaylist(name, videoIds);
         },
         remove: (name: string) => {
-          if (name === "History") {
-            console.error("History is not allowed to be removed");
+          if (name === "History" || name === "Search") {
+            console.error(`${name} is not allowed to be removed. It is a system-managed playlist.`);
             return;
           }
           setPlaylists((prev) => {
