@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@11ty/eleventy": "^3.1.2",
+    "js-video-url-parser": "^0.5.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.9.5",
@@ -40,11 +41,7 @@
     "vite": "^6.3.5"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css}": [
-      "biome check --write --no-errors-on-unmatched"
-    ],
-    "*.{ts,tsx}": [
-      "bash -c 'tsc --noEmit --skipLibCheck --project tsconfig.app.json'"
-    ]
+    "*.{js,jsx,ts,tsx,json,css}": ["biome check --write --no-errors-on-unmatched"],
+    "*.{ts,tsx}": ["bash -c 'tsc --noEmit --skipLibCheck --project tsconfig.app.json'"]
   }
 }
