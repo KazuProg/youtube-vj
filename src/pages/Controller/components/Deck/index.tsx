@@ -174,7 +174,7 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
           durationFunc={() => deckAPIRef.current?.getDuration() ?? 0}
           hotCues={hotCues}
           loopMarkers={loopMarkers}
-          onSeek={(time: number) => deckAPIRef.current?.seekTo(time, true)}
+          onSeek={(time: number) => deckAPIRef.current?.seekTo(time)}
         />
       </div>
       <div className={styles.controlsContainer}>

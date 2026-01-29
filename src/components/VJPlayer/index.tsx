@@ -55,7 +55,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         seekTo: (time: number) => {
           const player = playerRef.current;
           if (player && player.getPlayerState() === YT_PLAYER_STATE.PLAYING) {
-            player.seekTo(time, true);
+            player.seekTo(time);
           }
         },
       }),
