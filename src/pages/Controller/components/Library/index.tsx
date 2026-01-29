@@ -1,6 +1,6 @@
 import { useTextFileReader } from "@/hooks/useTextFileReader";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
-import { parseYouTubeURL } from "@/utils/YouTube";
+import { isYouTubeVideoInfo, urlParser } from "@/pages/Controller/utils/youtube";
 import { useCallback, useState } from "react";
 import styles from "./Library.module.css";
 import FileDropZone from "./components/FileDropZone";
@@ -40,9 +40,9 @@ const Library = () => {
         .split("\n")
         .map((line) => line.trim())
         .filter(Boolean)
-        .map((line) => parseYouTubeURL(line)?.id)
-        .filter((id): id is string => id !== undefined);
-      const videoItems: VideoItem[] = items.map((id) => ({ id, title: null }));
+        .map((line) => urlParser.parse(line))
+        .filter(isYouTubeVideoInfo);
+      const videoItems: VideoItem[] = items.map((info) => ({ id: info.id, title: null }));
       addPlaylist(filenameWithoutExt, videoItems, true);
     },
     [libraryAPI, addPlaylist]
