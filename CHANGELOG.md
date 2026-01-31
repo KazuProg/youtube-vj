@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0](https://github.com/KazuProg/youtube-vj/compare/v1.0.0...v1.1.0) (2026-02-01)
+
+
+### Features
+
+* conditionally show Search playlist based on YouTubeDataAPIKey ([4ab7fec](https://github.com/KazuProg/youtube-vj/commit/4ab7fece9c4b36710837545bd409862f9b8d0e5b))
+* **dev:** add setup command to ensure generated files before dev/preview ([5f32fac](https://github.com/KazuProg/youtube-vj/commit/5f32faccf93a321f088bb911029ea876f14be3bd))
+* replace custom YouTube parser with js-video-url-parser and add Shorts support ([d9cc55f](https://github.com/KazuProg/youtube-vj/commit/d9cc55f553ed5834be9f3f8f5f65b4914bfb9472))
+* unmute on load ([8a8d038](https://github.com/KazuProg/youtube-vj/commit/8a8d03848bf742f21ebb107fe0e1d3a233f90d3b))
+
+
+### Bug Fixes
+
+* **midi-template:** fix API compatibility and type issues ([73be2be](https://github.com/KazuProg/youtube-vj/commit/73be2bed83eddfa434246f718ba179a906f66f50))
+
 ## 1.0.0 (2026-01-25)
 
 
