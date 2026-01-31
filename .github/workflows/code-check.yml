@@ -1,0 +1,33 @@
+name: Code Check
+
+on: [pull_request]
+
+jobs:
+  check:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Generate MIDI template
+        run: npm run generate:midi-template
+      
+      - name: Run Biome check
+        run: npm run check
+      
+      - name: Run TypeScript type check
+        run: npm run type-check
+      
+      - name: Build project
+        run: npm run build
