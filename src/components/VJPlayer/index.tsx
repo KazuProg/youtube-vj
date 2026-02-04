@@ -17,7 +17,6 @@ const playerVars: YTPlayerVars = {
 };
 
 interface VJPlayerEvents {
-  onUnstarted?: () => void;
   onPaused?: () => void;
   onUnpaused?: () => void;
   onEnded?: () => void;
@@ -146,10 +145,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         const playerState = e.data;
         if (playerState === YT_PLAYER_STATE.PLAYING) {
           setDuration(playerRef.current?.getDuration() ?? null);
-        }
-
-        if (playerState === YT_PLAYER_STATE.UNSTARTED) {
-          eventsRef.current?.onUnstarted?.();
         }
 
         if (playerState === YT_PLAYER_STATE.PAUSED && !syncDataRef.current?.paused) {
