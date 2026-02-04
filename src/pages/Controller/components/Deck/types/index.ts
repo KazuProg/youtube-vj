@@ -1,4 +1,4 @@
-import type { YouTubeVideoMetadata } from "@/types";
+import type { VideoItem } from "@/pages/Controller/types/videoItem";
 
 export interface DeckAPI {
   playVideo: () => void;
@@ -20,6 +20,6 @@ export interface DeckAPI {
   setPlaybackRate: (rate: number) => void;
   setFilters: (filters: Record<string, string>) => void;
   getCurrentTime: () => number | null;
-  loadVideo: (video: YouTubeVideoMetadata | string) => void;
+  loadVideo: (video: VideoItem | string) => void;
   getDuration: () => number | null;
 }

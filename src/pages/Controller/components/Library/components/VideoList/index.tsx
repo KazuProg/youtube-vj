@@ -1,6 +1,6 @@
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
+import type { VideoItem } from "@/pages/Controller/types/videoItem";
 import { useEffect, useRef } from "react";
-import type { VideoItem } from "../../types";
 import ListItem from "./components/ListItem";
 import styles from "./index.module.css";
 

@@ -1,6 +1,6 @@
 import type { VJPlayerRef, VJSyncData } from "@/components/VJPlayer/types";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
-import type { YouTubeVideoMetadata } from "@/types";
+import type { VideoItem } from "@/pages/Controller/types/videoItem";
 import { normalizeNumericValue } from "@/utils";
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
@@ -131,7 +131,7 @@ export const useDeckAPI = ({
         });
         onOpacityChange?.("opacity" in filters ? normalizeNumericValue(filters.opacity) : 1);
       },
-      loadVideo: (video: YouTubeVideoMetadata | string) => {
+      loadVideo: (video: VideoItem | string) => {
         const videoObj = typeof video === "string" ? { id: video } : video;
         updateSyncData({
           videoId: videoObj.id,

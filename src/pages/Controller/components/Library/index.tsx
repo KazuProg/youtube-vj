@@ -1,5 +1,6 @@
 import { useTextFileReader } from "@/hooks/useTextFileReader";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
+import type { VideoItem } from "@/pages/Controller/types/videoItem";
 import { isYouTubeVideoInfo, urlParser } from "@/pages/Controller/utils/youtube";
 import { useCallback, useState } from "react";
 import styles from "./Library.module.css";
@@ -7,7 +8,6 @@ import FileDropZone from "./components/FileDropZone";
 import VideoList from "./components/VideoList";
 import { YouTubeDataProvider } from "./contexts/YouTubeDataContext";
 import { useLibraryAPI } from "./hooks/useLibraryAPI";
-import type { VideoItem } from "./types";
 
 const Library = () => {
   const { libraryAPI, setLibraryAPI, mixerAPI } = useControllerAPIContext();
@@ -42,7 +42,7 @@ const Library = () => {
         .filter(Boolean)
         .map((line) => urlParser.parse(line))
         .filter(isYouTubeVideoInfo);
-      const videoItems: VideoItem[] = items.map((info) => ({ id: info.id, title: null }));
+      const videoItems: VideoItem[] = items.map((info) => ({ id: info.id }));
       addPlaylist(filenameWithoutExt, videoItems, true);
     },
     [libraryAPI, addPlaylist]
