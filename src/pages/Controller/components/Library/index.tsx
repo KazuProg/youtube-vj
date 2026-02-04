@@ -42,7 +42,10 @@ const Library = () => {
         .filter(Boolean)
         .map((line) => urlParser.parse(line))
         .filter(isYouTubeVideoInfo);
-      const videoItems: VideoItem[] = items.map((info) => ({ id: info.id }));
+      const videoItems: VideoItem[] = items.map((info) => ({
+        id: info.id,
+        start: info.params?.start,
+      }));
       addPlaylist(filenameWithoutExt, videoItems, true);
     },
     [libraryAPI, addPlaylist]
@@ -61,8 +64,8 @@ const Library = () => {
   );
 
   const handleSelectVideo = useCallback(
-    (id: string, index: number) => {
-      mixerAPI?.setPreparedVideo(id);
+    (videoItem: VideoItem, index: number) => {
+      mixerAPI?.setPreparedVideo(videoItem);
       changeVideoFocus(index);
     },
     [mixerAPI, changeVideoFocus]
