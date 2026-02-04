@@ -123,7 +123,6 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           playerRef.current = player;
 
           if (syncDataRef.current) {
-            player.loadVideoById(syncDataRef.current.videoId);
             handleSyncData(syncDataRef.current);
           }
         } catch (error) {
