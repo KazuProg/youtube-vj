@@ -4,14 +4,14 @@ import styles from "./index.module.css";
 
 interface ListItemProps {
   id: string;
-  title: string | null;
+  title?: string;
   onSelect: (id: string, index: number) => void;
   className: string;
   index: number;
 }
 
 const ListItem = ({ id, title: _title, onSelect, className, index }: ListItemProps) => {
-  const [title, setTitle] = useState<string | null>(_title);
+  const [title, setTitle] = useState<string | null>(_title ?? null);
   const { fetchTitle } = useYouTubeDataContext();
 
   useEffect(() => {

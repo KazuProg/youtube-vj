@@ -1,7 +1,8 @@
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
+import type { VideoItem } from "@/pages/Controller/types/videoItem";
 import { clamp } from "@/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { LibraryAPI, VideoItem } from "../../types";
+import type { LibraryAPI } from "../../types";
 import { useHistory } from "../usehistory";
 
 interface UseLibraryAPIParams {
@@ -32,7 +33,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
       const newMap = new Map(prev);
       newMap.set(
         "History",
-        history.map((videoId) => ({ id: videoId, title: null }))
+        history.map((videoId) => ({ id: videoId }))
       );
       return newMap;
     });
@@ -41,9 +42,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
   const { history, addHistory, removeHistory, clearHistory } = useHistory(handleHistoryChange);
 
   const [playlists, setPlaylists] = useState<Map<string, VideoItem[]>>(() => {
-    const initialPlaylists = new Map([
-      ["History", history.map((videoId) => ({ id: videoId, title: null }))],
-    ]);
+    const initialPlaylists = new Map([["History", history.map((videoId) => ({ id: videoId }))]]);
     if (settings.youtubeDataAPIKey) {
       initialPlaylists.set("Search", []);
     }

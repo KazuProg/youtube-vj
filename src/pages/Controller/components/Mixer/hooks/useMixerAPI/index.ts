@@ -1,5 +1,5 @@
+import type { VideoItem } from "@/pages/Controller/types/videoItem";
 import type { MixerData } from "@/types";
-import type { YouTubeVideoMetadata } from "@/types";
 import { useEffect, useRef, useState } from "react";
 import type { MixerAPI } from "../../types";
 
@@ -11,8 +11,8 @@ interface UseMixerAPIParams {
 
 export const useMixerAPI = ({ mixerDataRef, setMixerData, setGlobalMixer }: UseMixerAPIParams) => {
   const mixerAPIRef = useRef<MixerAPI | null>(null);
-  const [preparedVideo, setPreparedVideo] = useState<YouTubeVideoMetadata | null>(null);
-  const preparedVideoRef = useRef<YouTubeVideoMetadata | null>(null);
+  const [preparedVideo, setPreparedVideo] = useState<VideoItem | null>(null);
+  const preparedVideoRef = useRef<VideoItem | null>(null);
   const [isAudioOn, setIsAudioOn] = useState<Record<number, boolean>>({});
   const [opacityValues, setOpacityValues] = useState<Record<number, number>>({});
 
@@ -28,7 +28,7 @@ export const useMixerAPI = ({ mixerDataRef, setMixerData, setGlobalMixer }: UseM
           crossfader: value,
         });
       },
-      setPreparedVideo: (video: YouTubeVideoMetadata | string) => {
+      setPreparedVideo: (video: VideoItem | string) => {
         const videoObj = typeof video === "string" ? { id: video } : video;
         setPreparedVideo(videoObj);
       },

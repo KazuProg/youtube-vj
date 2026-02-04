@@ -1,7 +1,4 @@
-export type VideoItem = {
-  id: string;
-  title: string | null;
-};
+import type { VideoItem } from "@/pages/Controller/types/videoItem";
 
 export interface LibraryAPI {
   history: {
