@@ -33,6 +33,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
   ({ className, events, syncKey = DEFAULT_VALUES.syncKey }, ref) => {
     const playerRef = useRef<YTPlayer | null>(null);
     const beforeSyncDataRef = useRef<VJSyncData | null>(null);
+    const isSuppressingStateEventsRef = useRef(false);
 
     // プレイヤーインターフェースの作成
     const playerInterface = useCallback(
@@ -76,13 +77,18 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
         const changedVideoId = syncData.videoId !== beforeSyncData?.videoId;
 
         if (changedVideoId) {
-          player.loadVideoById(syncData.videoId);
-        }
-
-        if (syncData.paused) {
-          player.pauseVideo();
+          isSuppressingStateEventsRef.current = true;
+          if (syncData.paused) {
+            player.cueVideoById(syncData.videoId);
+          } else {
+            player.loadVideoById(syncData.videoId);
+          }
         } else {
-          player.playVideo();
+          if (syncData.paused) {
+            player.pauseVideo();
+          } else {
+            player.playVideo();
+          }
         }
 
         if (syncData.filters !== beforeSyncData?.filters) {
@@ -140,13 +146,8 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       eventsRef.current = events;
     }, [events]);
 
-    const handleStateChange = useCallback(
-      (e: YTPlayerEvent) => {
-        const playerState = e.data;
-        if (playerState === YT_PLAYER_STATE.PLAYING) {
-          setDuration(playerRef.current?.getDuration() ?? null);
-        }
-
+    const handlePlayerStateEvents = useCallback(
+      (playerState: number) => {
         if (playerState === YT_PLAYER_STATE.PAUSED && !syncDataRef.current?.paused) {
           eventsRef.current?.onPaused?.();
         }
@@ -159,7 +160,29 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           eventsRef.current?.onEnded?.();
         }
       },
-      [setDuration, syncDataRef]
+      [syncDataRef]
+    );
+
+    const handleStateChange = useCallback(
+      (e: YTPlayerEvent) => {
+        const playerState = e.data;
+
+        if (isSuppressingStateEventsRef.current) {
+          if (playerState === YT_PLAYER_STATE.BUFFERING) {
+            // 初めのBufferingで準備完了とみなす
+            // (以後onPausedやonUnpausedを発火させる)
+            isSuppressingStateEventsRef.current = false;
+          }
+          return;
+        }
+
+        if (playerState === YT_PLAYER_STATE.PLAYING) {
+          setDuration(playerRef.current?.getDuration() ?? null);
+        }
+
+        handlePlayerStateEvents(playerState);
+      },
+      [setDuration, handlePlayerStateEvents]
     );
 
     useImperativeHandle(
