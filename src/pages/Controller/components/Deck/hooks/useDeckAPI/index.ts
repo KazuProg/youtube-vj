@@ -135,7 +135,7 @@ export const useDeckAPI = ({
         const videoObj = typeof video === "string" ? { id: video } : video;
         updateSyncData({
           videoId: videoObj.id,
-          currentTime: 0, // TODO: start time
+          currentTime: videoObj.start ?? 0,
           baseTime: Date.now(),
           paused: false,
           loopStart: null,

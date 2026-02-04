@@ -7,7 +7,7 @@ import styles from "./index.module.css";
 interface VideoListProps {
   videos: VideoItem[];
   selectedIndex: number;
-  onSelect: (id: string, index: number) => void;
+  onSelect: (videoItem: VideoItem, index: number) => void;
 }
 
 const VideoList = ({ videos, selectedIndex, onSelect }: VideoListProps) => {
@@ -16,7 +16,7 @@ const VideoList = ({ videos, selectedIndex, onSelect }: VideoListProps) => {
 
   useEffect(() => {
     if (mixerAPI && selectedIndex < videos.length) {
-      mixerAPI.setPreparedVideo(videos[selectedIndex].id);
+      mixerAPI.setPreparedVideo(videos[selectedIndex]);
     }
   }, [mixerAPI, videos, selectedIndex]);
 
@@ -44,8 +44,7 @@ const VideoList = ({ videos, selectedIndex, onSelect }: VideoListProps) => {
         <tbody className={styles.tbody}>
           {videos.map((item: VideoItem, index: number) => (
             <ListItem
-              id={item.id}
-              title={item.title}
+              videoItem={item}
               key={`${item.id}-${index}`}
               onSelect={onSelect}
               className={selectedIndex === index ? styles.selected : ""}
