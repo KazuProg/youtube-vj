@@ -91,31 +91,8 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
     deckAPIRef.current?.setPlaybackRate(playbackRate);
   }, [playbackRate, deckAPIRef]);
 
-  const vjPlayerEventsRef = useRef({
-    onPaused: () => {
-      updateSyncData({
-        currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
-        baseTime: Date.now(),
-        paused: true,
-      });
-    },
-    onUnpaused: () => {
-      updateSyncData({
-        baseTime: Date.now(),
-        paused: false,
-      });
-    },
-    onEnded: () => {
-      updateSyncData({
-        currentTime: 0,
-        baseTime: Date.now(),
-      });
-    },
-  });
-
-  // updateSyncDataが変更されたときにイベントハンドラーを更新
-  useEffect(() => {
-    vjPlayerEventsRef.current = {
+  const vjPlayerEvents = useMemo(
+    () => ({
       onPaused: () => {
         updateSyncData({
           currentTime: vjPlayerRef.current?.getCurrentTime() ?? 0,
@@ -135,16 +112,8 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
           baseTime: Date.now(),
         });
       },
-    };
-  }, [updateSyncData]);
-
-  const vjPlayerEvents = useMemo(
-    () => ({
-      onPaused: () => vjPlayerEventsRef.current.onPaused(),
-      onUnpaused: () => vjPlayerEventsRef.current.onUnpaused(),
-      onEnded: () => vjPlayerEventsRef.current.onEnded(),
     }),
-    []
+    [updateSyncData]
   );
 
   return (
