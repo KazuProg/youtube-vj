@@ -3,7 +3,7 @@ import { useStorageSync } from "@/hooks/useStorageSync";
 import { useCallback } from "react";
 
 interface UseHistoryReturn {
-  history: string[];
+  getHistory: () => string[];
   addHistory: (videoId: string) => void;
   removeHistory: (index: number) => void;
   clearHistory: () => void;
@@ -18,6 +18,10 @@ export const useHistory = (onChange?: (history: string[]) => void): UseHistoryRe
       defaultValue: [],
     }
   );
+
+  const getHistory = useCallback(() => {
+    return historyRef.current ?? [];
+  }, [historyRef]);
 
   const addHistory = useCallback(
     (videoId: string) => {
@@ -46,7 +50,7 @@ export const useHistory = (onChange?: (history: string[]) => void): UseHistoryRe
   }, [setHistory]);
 
   return {
-    history: historyRef.current ?? [],
+    getHistory,
     addHistory,
     removeHistory,
     clearHistory,
