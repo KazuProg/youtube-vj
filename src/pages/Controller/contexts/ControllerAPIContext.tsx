@@ -3,10 +3,18 @@ import { useStorageSync } from "@/hooks/useStorageSync";
 import type { DeckAPI } from "@/pages/Controller/components/Deck/types";
 import type { LibraryAPI } from "@/pages/Controller/components/Library/types";
 import type { MixerAPI } from "@/pages/Controller/components/Mixer/types";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { DEFAULT_SETTINGS } from "../constants";
+import { useHistory } from "../hooks/useHistory";
 import type { MIDIScriptManager } from "../types/MIDIScriptManager";
 import type { SettingsData } from "../types/settings";
+
+interface HistoryAPI {
+  get: () => string[];
+  add: (videoId: string) => void;
+  remove: (index: number) => void;
+  clear: () => void;
+}
 
 interface ControllerAPIContextValue {
   deckAPIs: (DeckAPI | null)[];
@@ -17,6 +25,7 @@ interface ControllerAPIContextValue {
   setLibraryAPI: (library: LibraryAPI | null) => void;
   midiAPI: MIDIScriptManager | null;
   setMidiAPI: (midi: MIDIScriptManager | null) => void;
+  historyAPI: HistoryAPI;
 
   settings: SettingsData;
   setSettings: (settings: SettingsData) => void;
@@ -33,6 +42,26 @@ export const ControllerAPIProvider = ({
   const [mixerAPI, _setMixerAPI] = useState<MixerAPI | null>(null);
   const [libraryAPI, _setLibraryAPI] = useState<LibraryAPI | null>(null);
   const [midiAPI, setMidiAPI] = useState<MIDIScriptManager | null>(null);
+
+  const {
+    history: initialHistory,
+    addHistory,
+    removeHistory,
+    clearHistory,
+  } = useHistory((newHistory) => {
+    setHistoryState(newHistory);
+  });
+  const [historyState, setHistoryState] = useState<string[]>(initialHistory);
+
+  const historyAPI: HistoryAPI = useMemo(
+    () => ({
+      get: () => historyState,
+      add: addHistory,
+      remove: removeHistory,
+      clear: clearHistory,
+    }),
+    [addHistory, removeHistory, clearHistory, historyState]
+  );
 
   const setDeckAPI = useCallback((deckId: number, deckAPI: DeckAPI | null) => {
     setDeckAPIs((prev) => {
@@ -79,6 +108,7 @@ export const ControllerAPIProvider = ({
         setLibraryAPI,
         midiAPI,
         setMidiAPI,
+        historyAPI,
 
         settings,
         setSettings,

@@ -3,7 +3,6 @@ import type { VideoItem } from "@/pages/Controller/types/videoItem";
 import { clamp } from "@/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LibraryAPI } from "../../types";
-import { useHistory } from "../usehistory";
 
 interface UseLibraryAPIParams {
   setGlobalLibrary: (library: LibraryAPI | null) => void;
@@ -26,9 +25,10 @@ interface UseLibraryAPIReturn {
 type FocusType = "playlist" | "video";
 
 export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLibraryAPIReturn => {
-  const { settings } = useControllerAPIContext();
+  const { settings, historyAPI } = useControllerAPIContext();
 
-  const handleHistoryChange = useCallback((history: string[]) => {
+  const handleHistoryChange = useCallback(() => {
+    const history = historyAPI.get();
     setPlaylists((prev) => {
       const newMap = new Map(prev);
       newMap.set(
@@ -37,12 +37,17 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
       );
       return newMap;
     });
-  }, []);
+  }, [historyAPI]);
 
-  const { history, addHistory, removeHistory, clearHistory } = useHistory(handleHistoryChange);
+  useEffect(() => {
+    handleHistoryChange();
+  }, [handleHistoryChange]);
 
   const [playlists, setPlaylists] = useState<Map<string, VideoItem[]>>(() => {
-    const initialPlaylists = new Map([["History", history.map((videoId) => ({ id: videoId }))]]);
+    const initialHistory = historyAPI.get();
+    const initialPlaylists = new Map([
+      ["History", initialHistory.map((videoId) => ({ id: videoId }))],
+    ]);
     if (settings.youtubeDataAPIKey) {
       initialPlaylists.set("Search", []);
     }
@@ -143,13 +148,16 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
     const libraryAPI: LibraryAPI = {
       history: {
         add: (videoId: string) => {
-          addHistory(videoId);
+          historyAPI.add(videoId);
+          handleHistoryChange();
         },
         remove: (index: number) => {
-          removeHistory(index);
+          historyAPI.remove(index);
+          handleHistoryChange();
         },
         clear: () => {
-          clearHistory();
+          historyAPI.clear();
+          handleHistoryChange();
         },
         get: () => {
           return playlists.get("History") ?? [];
@@ -233,9 +241,8 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
     } as LibraryAPI;
     setGlobalLibrary(libraryAPI);
   }, [
-    addHistory,
-    removeHistory,
-    clearHistory,
+    historyAPI,
+    handleHistoryChange,
 
     playlists,
     addPlaylist,
