@@ -43,24 +43,16 @@ export const ControllerAPIProvider = ({
   const [libraryAPI, _setLibraryAPI] = useState<LibraryAPI | null>(null);
   const [midiAPI, setMidiAPI] = useState<MIDIScriptManager | null>(null);
 
-  const {
-    history: initialHistory,
-    addHistory,
-    removeHistory,
-    clearHistory,
-  } = useHistory((newHistory) => {
-    setHistoryState(newHistory);
-  });
-  const [historyState, setHistoryState] = useState<string[]>(initialHistory);
+  const { getHistory, addHistory, removeHistory, clearHistory } = useHistory();
 
   const historyAPI: HistoryAPI = useMemo(
     () => ({
-      get: () => historyState,
+      get: getHistory,
       add: addHistory,
       remove: removeHistory,
       clear: clearHistory,
     }),
-    [addHistory, removeHistory, clearHistory, historyState]
+    [getHistory, addHistory, removeHistory, clearHistory]
   );
 
   const setDeckAPI = useCallback((deckId: number, deckAPI: DeckAPI | null) => {
