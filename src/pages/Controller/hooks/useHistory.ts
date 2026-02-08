@@ -15,7 +15,7 @@ export const useHistory = (): UseHistoryReturn => {
     dataRef: historyRef,
     setData: setHistory,
     onChange,
-  } = useStorageSync<string[]>(LOCAL_STORAGE_KEY.history, { defaultValue: [] });
+  } = useStorageSync<string[]>(LOCAL_STORAGE_KEY.history, []);
 
   const getHistory = useCallback(() => {
     return historyRef.current ?? [];

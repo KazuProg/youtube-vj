@@ -19,10 +19,8 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
   const vjPlayerRef = useRef<VJPlayerRef | null>(null);
   const { dataRef: syncDataRef, setData: setSyncData } = useStorageSync<VJSyncData>(
     localStorageKey,
-    {
-      defaultValue: INITIAL_SYNC_DATA,
-      overwrite: true,
-    }
+    INITIAL_SYNC_DATA,
+    { overwrite: true }
   );
   const { mixerAPI } = useControllerAPIContext();
 
