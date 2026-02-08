@@ -5,9 +5,9 @@ import type { LibraryAPI } from "@/pages/Controller/components/Library/types";
 import type { MixerAPI } from "@/pages/Controller/components/Mixer/types";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { DEFAULT_SETTINGS } from "../constants";
-import { useHistory } from "../hooks/useHistory";
 import type { MIDIScriptManager } from "../types/MIDIScriptManager";
 import type { SettingsData } from "../types/settings";
+import { useHistory } from "./hooks/useHistory";
 
 interface HistoryAPI {
   get: () => string[];
