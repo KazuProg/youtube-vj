@@ -19,7 +19,6 @@ const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
   const vjPlayerRef = useRef<VJPlayerRef | null>(null);
   const { dataRef: syncDataRef, setData: setSyncData } = useStorageSync<VJSyncData>(
     localStorageKey,
-    null,
     {
       defaultValue: INITIAL_SYNC_DATA,
       overwrite: true,

@@ -7,17 +7,15 @@ interface UseHistoryReturn {
   addHistory: (videoId: string) => void;
   removeHistory: (index: number) => void;
   clearHistory: () => void;
+  onChange: (callback: (history: string[]) => void) => () => void;
 }
 
-export const useHistory = (onChange?: (history: string[]) => void): UseHistoryReturn => {
-  // LocalStorageから再生履歴を読み取り
-  const { dataRef: historyRef, setData: setHistory } = useStorageSync<string[]>(
-    LOCAL_STORAGE_KEY.history,
+export const useHistory = (): UseHistoryReturn => {
+  const {
+    dataRef: historyRef,
+    setData: setHistory,
     onChange,
-    {
-      defaultValue: [],
-    }
-  );
+  } = useStorageSync<string[]>(LOCAL_STORAGE_KEY.history, { defaultValue: [] });
 
   const getHistory = useCallback(() => {
     return historyRef.current ?? [];
@@ -54,5 +52,6 @@ export const useHistory = (onChange?: (history: string[]) => void): UseHistoryRe
     addHistory,
     removeHistory,
     clearHistory,
+    onChange,
   };
 };
