@@ -14,6 +14,7 @@ interface HistoryAPI {
   add: (videoId: string) => void;
   remove: (index: number) => void;
   clear: () => void;
+  onChange: (callback: (history: string[]) => void) => () => void;
 }
 
 interface ControllerAPIContextValue {
@@ -43,7 +44,7 @@ export const ControllerAPIProvider = ({
   const [libraryAPI, _setLibraryAPI] = useState<LibraryAPI | null>(null);
   const [midiAPI, setMidiAPI] = useState<MIDIScriptManager | null>(null);
 
-  const { getHistory, addHistory, removeHistory, clearHistory } = useHistory();
+  const { getHistory, addHistory, removeHistory, clearHistory, onChange } = useHistory();
 
   const historyAPI: HistoryAPI = useMemo(
     () => ({
@@ -51,8 +52,9 @@ export const ControllerAPIProvider = ({
       add: addHistory,
       remove: removeHistory,
       clear: clearHistory,
+      onChange,
     }),
-    [getHistory, addHistory, removeHistory, clearHistory]
+    [getHistory, addHistory, removeHistory, clearHistory, onChange]
   );
 
   const setDeckAPI = useCallback((deckId: number, deckAPI: DeckAPI | null) => {
@@ -76,14 +78,16 @@ export const ControllerAPIProvider = ({
     window.library = library;
   }, []);
 
-  const { setData: _setSettings, dataRef: settingsRef } = useStorageSync<SettingsData>(
-    LOCAL_STORAGE_KEY.settings,
-    (data) => setSettings(data),
-    {
-      defaultValue: DEFAULT_SETTINGS,
-    }
-  );
+  const {
+    setData: _setSettings,
+    dataRef: settingsRef,
+    onChange: settingsOnChange,
+  } = useStorageSync<SettingsData>(LOCAL_STORAGE_KEY.settings, { defaultValue: DEFAULT_SETTINGS });
   const [settings, setSettings] = useState<SettingsData>(settingsRef.current);
+
+  useEffect(() => {
+    return settingsOnChange(setSettings);
+  }, [settingsOnChange]);
 
   useEffect(() => {
     _setSettings(settings);

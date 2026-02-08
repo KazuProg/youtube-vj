@@ -14,12 +14,17 @@ interface MixerProps {
 
 const Mixer = ({ className }: MixerProps) => {
   const { deckAPIs, setMixerAPI } = useControllerAPIContext();
-  const { dataRef: mixerDataRef, setData: setMixerData } = useStorageSync<MixerData>(
-    LOCAL_STORAGE_KEY.mixer,
-    (data) => _setMixerData(data),
-    { defaultValue: { crossfader: 0 } }
-  );
+  const {
+    dataRef: mixerDataRef,
+    setData: setMixerData,
+    onChange: onChangeMixerData,
+  } = useStorageSync<MixerData>(LOCAL_STORAGE_KEY.mixer, { defaultValue: { crossfader: 0 } });
   const [mixerData, _setMixerData] = useState<MixerData>(mixerDataRef.current);
+
+  useEffect(() => {
+    return onChangeMixerData(_setMixerData);
+  }, [onChangeMixerData]);
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

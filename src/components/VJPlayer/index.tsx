@@ -101,19 +101,19 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [notifySyncData]
     );
 
-    const onChangeSyncData = useCallback(
-      (syncData: VJSyncData | null) => {
+    const {
+      dataRef: syncDataRef,
+      setData: setSyncData,
+      onChange: onChangeSyncData,
+    } = useStorageSync<VJSyncData>(syncKey);
+
+    useEffect(() => {
+      return onChangeSyncData((syncData) => {
         if (syncData) {
           handleSyncData(syncData);
         }
-      },
-      [handleSyncData]
-    );
-
-    const { dataRef: syncDataRef, setData: setSyncData } = useStorageSync<VJSyncData>(
-      syncKey,
-      onChangeSyncData
-    );
+      });
+    }, [onChangeSyncData, handleSyncData]);
 
     const handleReady = useCallback(
       (event: YTPlayerEvent) => {

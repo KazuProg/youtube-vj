@@ -2,7 +2,7 @@ import VJPlayer from "@/components/VJPlayer";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import type { MixerData } from "@/types";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./index.module.css";
 
 const ProjectionPage = () => {
@@ -10,19 +10,20 @@ const ProjectionPage = () => {
   const [ch1Filters, setCh1Filters] = useState<Record<string, string>>({});
   const [crossfader, setCrossfader] = useState<number>(0);
 
-  const onChangeMixerData = useCallback((mixerData: MixerData | null) => {
-    setCrossfader(mixerData?.crossfader ?? 0);
-  }, []);
-
-  const { dataRef: mixerDataRef } = useStorageSync<MixerData>(
-    LOCAL_STORAGE_KEY.mixer,
-    onChangeMixerData
+  const { dataRef: mixerDataRef, onChange: onChangeMixerData } = useStorageSync<MixerData>(
+    LOCAL_STORAGE_KEY.mixer
   );
 
   // 初期値を設定
   useEffect(() => {
     setCrossfader(mixerDataRef.current?.crossfader ?? 0);
   }, [mixerDataRef]);
+
+  useEffect(() => {
+    return onChangeMixerData((mixerData) => {
+      setCrossfader(mixerData?.crossfader ?? 0);
+    });
+  }, [onChangeMixerData]);
 
   const [initialized, setInitialized] = useState(false);
 

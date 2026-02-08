@@ -78,7 +78,6 @@ const localStorageAdapter: StorageAdapter = {
 
 export const useStorageSync = <T>(
   syncKey: string,
-  onChange?: ((data: T) => void) | null,
   configParam?: {
     overwrite?: boolean;
     defaultValue?: {
@@ -104,19 +103,28 @@ export const useStorageSync = <T>(
     })()
   );
 
-  // onChangeをrefで保持（依存配列から除外してイベントリスナーの再登録を防ぐ）
-  const onChangeRef = useRef(onChange);
-  useEffect(() => {
-    onChangeRef.current = onChange;
-  }, [onChange]);
+  const listenersRef = useRef<Set<(data: T) => void>>(new Set());
+
+  const onChange = useCallback((callback: (data: T) => void) => {
+    listenersRef.current.add(callback);
+    return () => {
+      listenersRef.current.delete(callback);
+    };
+  }, []);
+
+  const notifyListeners = useCallback((data: T) => {
+    for (const listener of listenersRef.current) {
+      listener(data);
+    }
+  }, []);
 
   // 外部からの変更を監視（refを更新するが、再レンダリングは発生しない）
   useEffect(() => {
     return config.storage.onChange(syncKey, (newData: object | null) => {
       dataRef.current = newData as T;
-      onChangeRef.current?.(newData as T);
+      notifyListeners(newData as T);
     });
-  }, [config.storage, syncKey]);
+  }, [config.storage, syncKey, notifyListeners]);
 
   const setData = useCallback(
     (newData: T) => {
@@ -130,12 +138,13 @@ export const useStorageSync = <T>(
   const clearData = useCallback(() => {
     dataRef.current = config.defaultValue as T;
     config.storage.clear(syncKey);
-    onChangeRef.current?.(config.defaultValue as T);
-  }, [syncKey, config.storage, config.defaultValue]);
+    notifyListeners(config.defaultValue as T);
+  }, [syncKey, config.storage, config.defaultValue, notifyListeners]);
 
   return {
     dataRef,
     setData,
     clearData,
+    onChange,
   };
 };

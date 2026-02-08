@@ -27,8 +27,7 @@ type FocusType = "playlist" | "video";
 export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLibraryAPIReturn => {
   const { settings, historyAPI } = useControllerAPIContext();
 
-  const handleHistoryChange = useCallback(() => {
-    const history = historyAPI.get();
+  const handleHistoryChange = useCallback((history: string[]) => {
     setPlaylists((prev) => {
       const newMap = new Map(prev);
       newMap.set(
@@ -37,11 +36,12 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
       );
       return newMap;
     });
-  }, [historyAPI]);
+  }, []);
 
   useEffect(() => {
-    handleHistoryChange();
-  }, [handleHistoryChange]);
+    handleHistoryChange(historyAPI.get());
+    return historyAPI.onChange(handleHistoryChange);
+  }, [historyAPI, handleHistoryChange]);
 
   const [playlists, setPlaylists] = useState<Map<string, VideoItem[]>>(() => {
     const initialHistory = historyAPI.get();
@@ -149,15 +149,12 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
       history: {
         add: (videoId: string) => {
           historyAPI.add(videoId);
-          handleHistoryChange();
         },
         remove: (index: number) => {
           historyAPI.remove(index);
-          handleHistoryChange();
         },
         clear: () => {
           historyAPI.clear();
-          handleHistoryChange();
         },
         get: () => {
           return playlists.get("History") ?? [];
@@ -242,8 +239,6 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
     setGlobalLibrary(libraryAPI);
   }, [
     historyAPI,
-    handleHistoryChange,
-
     playlists,
     addPlaylist,
 
