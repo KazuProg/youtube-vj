@@ -82,7 +82,7 @@ export const ControllerAPIProvider = ({
     setData: _setSettings,
     dataRef: settingsRef,
     onChange: settingsOnChange,
-  } = useStorageSync<SettingsData>(LOCAL_STORAGE_KEY.settings, { defaultValue: DEFAULT_SETTINGS });
+  } = useStorageSync<SettingsData>(LOCAL_STORAGE_KEY.settings, DEFAULT_SETTINGS);
   const [settings, setSettings] = useState<SettingsData>(settingsRef.current);
 
   useEffect(() => {

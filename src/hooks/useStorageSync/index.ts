@@ -78,17 +78,15 @@ const localStorageAdapter: StorageAdapter = {
 
 export const useStorageSync = <T>(
   syncKey: string,
+  defaultValue?: { [K in keyof T]: T[K] extends JsonValue ? T[K] : never },
   configParam?: {
     overwrite?: boolean;
-    defaultValue?: {
-      [K in keyof T]: T[K] extends JsonValue ? T[K] : never;
-    };
     storage?: StorageAdapter;
   }
 ) => {
   const config = {
     overwrite: false,
-    defaultValue: null,
+    defaultValue: defaultValue ?? null,
     storage: localStorageAdapter,
     ...configParam,
   };

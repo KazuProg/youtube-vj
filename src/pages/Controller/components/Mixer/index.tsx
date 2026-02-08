@@ -18,7 +18,7 @@ const Mixer = ({ className }: MixerProps) => {
     dataRef: mixerDataRef,
     setData: setMixerData,
     onChange: onChangeMixerData,
-  } = useStorageSync<MixerData>(LOCAL_STORAGE_KEY.mixer, { defaultValue: { crossfader: 0 } });
+  } = useStorageSync<MixerData>(LOCAL_STORAGE_KEY.mixer, { crossfader: 0 });
   const [mixerData, _setMixerData] = useState<MixerData>(mixerDataRef.current);
 
   useEffect(() => {
