@@ -13,13 +13,14 @@ interface DeckProps {
   localStorageKey: string;
   deckId: number;
   className?: string;
+  initialPaused?: boolean;
 }
 
-const Deck = ({ localStorageKey, deckId, className }: DeckProps) => {
+const Deck = ({ localStorageKey, deckId, className, initialPaused = false }: DeckProps) => {
   const vjPlayerRef = useRef<VJPlayerRef | null>(null);
   const { dataRef: syncDataRef, setData: setSyncData } = useStorageSync<VJSyncData>(
     localStorageKey,
-    INITIAL_SYNC_DATA,
+    { ...INITIAL_SYNC_DATA, paused: initialPaused },
     { overwrite: true }
   );
   const { mixerAPI } = useControllerAPIContext();

@@ -20,9 +20,19 @@ const ControllerPageContent = () => {
   return (
     <div className={styles.controllerWindow}>
       <div className={styles.controller}>
-        <Deck className={styles.deck} localStorageKey={LOCAL_STORAGE_KEY.leftDeck} deckId={0} />
+        <Deck
+          className={styles.deck}
+          localStorageKey={LOCAL_STORAGE_KEY.leftDeck}
+          deckId={0}
+          initialPaused={false}
+        />
         <Mixer className={styles.mixer} />
-        <Deck className={styles.deck} localStorageKey={LOCAL_STORAGE_KEY.rightDeck} deckId={1} />
+        <Deck
+          className={styles.deck}
+          localStorageKey={LOCAL_STORAGE_KEY.rightDeck}
+          deckId={1}
+          initialPaused={true}
+        />
       </div>
       {settings.openLibrary && <Library />}
       <StatusBar onOpenSettings={() => setIsSettingsOpen(true)} />
