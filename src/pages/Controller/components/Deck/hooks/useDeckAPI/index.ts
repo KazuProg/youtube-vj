@@ -28,7 +28,7 @@ export const useDeckAPI = ({
   onOpacityChange,
 }: UseDeckAPIParams) => {
   const deckAPIRef = useRef<DeckAPI | null>(null);
-  const { setDeckAPI, historyAPI } = useControllerAPIContext();
+  const { setDeckAPI, historyAPI, settings } = useControllerAPIContext();
   const hotCuesRef = useRef<Map<number, number>>(new Map());
 
   useEffect(() => {
@@ -133,14 +133,17 @@ export const useDeckAPI = ({
       },
       loadVideo: (video: VideoItem | string) => {
         const videoObj = typeof video === "string" ? { id: video } : video;
-        updateSyncData({
+        const updateData: Partial<VJSyncData> = {
           videoId: videoObj.id,
           currentTime: videoObj.start ?? 0,
           baseTime: Date.now(),
-          paused: false,
           loopStart: null,
           loopEnd: null,
-        });
+        };
+        if (!settings.preservePauseState) {
+          updateData.paused = false;
+        }
+        updateSyncData(updateData);
         deckAPIRef.current?.unMute();
         hotCuesRef.current.clear();
         onHotCuesChange?.(hotCuesRef.current);
@@ -165,6 +168,7 @@ export const useDeckAPI = ({
     onVolumeChange,
     onMuteChange,
     onOpacityChange,
+    settings,
   ]);
 
   return deckAPIRef;

@@ -39,6 +39,13 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
     }
   };
 
+  const handleChangePreservePauseState = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSettings({
+      ...settings,
+      preservePauseState: e.target.checked,
+    });
+  };
+
   const handleChangeYoutubeDataAPIKey = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSettings({
       ...settings,
@@ -63,6 +70,17 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
           </button>
         </div>
         <div className={styles.content}>
+          <div className={styles.settingItem}>
+            <label htmlFor="preserve-pause-state" className={styles.label}>
+              <input
+                id="preserve-pause-state"
+                type="checkbox"
+                checked={settings.preservePauseState}
+                onChange={handleChangePreservePauseState}
+              />
+              動画Load時に再生状態を保持する
+            </label>
+          </div>
           <div className={styles.settingItem}>
             <label htmlFor="youtube-api-key" className={styles.label}>
               YouTube Data API キー
