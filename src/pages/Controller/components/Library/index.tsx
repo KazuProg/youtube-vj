@@ -100,6 +100,7 @@ const Library = () => {
             {Array.from(playlists.keys()).map((name, index) => (
               <li
                 key={name}
+                title={name}
                 onClick={() => handleSelectPlaylist(index)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
