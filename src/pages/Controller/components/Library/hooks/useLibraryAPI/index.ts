@@ -1,4 +1,4 @@
-import { searchYouTubeVideos } from "@/api/youtubeDataAPI";
+import { fetchYouTubePlaylist, searchYouTubeVideos } from "@/api/youtubeDataAPI";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import type { VideoItem } from "@/pages/Controller/types/videoItem";
 import { clamp } from "@/utils";
@@ -165,6 +165,23 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
         add: (name: string, videoIds: VideoItem[]) => {
           addPlaylist(name, videoIds);
         },
+        addFromYouTubePlaylist: (playlistId: string) => {
+          const apiKey = settings.youtubeDataAPIKey;
+          if (!apiKey) {
+            console.warn("YouTube API key is not set. Please configure it in settings.");
+            return;
+          }
+          fetchYouTubePlaylist(apiKey, playlistId).then((result) => {
+            if (!result) {
+              console.warn(
+                "Failed to fetch YouTube playlist. Please check the playlist ID and API key."
+              );
+              return;
+            }
+            const { playlistName, videos } = result;
+            addPlaylist(playlistName || "YouTube Playlist", videos, true);
+          });
+        },
         remove: (name: string) => {
           if (name === "History" || name === "Search") {
             console.error(`${name} is not allowed to be removed. It is a system-managed playlist.`);
@@ -242,6 +259,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
     historyAPI,
     playlists,
     addPlaylist,
+    settings.youtubeDataAPIKey,
 
     changePlaylistFocus,
     changeVideoFocus,

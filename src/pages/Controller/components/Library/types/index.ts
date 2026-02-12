@@ -9,6 +9,7 @@ export interface LibraryAPI {
   };
   playlists: {
     add: (name: string, videoIds: VideoItem[]) => void;
+    addFromYouTubePlaylist: (playlistId: string) => void;
     remove: (name: string) => void;
     get: (name: string) => VideoItem[];
     getAllNames: () => string[];

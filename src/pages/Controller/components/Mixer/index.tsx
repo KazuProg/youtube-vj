@@ -13,7 +13,7 @@ interface MixerProps {
 }
 
 const Mixer = ({ className }: MixerProps) => {
-  const { deckAPIs, setMixerAPI } = useControllerAPIContext();
+  const { deckAPIs, setMixerAPI, libraryAPI } = useControllerAPIContext();
   const {
     dataRef: mixerDataRef,
     setData: setMixerData,
@@ -44,6 +44,10 @@ const Mixer = ({ className }: MixerProps) => {
     if (isYouTubeVideoInfo(info) && inputRef.current) {
       inputRef.current.value = info.id;
       mixerAPIRef.current?.setPreparedVideo({ id: info.id, start: info.params?.start });
+    }
+    if (info && "list" in info) {
+      const playlistId = (info as { list: string }).list;
+      libraryAPI?.playlists.addFromYouTubePlaylist(playlistId);
     }
   };
 
