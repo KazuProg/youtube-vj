@@ -1,3 +1,4 @@
+import { searchYouTubeVideos } from "@/api/youtubeDataAPI";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import type { VideoItem } from "@/pages/Controller/types/videoItem";
 import { clamp } from "@/utils";
@@ -257,16 +258,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
         return;
       }
 
-      const response = await fetch(
-        `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&part=snippet&q=${query}&type=video&maxResults=50`
-      );
-      const data = await response.json();
-      const videos = data.items.map(
-        (item: { id: { videoId: string }; snippet: { title: string } }) => ({
-          id: item.id.videoId,
-          title: item.snippet.title,
-        })
-      );
+      const videos = await searchYouTubeVideos(apiKey, query);
       setPlaylists((prev) => {
         const newMap = new Map(prev);
         newMap.set("Search", videos);
