@@ -25,6 +25,9 @@
 
 .playlist > ul > li {
   padding-left: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .playlist > ul li.focused,
