@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/KazuProg/youtube-vj/compare/v1.1.0...v1.2.0) (2026-02-13)
+
+
+### Features
+
+* add ellipsis and tooltip for long playlist names ([dedba23](https://github.com/KazuProg/youtube-vj/commit/dedba237872cdd5fe817d2a66de775a41b691d18))
+* add YouTube playlist URL support ([53a325a](https://github.com/KazuProg/youtube-vj/commit/53a325a71c887307e25cd61ea272310c5bb63224))
+* preserve paused state on video load ([9e446e1](https://github.com/KazuProg/youtube-vj/commit/9e446e1ad9a5f7c0408f7eea64abb93188f832b7))
+* set right deck to paused by default ([badc53b](https://github.com/KazuProg/youtube-vj/commit/badc53b42e4687994d0006cd6e697fec2209face))
+* support YouTube URL start time parameter ([26ce703](https://github.com/KazuProg/youtube-vj/commit/26ce70389c46bd87d4ddbe4a70dd03566a8ac6a7))
+* suppress state events during video change ([040b843](https://github.com/KazuProg/youtube-vj/commit/040b84368890a74647c9e8546c435f88c0190087))
+
 ## [1.1.0](https://github.com/KazuProg/youtube-vj/compare/v1.0.0...v1.1.0) (2026-02-01)
 
 
