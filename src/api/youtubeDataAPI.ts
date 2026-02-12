@@ -3,7 +3,34 @@
  * @see https://developers.google.com/youtube/v3/docs
  */
 
-interface YouTubePlaylistResponse {
+// =============================================================================
+// Export types (Public API)
+// =============================================================================
+
+export type YouTubeVideoInfo = { id: string; title: string };
+
+export interface YouTubePlaylistResult {
+  playlistName: string;
+  videos: YouTubeVideoInfo[];
+}
+
+// =============================================================================
+// Internal types (API response)
+// =============================================================================
+
+interface YouTubeAPIError {
+  code: number;
+  message: string;
+}
+
+interface PlaylistsResponse {
+  items?: Array<{
+    snippet?: { title?: string };
+  }>;
+  error?: YouTubeAPIError;
+}
+
+interface PlaylistItemsResponse {
   items?: Array<{
     snippet?: {
       title?: string;
@@ -11,37 +38,47 @@ interface YouTubePlaylistResponse {
     };
   }>;
   nextPageToken?: string;
-  error?: {
-    code: number;
-    message: string;
-  };
+  error?: YouTubeAPIError;
 }
 
-interface YouTubePlaylistsListResponse {
-  items?: Array<{
-    snippet?: { title?: string };
-  }>;
-  error?: {
-    code: number;
-    message: string;
-  };
-}
-
-export interface YouTubePlaylistResult {
-  playlistName: string;
-  videos: { id: string; title: string }[];
-}
-
-interface YouTubeSearchResponse {
+interface SearchResponse {
   items?: Array<{
     id?: { videoId?: string };
     snippet?: { title?: string };
   }>;
-  error?: {
-    code: number;
-    message: string;
-  };
+  error?: YouTubeAPIError;
 }
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
+async function apiFetch<T>(url: string, params: Record<string, string | undefined>): Promise<T> {
+  const filtered = Object.fromEntries(
+    Object.entries(params).filter(([, v]) => v != null)
+  ) as Record<string, string>;
+  const searchParams = new URLSearchParams(filtered);
+  const response = await fetch(
+    `https://www.googleapis.com/youtube/v3${url}?${searchParams.toString()}`
+  );
+  return response.json();
+}
+
+function handleApiError(data: { error?: YouTubeAPIError }): boolean {
+  if (data.error) {
+    console.warn("[YouTube Data API]", data.error.message);
+    return true;
+  }
+  return false;
+}
+
+function toVideoInfo(videoId: string | undefined, title: string | undefined): YouTubeVideoInfo[] {
+  return videoId && title ? [{ id: videoId, title }] : [];
+}
+
+// =============================================================================
+// Public API
+// =============================================================================
 
 /**
  * YouTube Data API を使用してプレイリスト内の動画一覧を取得する
@@ -58,54 +95,43 @@ export async function fetchYouTubePlaylist(
     return null;
   }
 
-  let playlistName = "";
-  const playlistsParams = new URLSearchParams({
+  const playlistsData = await apiFetch<PlaylistsResponse>("/playlists", {
     key: apiKey,
     part: "snippet",
     fields: "items(snippet(title))",
     id: playlistId,
   });
-  const playlistsResponse = await fetch(
-    `https://www.googleapis.com/youtube/v3/playlists?${playlistsParams.toString()}`
-  );
-  const playlistsData: YouTubePlaylistsListResponse = await playlistsResponse.json();
-  if (!playlistsData.error && playlistsData.items?.[0]?.snippet?.title) {
-    playlistName = playlistsData.items[0].snippet.title;
+  if (handleApiError(playlistsData)) {
+    return null;
   }
 
-  const maxResults = 50;
-  const videos: { id: string; title: string }[] = [];
+  const playlistName = playlistsData.items?.[0]?.snippet?.title ?? "";
+
+  const playlistItemsParams = {
+    key: apiKey,
+    part: "snippet",
+    fields: "items(snippet(title,resourceId(videoId))),nextPageToken,pageInfo",
+    playlistId,
+    maxResults: "50",
+  };
+
+  const videos: YouTubeVideoInfo[] = [];
   let pageToken: string | null = null;
 
   do {
-    const params = new URLSearchParams({
-      key: apiKey,
-      part: "snippet",
-      fields: "items(snippet(title,resourceId(videoId))),nextPageToken,pageInfo",
-      playlistId,
-      maxResults: String(maxResults),
+    const data: PlaylistItemsResponse = await apiFetch("/playlistItems", {
+      ...playlistItemsParams,
+      pageToken: pageToken ?? undefined,
     });
-    if (pageToken) {
-      params.set("pageToken", pageToken);
-    }
-
-    const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/playlistItems?${params.toString()}`
-    );
-    const data: YouTubePlaylistResponse = await response.json();
-    if (data.error) {
-      console.warn("[YouTube Data API]", data.error.message);
+    if (handleApiError(data)) {
       return null;
     }
 
-    const items = data.items ?? [];
-    const pageVideos = items
-      .filter(
-        (item): item is { snippet: { resourceId: { videoId: string }; title: string } } =>
-          !!item.snippet?.resourceId?.videoId && !!item.snippet?.title
+    videos.push(
+      ...(data.items ?? []).flatMap((item) =>
+        toVideoInfo(item.snippet?.resourceId?.videoId, item.snippet?.title)
       )
-      .map((item) => ({ id: item.snippet.resourceId.videoId, title: item.snippet.title }));
-    videos.push(...pageVideos);
+    );
 
     // MixListの場合はページングを無視する
     pageToken = playlistId.startsWith("RD") ? null : (data.nextPageToken ?? null);
@@ -126,35 +152,21 @@ export async function searchYouTubeVideos(
   apiKey: string,
   query: string,
   maxResults = 50
-): Promise<{ id: string; title: string }[]> {
+): Promise<YouTubeVideoInfo[]> {
   if (!apiKey.trim()) {
     return [];
   }
 
-  const params = new URLSearchParams({
+  const data = await apiFetch<SearchResponse>("/search", {
     key: apiKey,
     part: "snippet",
     q: query,
     type: "video",
     maxResults: String(maxResults),
   });
-
-  const response = await fetch(`https://www.googleapis.com/youtube/v3/search?${params.toString()}`);
-  const data: YouTubeSearchResponse = await response.json();
-
-  if (data.error) {
-    console.warn("[YouTube Data API]", data.error.message);
+  if (handleApiError(data)) {
     return [];
   }
 
-  const items = data.items ?? [];
-  return items
-    .filter(
-      (item): item is { id: { videoId: string }; snippet: { title: string } } =>
-        !!item.id?.videoId && !!item.snippet?.title
-    )
-    .map((item) => ({
-      id: item.id.videoId,
-      title: item.snippet.title,
-    }));
+  return (data.items ?? []).flatMap((item) => toVideoInfo(item.id?.videoId, item.snippet?.title));
 }
