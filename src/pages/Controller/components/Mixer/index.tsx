@@ -1,7 +1,7 @@
 import Fader from "@/components/Fader";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
-import { isYouTubeVideoInfo, urlParser } from "@/pages/Controller/utils/youtube";
+import { isYouTubeVideoId, isYouTubeVideoInfo, urlParser } from "@/pages/Controller/utils/youtube";
 import type { MixerData } from "@/types";
 import { useEffect, useRef, useState } from "react";
 import { useControllerAPIContext } from "../../contexts/ControllerAPIContext";
@@ -40,7 +40,12 @@ const Mixer = ({ className }: MixerProps) => {
   });
 
   const handleVideoIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const info = urlParser.parse(e.target.value);
+    const value = e.target.value;
+    if (isYouTubeVideoId(value)) {
+      mixerAPIRef.current?.setPreparedVideo({ id: value });
+      return;
+    }
+    const info = urlParser.parse(value);
     if (isYouTubeVideoInfo(info) && inputRef.current) {
       inputRef.current.value = info.id;
       mixerAPIRef.current?.setPreparedVideo({ id: info.id, start: info.params?.start });
