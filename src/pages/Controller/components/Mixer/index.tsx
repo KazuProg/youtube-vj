@@ -1,7 +1,12 @@
 import Fader from "@/components/Fader";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
-import { isYouTubeVideoId, isYouTubeVideoInfo, urlParser } from "@/pages/Controller/utils/youtube";
+import {
+  isYouTubePlaylistInfo,
+  isYouTubeVideoId,
+  isYouTubeVideoInfo,
+  urlParser,
+} from "@/pages/Controller/utils/youtube";
 import type { MixerData } from "@/types";
 import { useEffect, useRef, useState } from "react";
 import { useControllerAPIContext } from "../../contexts/ControllerAPIContext";
@@ -50,9 +55,8 @@ const Mixer = ({ className }: MixerProps) => {
       inputRef.current.value = info.id;
       mixerAPIRef.current?.setPreparedVideo({ id: info.id, start: info.params?.start });
     }
-    if (info && "list" in info) {
-      const playlistId = (info as { list: string }).list;
-      libraryAPI?.playlists.addFromYouTubePlaylist(playlistId);
+    if (isYouTubePlaylistInfo(info)) {
+      libraryAPI?.playlists.addFromYouTubePlaylist(info.list);
     }
   };
 
