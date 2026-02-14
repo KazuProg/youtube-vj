@@ -33,4 +33,10 @@ const isYouTubeVideoInfo = (info: VideoInfo | undefined): info is YouTubeVideoIn
   return info !== undefined && info.provider === "youtube" && "id" in info;
 };
 
-export { isYouTubeVideoId, isYouTubeVideoInfo, urlParserBase as urlParser };
+type YouTubePlaylistInfo = VideoInfo & { provider: "youtube"; list: string };
+
+const isYouTubePlaylistInfo = (info: VideoInfo | undefined): info is YouTubePlaylistInfo => {
+  return info !== undefined && info.provider === "youtube" && "list" in info;
+};
+
+export { isYouTubePlaylistInfo, isYouTubeVideoId, isYouTubeVideoInfo, urlParserBase as urlParser };
