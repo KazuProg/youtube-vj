@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/KazuProg/youtube-vj/compare/v1.2.0...v1.2.1) (2026-02-14)
+
+
+### Bug Fixes
+
+* restore support for loading video by YouTube ID only ([8746ffd](https://github.com/KazuProg/youtube-vj/commit/8746ffdf867c0a9ba9bb124d7c4c3a30e4295037))
+
 ## [1.2.0](https://github.com/KazuProg/youtube-vj/compare/v1.1.0...v1.2.0) (2026-02-13)
 
 
