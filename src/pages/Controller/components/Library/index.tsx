@@ -1,7 +1,7 @@
 import { useTextFileReader } from "@/hooks/useTextFileReader";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import type { VideoItem } from "@/pages/Controller/types/videoItem";
-import { isYouTubeVideoInfo, urlParser } from "@/pages/Controller/utils/youtube";
+import { isYouTubeVideoId, isYouTubeVideoInfo, urlParser } from "@/pages/Controller/utils/youtube";
 import { useCallback, useState } from "react";
 import styles from "./Library.module.css";
 import FileDropZone from "./components/FileDropZone";
@@ -35,17 +35,20 @@ const Library = () => {
         return;
       }
 
-      // 各行を解析して YouTube ID を抽出
-      const items = text
+      const videoItems: VideoItem[] = text
         .split("\n")
         .map((line) => line.trim())
         .filter(Boolean)
-        .map((line) => urlParser.parse(line))
-        .filter(isYouTubeVideoInfo);
-      const videoItems: VideoItem[] = items.map((info) => ({
-        id: info.id,
-        start: info.params?.start,
-      }));
+        .flatMap((line): VideoItem[] => {
+          if (isYouTubeVideoId(line)) {
+            return [{ id: line }];
+          }
+          const info = urlParser.parse(line);
+          if (isYouTubeVideoInfo(info)) {
+            return [{ id: info.id, start: info.params?.start }];
+          }
+          return [];
+        });
       addPlaylist(filenameWithoutExt, videoItems, true);
     },
     [libraryAPI, addPlaylist]

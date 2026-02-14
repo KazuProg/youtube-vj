@@ -27,8 +27,10 @@ import("js-video-url-parser/lib/provider/youtube").then((module) => {
   }
 });
 
+const isYouTubeVideoId = (value: string): boolean => /^[A-Za-z0-9_-]{11}$/.test(value);
+
 const isYouTubeVideoInfo = (info: VideoInfo | undefined): info is YouTubeVideoInfo => {
   return info !== undefined && info.provider === "youtube" && "id" in info;
 };
 
-export { isYouTubeVideoInfo, urlParserBase as urlParser };
+export { isYouTubeVideoId, isYouTubeVideoInfo, urlParserBase as urlParser };
