@@ -34,7 +34,7 @@
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
     "archiver": "^7.0.1",
-    "globals": "^16.0.0",
+    "globals": "^17.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "typescript": "~5.9.3",
