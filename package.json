@@ -23,7 +23,7 @@
     "js-video-url-parser": "^0.5.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.9.5",
+    "react-router-dom": "^7.13.0",
     "use-indexeddb": "^2.0.2"
   },
   "devDependencies": {
