@@ -13,7 +13,7 @@ interface MixerProps {
 }
 
 const Mixer = ({ className }: MixerProps) => {
-  const { deckAPIs, setMixerAPI, libraryAPI } = useControllerAPIContext();
+  const { deckAPIs, setMixerAPI, libraryAPI, settings } = useControllerAPIContext();
   const {
     dataRef: mixerDataRef,
     setData: setMixerData,
@@ -72,6 +72,18 @@ const Mixer = ({ className }: MixerProps) => {
         >
           Load
         </button>
+        {settings.showYoutubeButton && (
+          <button
+            className={styles.youtubeButton}
+            type="button"
+            title="YouTubeを開く"
+            onClick={() => {
+              window.open("https://www.youtube.com", "_blank", "noopener,noreferrer");
+            }}
+          >
+            Y
+          </button>
+        )}
         <button
           className={styles.loadButton}
           type="button"

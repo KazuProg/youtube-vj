@@ -12,6 +12,19 @@
   margin: auto;
 }
 
+.youtubeButton {
+  margin: auto;
+  padding: 4px 6px;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.youtubeButton:hover {
+  background-color: #cc0000;
+}
+
 .loadTrack {
   margin-bottom: 10px;
 }
