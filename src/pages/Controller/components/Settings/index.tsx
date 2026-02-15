@@ -46,6 +46,13 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
     });
   };
 
+  const handleChangeShowYoutubeButton = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSettings({
+      ...settings,
+      showYoutubeButton: e.target.checked,
+    });
+  };
+
   const handleChangeYoutubeDataAPIKey = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSettings({
       ...settings,
@@ -79,6 +86,17 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
                 onChange={handleChangePreservePauseState}
               />
               動画Load時に再生状態を保持する
+            </label>
+          </div>
+          <div className={styles.settingItem}>
+            <label htmlFor="show-youtube-button" className={styles.label}>
+              <input
+                id="show-youtube-button"
+                type="checkbox"
+                checked={settings.showYoutubeButton}
+                onChange={handleChangeShowYoutubeButton}
+              />
+              YouTubeボタンを表示する
             </label>
           </div>
           <div className={styles.settingItem}>
