@@ -34,18 +34,13 @@
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
     "archiver": "^7.0.1",
-    "globals": "^16.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "typescript": "~5.9.3",
     "vite": "^6.3.5"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css}": [
-      "biome check --write --no-errors-on-unmatched"
-    ],
-    "*.{ts,tsx}": [
-      "bash -c 'tsc --noEmit --skipLibCheck --project tsconfig.app.json'"
-    ]
+    "*.{js,jsx,ts,tsx,json,css}": ["biome check --write --no-errors-on-unmatched"],
+    "*.{ts,tsx}": ["bash -c 'tsc --noEmit --skipLibCheck --project tsconfig.app.json'"]
   }
 }
