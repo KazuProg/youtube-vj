@@ -21,7 +21,7 @@
   "dependencies": {
     "@11ty/eleventy": "^3.1.2",
     "js-video-url-parser": "^0.5.1",
-    "react": "^19.1.0",
+    "react": "^19.2.4",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.13.0",
     "use-indexeddb": "^2.0.2"
@@ -30,7 +30,7 @@
     "@biomejs/biome": "^1.9.4",
     "@commitlint/cli": "^20.4.1",
     "@commitlint/config-conventional": "^20.4.1",
-    "@types/react": "^19.1.2",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
     "archiver": "^7.0.1",
