@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/KazuProg/youtube-vj/compare/v1.2.0...v1.3.0) (2026-02-16)
+
+
+### Features
+
+* add YouTube launch button in mixer ([25a28fe](https://github.com/KazuProg/youtube-vj/commit/25a28fe7b3f9b03494ede046a97061bb141b5b31))
+* **dev:** configure dependabot for npm package updates ([cb8fd93](https://github.com/KazuProg/youtube-vj/commit/cb8fd93fe810cab90e5f03756c6a3c3c778effa9))
+
+
+### Bug Fixes
+
+* restore support for loading video by YouTube ID only ([8746ffd](https://github.com/KazuProg/youtube-vj/commit/8746ffdf867c0a9ba9bb124d7c4c3a30e4295037))
+
 ## [1.2.0](https://github.com/KazuProg/youtube-vj/compare/v1.1.0...v1.2.0) (2026-02-13)
 
 

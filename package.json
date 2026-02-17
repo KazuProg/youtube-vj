@@ -1,7 +1,7 @@
 {
   "name": "youtube-vj",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.3.0",
   "type": "module",
   "scripts": {
     "setup": "npm run generate:midi-template && npm run docs",
@@ -40,7 +40,11 @@
     "vite": "^6.3.5"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css}": ["biome check --write --no-errors-on-unmatched"],
-    "*.{ts,tsx}": ["bash -c 'tsc --noEmit --skipLibCheck --project tsconfig.app.json'"]
+    "*.{js,jsx,ts,tsx,json,css}": [
+      "biome check --write --no-errors-on-unmatched"
+    ],
+    "*.{ts,tsx}": [
+      "bash -c 'tsc --noEmit --skipLibCheck --project tsconfig.app.json'"
+    ]
   }
 }
