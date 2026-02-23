@@ -1,0 +1,147 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  background-color: #333;
+  color: white;
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.root > * {
+  padding: 0.5rem;
+}
+
+.header {
+  margin: 1em 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.headerDeviceRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.keymapTable {
+  flex: 1;
+  white-space: nowrap;
+  overflow-y: auto;
+  position: relative;
+  padding: 0;
+  border: solid 1px #555;
+}
+
+.keymapTable table {
+  width: 100%;
+  border-collapse: collapse;
+  padding: 0;
+}
+
+.keymapTable thead {
+  background-color: #222;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.keymapTable tbody tr:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.keymapTable tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.keymapTable tbody tr.highlight {
+  animation: flash 0.3s ease-out;
+}
+
+@keyframes flash {
+  0% {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.keymapTable th,
+.keymapTable td {
+  white-space: nowrap;
+  padding: 0.2rem 0.5rem;
+  border-right: solid 1px #555;
+}
+
+.keymapTable td:nth-child(1) {
+  width: 8rem;
+}
+
+.keymapTable tbody tr {
+  cursor: pointer;
+}
+
+.buttons {
+  text-align: right;
+}
+
+.buttons button {
+  padding: 0.5rem 1rem;
+  background-color: #222;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  margin-left: 0.5rem;
+}
+
+.buttons button:hover {
+  background-color: #333;
+}
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+.error {
+  color: #f80;
+  text-align: center;
+  padding: 1rem;
+}
+
+.connectHint {
+  color: #aaa;
+  font-size: 0.9em;
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.connectButton {
+  padding: 0.5rem 1rem;
+  background-color: #f80;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.connectButton:hover {
+  background-color: #fa0;
+}
+

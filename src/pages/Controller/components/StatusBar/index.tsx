@@ -1,6 +1,5 @@
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
-import midiScriptTemplate from "@/pages/Controller/utils/midi-script-template";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Status from "./components/Status";
 import styles from "./index.module.css";
 interface StatusBarProps {
@@ -9,8 +8,37 @@ interface StatusBarProps {
 
 const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
   const [projectionWindow, setProjectionWindow] = useState<Window | null>(null);
-  const { midiAPI, setMidiAPI, settings, setSettings } = useControllerAPIContext();
+  const { midiAPI, midiRequestAccess, midiOpenScriptEditor, settings, setSettings } =
+    useControllerAPIContext();
   const isInitializedRef = useRef(false);
+
+  const handleMIDI = useCallback(
+    (startup = false) => {
+    if (startup && localStorage.getItem("midi") === null) {
+      return;
+    }
+
+    if (!midiAPI) {
+      midiRequestAccess()
+        .then(() => {
+          localStorage.setItem("midi", "true");
+        })
+        .catch((error) => {
+          console.error("[StatusBar] Failed to request MIDI access:", error);
+        });
+    } else {
+      midiOpenScriptEditor();
+    }
+  },
+    [midiAPI, midiRequestAccess, midiOpenScriptEditor]
+  );
+
+  const handleLibrary = useCallback(() => {
+    setSettings({
+      ...settings,
+      openLibrary: !settings.openLibrary,
+    });
+  }, [settings, setSettings]);
 
   useEffect(() => {
     // React StrictModeによる二重実行を防ぐ
@@ -21,38 +49,7 @@ const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
 
     handleMIDI(true);
     openProjectionWindow();
-  }, []);
-
-  const handleLibrary = () => {
-    setSettings({
-      ...settings,
-      openLibrary: !settings.openLibrary,
-    });
-  };
-
-  const handleMIDI = (startup = false) => {
-    if (startup && localStorage.getItem("midi") === null) {
-      return;
-    }
-
-    if (!midiAPI) {
-      const _midi = new window.MIDIScriptManager("YouTube-VJ", {
-        executeScript: true,
-      });
-      setMidiAPI(_midi);
-      _midi
-        .requestAccess()
-        .then(() => {
-          localStorage.setItem("midi", "true");
-        })
-        .catch((error) => {
-          console.error("[StatusBar] Failed to request MIDI access:", error);
-          setMidiAPI(null);
-        });
-    } else {
-      midiAPI.openCustomScriptEditor(midiScriptTemplate);
-    }
-  };
+  }, [handleMIDI]);
 
   const openProjectionWindow = () => {
     const newWindow = window.open("/projection", "VJProjection", "width=640,height=360");
