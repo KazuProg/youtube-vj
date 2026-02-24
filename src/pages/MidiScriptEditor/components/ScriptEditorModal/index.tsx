@@ -23,7 +23,6 @@ export function ScriptEditorModal({
   const [scriptCode, setScriptCode] = useState("");
   const [placeholder, setPlaceholder] = useState(DEFAULT_PLACEHOLDER);
   const [isChanged, setIsChanged] = useState(false);
-  const popupRef = useRef<HTMLDialogElement>(null);
   const controlValueSpanRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -139,7 +138,6 @@ export function ScriptEditorModal({
       role="presentation"
     >
       <dialog
-        ref={popupRef}
         open
         className={styles.container}
         onClick={(e) => e.stopPropagation()}
