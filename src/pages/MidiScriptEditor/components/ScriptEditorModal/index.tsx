@@ -80,8 +80,6 @@ export function ScriptEditorModal({
     if (!window.confirm("スクリプトを削除しますか？")) {
       return;
     }
-    setScriptName("");
-    setScriptCode("");
     element.name = controlName.trim() || element.defaultName;
     element.scriptCode = "";
     onClose();
