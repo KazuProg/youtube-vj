@@ -81,6 +81,7 @@ export function ScriptEditorModal({
       return;
     }
     element.name = controlName.trim() || element.defaultName;
+    // scriptCode = "" で MIDIElement の setter が scriptName も null にする
     element.scriptCode = "";
     onClose();
   }, [controlName, element, onClose]);
