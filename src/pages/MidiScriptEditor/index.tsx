@@ -176,7 +176,14 @@ const MidiScriptEditorPage = () => {
               <tr
                 key={`${element.midiID}-${element.scriptCode ?? ""}`}
                 data-midi-id={element.midiID}
+                tabIndex={0}
                 onClick={() => handleRowClick(element)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleRowClick(element);
+                  }
+                }}
               >
                 <td>{element.controlIdentifier}</td>
                 <td>{element.name}</td>

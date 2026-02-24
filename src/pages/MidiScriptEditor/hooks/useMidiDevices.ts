@@ -99,7 +99,9 @@ export function useMidiDevices() {
   // 他ウィンドウ（Controller）で keymaps が更新されたとき、既存デバイスに再適用する
   useEffect(() => {
     const unsubscribe = onKeymapsChange((newKeymaps) => {
-      if (!newKeymaps || !Array.isArray(newKeymaps)) return;
+      if (!newKeymaps || !Array.isArray(newKeymaps)) {
+        return;
+      }
       setDevices((prev) => {
         return prev.map((device) => {
           const keymap = (newKeymaps as KeymapObject[]).find(
@@ -137,7 +139,9 @@ export function useMidiDevices() {
       .then((access) => {
         midiAccessRef.current = access;
         setError(null);
-        access.inputs.forEach((input) => handleInputChanged(input));
+        for (const input of access.inputs.values()) {
+          handleInputChanged(input);
+        }
         access.onstatechange = (e) => {
           const port = e.port;
           if (port && port.type === "input") {

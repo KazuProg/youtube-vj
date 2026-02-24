@@ -68,8 +68,8 @@ export class MIDIDevice implements MIDIDeviceInterface {
     };
 
     this.#elements = {
-      [MIDIMessageTypes.Note]: Array.from({ length: 16 }, () => []),
-      [MIDIMessageTypes.CC]: Array.from({ length: 16 }, () => []),
+      [MIDIMessageTypes.note]: Array.from({ length: 16 }, () => []),
+      [MIDIMessageTypes.cc]: Array.from({ length: 16 }, () => []),
     };
 
     if (this.#options.data) {
@@ -102,8 +102,8 @@ export class MIDIDevice implements MIDIDeviceInterface {
   }
 
   get elements(): MIDIElement[] {
-    const note = this.#elements[MIDIMessageTypes.Note].flat();
-    const cc = this.#elements[MIDIMessageTypes.CC].flat();
+    const note = this.#elements[MIDIMessageTypes.note].flat();
+    const cc = this.#elements[MIDIMessageTypes.cc].flat();
     return [...note, ...cc].filter((e): e is MIDIElement => e !== undefined);
   }
 
@@ -120,7 +120,9 @@ export class MIDIDevice implements MIDIDeviceInterface {
   }
 
   applyMappings(mappings: KeymapMapping[] | null | undefined): void {
-    if (!mappings) return;
+    if (!mappings) {
+      return;
+    }
     for (const mapping of mappings) {
       const type = mapping.midi.substring(0, 1);
       const combined = Number.parseInt(mapping.midi.substring(1), 16);
@@ -154,12 +156,12 @@ export class MIDIDevice implements MIDIDeviceInterface {
 
     let type: string;
     switch (messageType) {
-      case MIDIMessageTypes.RawNoteOn:
-      case MIDIMessageTypes.RawNoteOff:
-        type = MIDIMessageTypes.Note;
+      case MIDIMessageTypes.rawNoteOn:
+      case MIDIMessageTypes.rawNoteOff:
+        type = MIDIMessageTypes.note;
         break;
-      case MIDIMessageTypes.RawControlChange:
-        type = MIDIMessageTypes.CC;
+      case MIDIMessageTypes.rawControlChange:
+        type = MIDIMessageTypes.cc;
         break;
       default:
         return;

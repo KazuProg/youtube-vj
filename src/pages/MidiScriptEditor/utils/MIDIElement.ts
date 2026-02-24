@@ -16,7 +16,7 @@ export interface ExecuteScriptArgument {
   type: string;
   channel: number;
   value: number;
-  output: (arg1: number | [number, number, number] | string, arg2?: number) => void;
+  output: (arg1: number | [number, number, number], arg2?: string) => void;
 }
 
 export class MIDIElement {
@@ -66,9 +66,9 @@ export class MIDIElement {
 
   get defaultName(): string {
     switch (this.type) {
-      case MIDIMessageTypes.Note:
+      case MIDIMessageTypes.note:
         return this.#getNoteName(this.#midiNumber);
-      case MIDIMessageTypes.CC:
+      case MIDIMessageTypes.cc:
         return `0x${this.#midiNumber.toString(16).toUpperCase().padStart(2, "0")}`;
       default:
         return "";
@@ -76,7 +76,7 @@ export class MIDIElement {
   }
 
   get controlIdentifier(): string {
-    const typeStr = this.type === MIDIMessageTypes.Note ? "Note" : "CC";
+    const typeStr = this.type === MIDIMessageTypes.note ? "Note" : "CC";
     const channelHex = this.channel.toString(16).toUpperCase();
     return `${typeStr}#${channelHex} ${this.defaultName}`;
   }
