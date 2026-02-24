@@ -1,5 +1,5 @@
-import type { MIDIDeviceInterface } from "./MIDIDevice";
 import { MIDIMessageTypes } from "../constants";
+import type { MIDIDeviceInterface } from "./MIDIDevice";
 
 export interface MIDIElementData {
   name?: string;

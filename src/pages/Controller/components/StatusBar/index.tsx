@@ -14,22 +14,22 @@ const StatusBar = ({ onOpenSettings }: StatusBarProps) => {
 
   const handleMIDI = useCallback(
     (startup = false) => {
-    if (startup && localStorage.getItem("midi") === null) {
-      return;
-    }
+      if (startup && localStorage.getItem("midi") === null) {
+        return;
+      }
 
-    if (!midiAPI) {
-      midiRequestAccess()
-        .then(() => {
-          localStorage.setItem("midi", "true");
-        })
-        .catch((error) => {
-          console.error("[StatusBar] Failed to request MIDI access:", error);
-        });
-    } else {
-      midiOpenScriptEditor();
-    }
-  },
+      if (!midiAPI) {
+        midiRequestAccess()
+          .then(() => {
+            localStorage.setItem("midi", "true");
+          })
+          .catch((error) => {
+            console.error("[StatusBar] Failed to request MIDI access:", error);
+          });
+      } else {
+        midiOpenScriptEditor();
+      }
+    },
     [midiAPI, midiRequestAccess, midiOpenScriptEditor]
   );
 

@@ -42,10 +42,9 @@
   width: 100%;
 }
 
-.elementDetails > span:nth-child(3n-2) {
+.elementDetails > span:nth-child(3n - 2) {
   text-align: left;
 }
-
 
 .controlValue {
   min-height: 1.5em;

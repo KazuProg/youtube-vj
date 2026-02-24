@@ -37,10 +37,10 @@ export class MIDIDevice implements MIDIDeviceInterface {
   #output: MIDIOutput | null = null;
   #serviceName: string;
   #saveCallback: (device: MIDIDevice) => void;
-    #options: Required<Omit<MIDIDeviceOptions, "data" | "midiAccess">> & {
-      data: KeymapMapping[] | { mappings: KeymapMapping[] } | null;
-      midiAccess: MIDIAccess | null;
-    };
+  #options: Required<Omit<MIDIDeviceOptions, "data" | "midiAccess">> & {
+    data: KeymapMapping[] | { mappings: KeymapMapping[] } | null;
+    midiAccess: MIDIAccess | null;
+  };
   #elements: ElementsMap;
 
   constructor(
@@ -73,7 +73,9 @@ export class MIDIDevice implements MIDIDeviceInterface {
     };
 
     if (this.#options.data) {
-      const mappings = Array.isArray(this.#options.data) ? this.#options.data : this.#options.data.mappings;
+      const mappings = Array.isArray(this.#options.data)
+        ? this.#options.data
+        : this.#options.data.mappings;
       this.applyMappings(mappings);
     }
 
@@ -224,8 +226,9 @@ export class MIDIDevice implements MIDIDeviceInterface {
           return;
         }
         _status =
-          (elem.type === MIDIMessageTypes.Note ? MIDIMessageTypes.RawNoteOn : MIDIMessageTypes.RawControlChange) |
-          elem.channel;
+          (elem.type === MIDIMessageTypes.Note
+            ? MIDIMessageTypes.RawNoteOn
+            : MIDIMessageTypes.RawControlChange) | elem.channel;
         _data1 = elem.number;
         _data2 = arg2 ?? null;
       }
@@ -242,7 +245,11 @@ export class MIDIDevice implements MIDIDeviceInterface {
     }
   }
 
-  toJSON(): { device: { name: string; manufacturer: string }; service: string; mappings: KeymapMapping[] } {
+  toJSON(): {
+    device: { name: string; manufacturer: string };
+    service: string;
+    mappings: KeymapMapping[];
+  } {
     return {
       device: { name: this.name, manufacturer: this.manufacturer },
       service: this.#serviceName,

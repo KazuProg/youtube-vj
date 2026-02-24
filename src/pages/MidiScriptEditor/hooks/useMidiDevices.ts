@@ -14,25 +14,26 @@ export function useMidiDevices() {
   const [error, setError] = useState<string | null>(null);
   const midiAccessRef = useRef<MIDIAccess | null>(null);
   const highlightCallbackRef = useRef<((element: MIDIElement) => void) | null>(null);
-  const controlValueCallbackRef = useRef<
-    ((element: MIDIElement, value: number) => void) | null
-  >(null);
+  const controlValueCallbackRef = useRef<((element: MIDIElement, value: number) => void) | null>(
+    null
+  );
 
-  const { dataRef: keymapsRef, setData: setKeymaps, onChange: onKeymapsChange } = useStorageSync<
-    KeymapObject[]
-  >(LOCAL_STORAGE_KEY.midiScripts, []);
+  const {
+    dataRef: keymapsRef,
+    setData: setKeymaps,
+    onChange: onKeymapsChange,
+  } = useStorageSync<KeymapObject[]>(LOCAL_STORAGE_KEY.midiScripts, []);
 
   const saveDevice = useCallback(
     (device: MIDIDevice) => {
       const keymaps = (keymapsRef.current ?? []) as KeymapObject[];
       const json = device.toJSON();
       const existingKeymap = keymaps.find(
-        (k) => k.device.name === json.device.name && k.device.manufacturer === json.device.manufacturer
+        (k) =>
+          k.device.name === json.device.name && k.device.manufacturer === json.device.manufacturer
       );
       const mergedMappings = (() => {
-        const existingByMidi = new Map(
-          (existingKeymap?.mappings ?? []).map((m) => [m.midi, m])
-        );
+        const existingByMidi = new Map((existingKeymap?.mappings ?? []).map((m) => [m.midi, m]));
         for (const ourMapping of json.mappings) {
           const existing = existingByMidi.get(ourMapping.midi);
           if (existing?.script && !ourMapping.script) {
@@ -58,7 +59,9 @@ export function useMidiDevices() {
   const loadKeymapForDevice = useCallback(
     (deviceName: string, manufacturer: string): KeymapObject | undefined => {
       const keymaps = (keymapsRef.current ?? []) as KeymapObject[];
-      return keymaps.find((k) => k.device.name === deviceName && k.device.manufacturer === manufacturer);
+      return keymaps.find(
+        (k) => k.device.name === deviceName && k.device.manufacturer === manufacturer
+      );
     },
     [keymapsRef]
   );
@@ -100,8 +103,7 @@ export function useMidiDevices() {
       setDevices((prev) => {
         return prev.map((device) => {
           const keymap = (newKeymaps as KeymapObject[]).find(
-            (k) =>
-              k.device.name === device.name && k.device.manufacturer === device.manufacturer
+            (k) => k.device.name === device.name && k.device.manufacturer === device.manufacturer
           );
           if (keymap) {
             device.applyMappings(keymap.mappings);
@@ -115,7 +117,9 @@ export function useMidiDevices() {
 
   useEffect(() => {
     setCurrentDevice((curr) => {
-      const inList = devices.some((d) => d.name === curr?.name && d.manufacturer === curr?.manufacturer);
+      const inList = devices.some(
+        (d) => d.name === curr?.name && d.manufacturer === curr?.manufacturer
+      );
       if (!curr || !inList) {
         return devices[0] ?? null;
       }
@@ -152,12 +156,9 @@ export function useMidiDevices() {
     requestAccess().catch(() => {});
   }, [requestAccess]);
 
-  const updateKeymapsForDevice = useCallback(
-    (device: MIDIDevice) => {
-      setCurrentDevice(device);
-    },
-    []
-  );
+  const updateKeymapsForDevice = useCallback((device: MIDIDevice) => {
+    setCurrentDevice(device);
+  }, []);
 
   const importKeymapObject = useCallback(
     (keymapObj: unknown, force = false): boolean => {
@@ -170,11 +171,14 @@ export function useMidiDevices() {
       }
       const keymaps = (keymapsRef.current ?? []) as KeymapObject[];
       const target = keymaps.find(
-        (k) => k.device.name === obj.device.name && k.device.manufacturer === obj.device.manufacturer
+        (k) =>
+          k.device.name === obj.device.name && k.device.manufacturer === obj.device.manufacturer
       );
       const newKeymaps = target
         ? keymaps.map((k) =>
-            k.device.name === obj.device.name && k.device.manufacturer === obj.device.manufacturer ? obj : k
+            k.device.name === obj.device.name && k.device.manufacturer === obj.device.manufacturer
+              ? obj
+              : k
           )
         : [...keymaps, obj];
       setKeymaps(newKeymaps);

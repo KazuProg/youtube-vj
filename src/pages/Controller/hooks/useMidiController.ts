@@ -1,8 +1,8 @@
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
-import { useCallback, useEffect, useRef, useState } from "react";
 import type { KeymapObject } from "@/pages/MidiScriptEditor/types";
 import { MIDIDevice } from "@/pages/MidiScriptEditor/utils/MIDIDevice";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const MIDI_SERVICE_NAME = "YouTube-VJ";
 
@@ -18,9 +18,10 @@ export function useMidiController() {
   const midiAccessRef = useRef<MIDIAccess | null>(null);
   const initCalledRef = useRef(false);
 
-  const { dataRef: keymapsRef, onChange: onKeymapsChange } = useStorageSync<
-    KeymapObject[]
-  >(LOCAL_STORAGE_KEY.midiScripts, []);
+  const { dataRef: keymapsRef, onChange: onKeymapsChange } = useStorageSync<KeymapObject[]>(
+    LOCAL_STORAGE_KEY.midiScripts,
+    []
+  );
 
   const saveDevice = useCallback(() => {
     // Controller は keymaps を読み取り専用。永続化は Script Editor のみが行う。
@@ -29,7 +30,9 @@ export function useMidiController() {
   const loadKeymapForDevice = useCallback(
     (deviceName: string, manufacturer: string): KeymapObject | undefined => {
       const keymaps = (keymapsRef.current ?? []) as KeymapObject[];
-      return keymaps.find((k) => k.device.name === deviceName && k.device.manufacturer === manufacturer);
+      return keymaps.find(
+        (k) => k.device.name === deviceName && k.device.manufacturer === manufacturer
+      );
     },
     [keymapsRef]
   );
@@ -63,8 +66,7 @@ export function useMidiController() {
       setDevices((prev) => {
         return prev.map((device) => {
           const keymap = (newKeymaps as KeymapObject[]).find(
-            (k) =>
-              k.device.name === device.name && k.device.manufacturer === device.manufacturer
+            (k) => k.device.name === device.name && k.device.manufacturer === device.manufacturer
           );
           if (keymap) {
             device.applyMappings(keymap.mappings);

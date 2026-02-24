@@ -3,10 +3,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ScriptEditorModal } from "./components/ScriptEditorModal";
 import { MIDI_SERVICE_NAME } from "./constants";
 import { useMidiDevices } from "./hooks/useMidiDevices";
-import type { MIDIElement } from "./utils/MIDIElement";
-import type { KeymapObject } from "./types";
-import { isValidKeymapObject } from "./utils/isValidKeymapObject";
 import styles from "./index.module.css";
+import type { KeymapObject } from "./types";
+import type { MIDIElement } from "./utils/MIDIElement";
+import { isValidKeymapObject } from "./utils/isValidKeymapObject";
 
 const MidiScriptEditorPage = () => {
   const {
@@ -152,7 +152,11 @@ const MidiScriptEditorPage = () => {
           <p className={styles.connectHint}>
             popup ではユーザー操作が必要です。下のボタンをクリックして再接続してください。
           </p>
-          <button type="button" className={styles.connectButton} onClick={() => requestAccess().catch(() => {})}>
+          <button
+            type="button"
+            className={styles.connectButton}
+            onClick={() => requestAccess().catch(() => {})}
+          >
             Connect MIDI
           </button>
         </div>
@@ -165,7 +169,11 @@ const MidiScriptEditorPage = () => {
       <header className={styles.header}>
         <h2>Mapping Editor for {MIDI_SERVICE_NAME}</h2>
         <div className={styles.headerDeviceRow}>
-          <span>{currentDevice ? `${currentDevice.manufacturer} ${currentDevice.name}` : "No device connected"}</span>
+          <span>
+            {currentDevice
+              ? `${currentDevice.manufacturer} ${currentDevice.name}`
+              : "No device connected"}
+          </span>
         </div>
       </header>
 
