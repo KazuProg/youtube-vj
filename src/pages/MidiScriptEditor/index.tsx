@@ -196,11 +196,13 @@ const MidiScriptEditorPage = () => {
         </button>
       </div>
 
-      <ScriptEditorModal
-        element={editingElement}
-        controlValueCallbackRef={controlValueCallbackRef}
-        onClose={handleEditorClose}
-      />
+      {editingElement && (
+        <ScriptEditorModal
+          element={editingElement}
+          controlValueCallbackRef={controlValueCallbackRef}
+          onClose={handleEditorClose}
+        />
+      )}
     </div>
   );
 };

@@ -6,7 +6,7 @@ import styles from "./index.module.css";
 const DEFAULT_PLACEHOLDER = "Enter script here...";
 
 interface ScriptEditorModalProps {
-  element: MIDIElement | null;
+  element: MIDIElement;
   controlValueCallbackRef: React.MutableRefObject<
     ((element: MIDIElement, value: number) => void) | null
   >;
@@ -26,10 +26,6 @@ export function ScriptEditorModal({
   const controlValueSpanRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (!element) {
-      controlValueCallbackRef.current = null;
-      return;
-    }
     if (controlValueSpanRef.current) {
       controlValueSpanRef.current.textContent = "";
     }
@@ -67,9 +63,6 @@ export function ScriptEditorModal({
   }, [isChanged, onClose]);
 
   const handleSave = useCallback(() => {
-    if (!element) {
-      return;
-    }
     const code =
       scriptCode.trim() === "" && placeholder !== DEFAULT_PLACEHOLDER ? placeholder : scriptCode;
     element.name = controlName.trim() || element.defaultName;
@@ -86,7 +79,7 @@ export function ScriptEditorModal({
   }, [isChanged, onClose]);
 
   const handleDelete = useCallback(() => {
-    if (!window.confirm("スクリプトを削除しますか？") || !element) {
+    if (!window.confirm("スクリプトを削除しますか？")) {
       return;
     }
     setScriptName("");
@@ -114,9 +107,6 @@ export function ScriptEditorModal({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!element) {
-        return;
-      }
       if (e.key === "Escape") {
         e.preventDefault();
         handleDiscard();
@@ -124,11 +114,7 @@ export function ScriptEditorModal({
     };
     window.addEventListener("keydown", handleKeyDown, true);
     return () => window.removeEventListener("keydown", handleKeyDown, true);
-  }, [element, handleDiscard]);
-
-  if (!element) {
-    return null;
-  }
+  }, [handleDiscard]);
 
   return (
     <div
