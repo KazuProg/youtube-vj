@@ -11,14 +11,12 @@ interface ScriptEditorModalProps {
     ((element: MIDIElement, value: number) => void) | null
   >;
   onClose: () => void;
-  onSave: (updates: { name: string; scriptName: string; scriptCode: string }) => void;
 }
 
 export function ScriptEditorModal({
   element,
   controlValueCallbackRef,
   onClose,
-  onSave,
 }: ScriptEditorModalProps) {
   const [controlName, setControlName] = useState("");
   const [scriptName, setScriptName] = useState("");
@@ -80,15 +78,16 @@ export function ScriptEditorModal({
   }, []);
 
   const handleSave = useCallback(() => {
+    if (!element) {
+      return;
+    }
     const code =
       scriptCode.trim() === "" && placeholder !== DEFAULT_PLACEHOLDER ? placeholder : scriptCode;
-    onSave({
-      name: controlName.trim() || (element?.defaultName ?? ""),
-      scriptName: scriptName.trim() || "",
-      scriptCode: code,
-    });
+    element.name = controlName.trim() || element.defaultName;
+    element.scriptName = scriptName.trim();
+    element.scriptCode = code;
     onClose();
-  }, [controlName, scriptName, scriptCode, placeholder, element, onSave, onClose]);
+  }, [controlName, scriptName, scriptCode, placeholder, element, onClose]);
 
   const handleDiscard = useCallback(() => {
     if (isChanged && !window.confirm("変更を保存せずに閉じますか？")) {
@@ -98,18 +97,15 @@ export function ScriptEditorModal({
   }, [isChanged, onClose]);
 
   const handleDelete = useCallback(() => {
-    if (!window.confirm("スクリプトを削除しますか？")) {
+    if (!window.confirm("スクリプトを削除しますか？") || !element) {
       return;
     }
     setScriptName("");
     setScriptCode("");
-    onSave({
-      name: controlName.trim() || (element?.defaultName ?? ""),
-      scriptName: "",
-      scriptCode: "",
-    });
+    element.name = controlName.trim() || element.defaultName;
+    element.scriptCode = "";
     onClose();
-  }, [controlName, element, onSave, onClose]);
+  }, [controlName, element, onClose]);
 
   const handleScriptNameFocus = useCallback(() => {
     if (scriptCode !== "") {

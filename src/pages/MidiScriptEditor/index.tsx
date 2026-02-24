@@ -16,7 +16,6 @@ const MidiScriptEditorPage = () => {
     controlValueCallbackRef,
     error,
     requestAccess,
-    saveDevice,
     importKeymapObject,
   } = useMidiDevices();
 
@@ -117,20 +116,6 @@ const MidiScriptEditorPage = () => {
     setEditingElement(null);
   }, []);
 
-  const handleEditorSave = useCallback(
-    (updates: { name: string; scriptName: string; scriptCode: string }) => {
-      if (!editingElement || !currentDevice) {
-        return;
-      }
-      editingElement.name = updates.name;
-      editingElement.scriptName = updates.scriptName;
-      editingElement.scriptCode = updates.scriptCode;
-      saveDevice(currentDevice);
-      setEditingElement(null);
-    },
-    [editingElement, currentDevice, saveDevice]
-  );
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "F2" && !editingElement && latestElement && currentDevice) {
@@ -215,7 +200,6 @@ const MidiScriptEditorPage = () => {
         element={editingElement}
         controlValueCallbackRef={controlValueCallbackRef}
         onClose={handleEditorClose}
-        onSave={handleEditorSave}
       />
     </div>
   );
