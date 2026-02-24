@@ -1,11 +1,16 @@
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
+
+export interface ImportResult<T> {
+  data: T;
+  filename: string;
+}
 
 export interface UseFileIOOptions<T = unknown> {
   /** Export: MIME type (default: application/json) */
   contentType?: string;
   /** Import: accepted file extensions (default: .json) */
   accept?: string;
-  /** Import: parse file text to result (default: JSON.parse) */
+  /** Import: parse file text to result (default: JSON.parse). Use (t) => t for raw text. */
   parse?: (text: string) => T;
   /** Import: error handler */
   onError?: (error: Error) => void;
@@ -18,8 +23,6 @@ export function useFileIO<T = unknown>(options: UseFileIOOptions<T> = {}) {
     parse = JSON.parse as (text: string) => T,
     onError,
   } = options;
-
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const exportFile = useCallback(
     (data: unknown, filename: string) => {
@@ -35,7 +38,7 @@ export function useFileIO<T = unknown>(options: UseFileIOOptions<T> = {}) {
   );
 
   const importFile = useCallback(
-    (): Promise<T | null> =>
+    (): Promise<ImportResult<T> | null> =>
       new Promise((resolve) => {
         const input = document.createElement("input");
         input.type = "file";
@@ -51,8 +54,8 @@ export function useFileIO<T = unknown>(options: UseFileIOOptions<T> = {}) {
 
           try {
             const text = await file.text();
-            const result = parse(text);
-            resolve(result);
+            const data = parse(text);
+            resolve({ data, filename: file.name });
           } catch (error) {
             onError?.(error instanceof Error ? error : new Error(String(error)));
             resolve(null);
@@ -67,5 +70,5 @@ export function useFileIO<T = unknown>(options: UseFileIOOptions<T> = {}) {
     [accept, parse, onError]
   );
 
-  return { exportFile, importFile, inputRef };
+  return { exportFile, importFile };
 }

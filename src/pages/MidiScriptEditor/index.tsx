@@ -85,10 +85,11 @@ const MidiScriptEditorPage = () => {
   }, [currentDevice, exportFile]);
 
   const handleImport = useCallback(async () => {
-    const data = await importFile();
-    if (!data) {
+    const result = await importFile();
+    if (!result) {
       return;
     }
+    const { data } = result;
     if (!isValidKeymapObject(data)) {
       alert("Invalid keymap format.");
       return;
