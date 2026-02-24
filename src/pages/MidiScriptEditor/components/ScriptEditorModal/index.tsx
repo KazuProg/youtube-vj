@@ -62,11 +62,10 @@ export function ScriptEditorModal({
   }, [isChanged, onClose]);
 
   const handleSave = useCallback(() => {
-    const code =
-      scriptCode.trim() === "" && placeholder !== DEFAULT_PLACEHOLDER ? placeholder : scriptCode;
     element.name = controlName.trim() || element.defaultName;
     element.scriptName = scriptName.trim();
-    element.scriptCode = code;
+    element.scriptCode =
+      scriptCode.trim() === "" && placeholder !== DEFAULT_PLACEHOLDER ? placeholder : scriptCode;
     onClose();
   }, [controlName, scriptName, scriptCode, placeholder, element, onClose]);
 
