@@ -29,9 +29,8 @@ export function ScriptEditorModal({
     if (controlValueSpanRef.current) {
       controlValueSpanRef.current.textContent = "";
     }
-    const midiID = element.midiID;
     controlValueCallbackRef.current = (targetElement, value) => {
-      if (targetElement.midiID === midiID && controlValueSpanRef.current) {
+      if (targetElement.midiID === element.midiID && controlValueSpanRef.current) {
         controlValueSpanRef.current.textContent = String(value);
       }
     };
