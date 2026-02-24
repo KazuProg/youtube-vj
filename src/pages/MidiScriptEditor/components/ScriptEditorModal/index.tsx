@@ -28,7 +28,7 @@ export function ScriptEditorModal({
   const [placeholder, setPlaceholder] = useState(DEFAULT_PLACEHOLDER);
   const [isChanged, setIsChanged] = useState(false);
   const isClickEditorRef = useRef(false);
-  const popupRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDialogElement>(null);
   const controlValueSpanRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -154,12 +154,12 @@ export function ScriptEditorModal({
       onKeyDown={() => {}}
       role="presentation"
     >
-      <div
+      <dialog
         ref={popupRef}
+        open
         className={styles.container}
         onClick={handlePopupClick}
         onKeyDown={(e) => e.stopPropagation()}
-        role="dialog"
         aria-label="Script Editor"
       >
         <h2>
@@ -223,7 +223,7 @@ export function ScriptEditorModal({
             Save
           </button>
         </div>
-      </div>
+      </dialog>
     </div>
   );
 }
