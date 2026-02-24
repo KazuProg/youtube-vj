@@ -75,6 +75,12 @@ export class MIDIElement {
     }
   }
 
+  get controlIdentifier(): string {
+    const typeStr = this.type === MIDIMessageTypes.Note ? "Note" : "CC";
+    const channelHex = this.channel.toString(16).toUpperCase();
+    return `${typeStr}#${channelHex} ${this.defaultName}`;
+  }
+
   get name(): string {
     return this.#name !== null ? this.#name : this.defaultName;
   }

@@ -7,7 +7,6 @@ const DEFAULT_PLACEHOLDER = "Enter script here...";
 
 interface ScriptEditorModalProps {
   element: MIDIElement | null;
-  controlIdentifier: string;
   controlValueCallbackRef: React.MutableRefObject<
     ((element: MIDIElement, value: number) => void) | null
   >;
@@ -17,7 +16,6 @@ interface ScriptEditorModalProps {
 
 export function ScriptEditorModal({
   element,
-  controlIdentifier,
   controlValueCallbackRef,
   onClose,
   onSave,
@@ -163,7 +161,7 @@ export function ScriptEditorModal({
         aria-label="Script Editor"
       >
         <h2>
-          Edit: <span className={styles.controlName}>{controlIdentifier}</span>
+          Edit: <span className={styles.controlName}>{element.controlIdentifier}</span>
         </h2>
         <div className={styles.elementDetails}>
           <span>Control Name</span>

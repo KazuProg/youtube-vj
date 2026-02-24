@@ -18,7 +18,6 @@ const MidiScriptEditorPage = () => {
     requestAccess,
     saveDevice,
     importKeymapObject,
-    getControlName,
   } = useMidiDevices();
 
   const [editingElement, setEditingElement] = useState<MIDIElement | null>(null);
@@ -186,7 +185,7 @@ const MidiScriptEditorPage = () => {
                 data-midi-id={element.midiID}
                 onClick={() => handleRowClick(element)}
               >
-                <td>{getControlName(element)}</td>
+                <td>{element.controlIdentifier}</td>
                 <td>{element.name}</td>
                 <td>{element.scriptName ?? ""}</td>
               </tr>
@@ -206,7 +205,6 @@ const MidiScriptEditorPage = () => {
 
       <ScriptEditorModal
         element={editingElement}
-        controlIdentifier={editingElement ? getControlName(editingElement) : ""}
         controlValueCallbackRef={controlValueCallbackRef}
         onClose={handleEditorClose}
         onSave={handleEditorSave}

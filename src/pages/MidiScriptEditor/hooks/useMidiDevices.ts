@@ -1,7 +1,6 @@
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MIDIMessageTypes } from "../constants";
 import type { KeymapObject } from "../types";
 import { MIDIDevice } from "../utils/MIDIDevice";
 import type { MIDIElement } from "../utils/MIDIElement";
@@ -192,12 +191,6 @@ export function useMidiDevices() {
     [keymapsRef, setKeymaps, devices, updateKeymapsForDevice]
   );
 
-  const getControlName = useCallback((element: MIDIElement) => {
-    const typeStr = element.type === MIDIMessageTypes.Note ? "Note" : "CC";
-    const channelHex = element.channel.toString(16).toUpperCase();
-    return `${typeStr}#${channelHex} ${element.defaultName}`;
-  }, []);
-
   return {
     devices,
     currentDevice,
@@ -213,6 +206,5 @@ export function useMidiDevices() {
     importKeymapObject,
     setCurrentDevice,
     setLatestElement,
-    getControlName,
   };
 }
