@@ -209,34 +209,48 @@ export class MIDIDevice implements MIDIDeviceInterface {
     }
   }
 
+  #getStatusAndData1(elem: MIDIElement): [number, number] {
+    const raw =
+      elem.type === MIDIMessageTypes.note
+        ? MIDIMessageTypes.rawNoteOn
+        : MIDIMessageTypes.rawControlChange;
+    return [raw | elem.channel, elem.number];
+  }
+
   #createOutputHandler(status: number, data1: number, _data2: number) {
-    return (arg1: number | [number, number, number] | string, arg2?: number) => {
+    const resolveTarget = (name: string): [number, number] | null => {
+      const elem = this.findElementByName(name) ?? this.findElementByScriptName(name);
+      return elem ? this.#getStatusAndData1(elem) : null;
+    };
+
+    const resolveArgs = (
+      arg1: number | [number, number, number],
+      arg2?: string
+    ): [number, number, number] | null => {
+      if (Array.isArray(arg1) && arg1.length === 3) {
+        return arg1 as [number, number, number];
+      }
+      if (typeof arg1 !== "number") {
+        return null;
+      }
+
+      if (typeof arg2 === "string") {
+        const target = resolveTarget(arg2);
+        if (!target) {
+          return null;
+        }
+        return [...target, arg1];
+      }
+      return [status, data1, arg1];
+    };
+
+    return (arg1: number | [number, number, number], arg2?: string) => {
       if (!this.#output) {
         return;
       }
-      let _status = status;
-      let _data1 = data1;
-      let _data2: number | null = null;
-
-      if (typeof arg1 === "number") {
-        _data2 = arg1;
-      } else if (Array.isArray(arg1) && arg1.length === 3) {
-        [_status, _data1, _data2] = arg1;
-      } else if (typeof arg1 === "string") {
-        const elem = this.findElementByName(arg1) ?? this.findElementByScriptName(arg1);
-        if (!elem) {
-          return;
-        }
-        _status =
-          (elem.type === MIDIMessageTypes.Note
-            ? MIDIMessageTypes.RawNoteOn
-            : MIDIMessageTypes.RawControlChange) | elem.channel;
-        _data1 = elem.number;
-        _data2 = arg2 ?? null;
-      }
-
-      if (_data2 !== null) {
-        this.#output.send([_status, _data1, _data2]);
+      const msg = resolveArgs(arg1, arg2);
+      if (msg) {
+        this.#output.send(msg);
       }
     };
   }
