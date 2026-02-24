@@ -23,7 +23,6 @@ export function ScriptEditorModal({
   const [scriptCode, setScriptCode] = useState("");
   const [placeholder, setPlaceholder] = useState(DEFAULT_PLACEHOLDER);
   const [isChanged, setIsChanged] = useState(false);
-  const isClickEditorRef = useRef(false);
   const popupRef = useRef<HTMLDialogElement>(null);
   const controlValueSpanRef = useRef<HTMLSpanElement>(null);
 
@@ -62,20 +61,11 @@ export function ScriptEditorModal({
   }, [scriptName]);
 
   const handleOverlayClick = useCallback(() => {
-    if (!isClickEditorRef.current) {
-      if (isChanged && !window.confirm("変更を保存せずに閉じますか？")) {
-        return;
-      }
-      onClose();
+    if (isChanged && !window.confirm("変更を保存せずに閉じますか？")) {
+      return;
     }
+    onClose();
   }, [isChanged, onClose]);
-
-  const handlePopupClick = useCallback(() => {
-    isClickEditorRef.current = true;
-    setTimeout(() => {
-      isClickEditorRef.current = false;
-    }, 10);
-  }, []);
 
   const handleSave = useCallback(() => {
     if (!element) {
@@ -152,7 +142,7 @@ export function ScriptEditorModal({
         ref={popupRef}
         open
         className={styles.container}
-        onClick={handlePopupClick}
+        onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
         aria-label="Script Editor"
       >
