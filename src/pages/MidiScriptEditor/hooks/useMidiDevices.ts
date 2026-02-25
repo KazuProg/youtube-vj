@@ -76,7 +76,6 @@ export function useMidiDevices() {
     latestElement,
     highlightCallbackRef,
     controlValueCallbackRef,
-    error: base.error,
     requestAccess: base.requestAccess,
     importKeymapObject,
   };

@@ -13,7 +13,6 @@ export function useMidiDevicesBase(options: UseMidiDevicesBaseOptions) {
   const { executeScript, onMessage } = options;
 
   const [devices, setDevices] = useState<MIDIDevice[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const midiAccessRef = useRef<MIDIAccess | null>(null);
 
   const storage = useStorageSync<KeymapObject[]>(LOCAL_STORAGE_KEY.midiScripts, []);
@@ -107,36 +106,25 @@ export function useMidiDevicesBase(options: UseMidiDevicesBaseOptions) {
 
   const requestAccess = useCallback((): Promise<void> => {
     if (!navigator.requestMIDIAccess) {
-      const err = new Error("Web MIDI API is not supported.");
-      setError(err.message);
-      return Promise.reject(err);
+      return Promise.reject(new Error("Web MIDI API is not supported."));
     }
 
-    return navigator
-      .requestMIDIAccess()
-      .then((access) => {
-        midiAccessRef.current = access;
-        setError(null);
-        for (const input of access.inputs.values()) {
-          handleInputChanged(input);
+    return navigator.requestMIDIAccess().then((access) => {
+      midiAccessRef.current = access;
+      for (const input of access.inputs.values()) {
+        handleInputChanged(input);
+      }
+      access.onstatechange = (e) => {
+        const port = e.port;
+        if (port?.type === "input") {
+          handleInputChanged(port as MIDIInput);
         }
-        access.onstatechange = (e) => {
-          const port = e.port;
-          if (port?.type === "input") {
-            handleInputChanged(port as MIDIInput);
-          }
-        };
-      })
-      .catch((err) => {
-        const msg = err?.message ?? "Failed to request MIDI access.";
-        setError(msg);
-        throw err;
-      });
+      };
+    });
   }, [handleInputChanged]);
 
   return {
     devices,
-    error,
     requestAccess,
     keymapsRef: storage.dataRef,
     setKeymaps: storage.setData,

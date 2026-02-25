@@ -108,39 +108,3 @@
 .buttons button:hover {
   background-color: #333;
 }
-
-.errorState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 2rem;
-}
-
-.error {
-  color: #f80;
-  text-align: center;
-  padding: 1rem;
-}
-
-.connectHint {
-  color: #aaa;
-  font-size: 0.9em;
-  text-align: center;
-  margin: 0.5rem 0;
-}
-
-.connectButton {
-  padding: 0.5rem 1rem;
-  background-color: #f80;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.connectButton:hover {
-  background-color: #fa0;
-}

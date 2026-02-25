@@ -12,7 +12,6 @@ const MidiScriptEditorPage = () => {
     latestElement,
     highlightCallbackRef,
     controlValueCallbackRef,
-    error,
     requestAccess,
     importKeymapObject,
   } = useMidiDevices();
@@ -57,7 +56,13 @@ const MidiScriptEditorPage = () => {
   }, []);
 
   useEffect(() => {
-    requestAccess().catch(() => {});
+    requestAccess().catch((err) => {
+      const msg = (err as Error)?.message ?? "Failed to request MIDI access.";
+      alert(msg);
+      if (window.opener) {
+        window.close();
+      }
+    });
   }, [requestAccess]);
 
   useEffect(() => {
@@ -69,13 +74,6 @@ const MidiScriptEditorPage = () => {
       }
     };
   }, [highlightCallbackRef, highlightElement]);
-
-  useEffect(() => {
-    if (error && window.opener) {
-      alert(error);
-      window.close();
-    }
-  }, [error]);
 
   const handleExport = useCallback(() => {
     if (!currentDevice) {
@@ -131,26 +129,6 @@ const MidiScriptEditorPage = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [editingElement, latestElement, currentDevice]);
-
-  if (error) {
-    return (
-      <div className={styles.root}>
-        <div className={styles.errorState}>
-          <div className={styles.error}>{error}</div>
-          <p className={styles.connectHint}>
-            popup ではユーザー操作が必要です。下のボタンをクリックして再接続してください。
-          </p>
-          <button
-            type="button"
-            className={styles.connectButton}
-            onClick={() => requestAccess().catch(() => {})}
-          >
-            Connect MIDI
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.root}>
