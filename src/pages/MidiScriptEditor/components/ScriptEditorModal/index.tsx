@@ -1,6 +1,6 @@
+import type { MIDIElement } from "@/midi";
 import midiScriptTemplate from "@/pages/Controller/utils/midi-script-template";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { MIDIElement } from "../../utils/MIDIElement";
 import styles from "./index.module.css";
 
 const DEFAULT_PLACEHOLDER = "Enter script here...";

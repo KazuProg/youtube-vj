@@ -17,8 +17,3 @@ export interface KeymapObject {
 }
 
 export type KeymapsData = KeymapObject[];
-
-export interface MidiScriptTemplate {
-  name: string;
-  code: string;
-}

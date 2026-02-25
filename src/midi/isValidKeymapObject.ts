@@ -1,4 +1,4 @@
-import type { KeymapObject } from "../types";
+import type { KeymapObject } from "./types";
 
 export function isValidKeymapObject(obj: unknown): obj is KeymapObject {
   if (typeof obj !== "object" || obj === null) {

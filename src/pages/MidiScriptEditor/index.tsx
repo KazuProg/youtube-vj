@@ -1,12 +1,10 @@
 import { useFileIO } from "@/hooks/useFileIO";
+import type { KeymapObject, MIDIElement } from "@/midi";
+import { MIDI_SERVICE_NAME, isValidKeymapObject } from "@/midi";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ScriptEditorModal } from "./components/ScriptEditorModal";
-import { MIDI_SERVICE_NAME } from "./constants";
 import { useMidiDevices } from "./hooks/useMidiDevices";
 import styles from "./index.module.css";
-import type { KeymapObject } from "./types";
-import type { MIDIElement } from "./utils/MIDIElement";
-import { isValidKeymapObject } from "./utils/isValidKeymapObject";
 
 const MidiScriptEditorPage = () => {
   const {
@@ -57,6 +55,10 @@ const MidiScriptEditorPage = () => {
   useEffect(() => {
     document.title = "YouTube-VJ Midi Script Editor";
   }, []);
+
+  useEffect(() => {
+    requestAccess().catch(() => {});
+  }, [requestAccess]);
 
   useEffect(() => {
     highlightCallbackRef.current = highlightElement;

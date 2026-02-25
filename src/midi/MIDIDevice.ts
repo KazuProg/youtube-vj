@@ -1,6 +1,6 @@
-import { MIDIMessageTypes } from "../constants";
-import type { KeymapMapping } from "../types";
 import { MIDIElement } from "./MIDIElement";
+import { MIDIMessageTypes } from "./constants";
+import type { KeymapMapping } from "./types";
 
 export interface MIDIDeviceInterface {
   name: string;
