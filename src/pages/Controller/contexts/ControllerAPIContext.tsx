@@ -5,6 +5,7 @@ import type { LibraryAPI } from "@/pages/Controller/components/Library/types";
 import type { MixerAPI } from "@/pages/Controller/components/Mixer/types";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { DEFAULT_SETTINGS } from "../constants";
+import { useMidiController } from "../hooks/useMidiController";
 import type { MIDIScriptManager } from "../types/MIDIScriptManager";
 import type { SettingsData } from "../types/settings";
 import { useHistory } from "./hooks/useHistory";
@@ -25,7 +26,8 @@ interface ControllerAPIContextValue {
   libraryAPI: LibraryAPI | null;
   setLibraryAPI: (library: LibraryAPI | null) => void;
   midiAPI: MIDIScriptManager | null;
-  setMidiAPI: (midi: MIDIScriptManager | null) => void;
+  midiRequestAccess: () => Promise<void>;
+  midiOpenScriptEditor: () => void;
   historyAPI: HistoryAPI;
 
   settings: SettingsData;
@@ -42,7 +44,11 @@ export const ControllerAPIProvider = ({
   const [deckAPIs, setDeckAPIs] = useState<(DeckAPI | null)[]>([]);
   const [mixerAPI, _setMixerAPI] = useState<MixerAPI | null>(null);
   const [libraryAPI, _setLibraryAPI] = useState<LibraryAPI | null>(null);
-  const [midiAPI, setMidiAPI] = useState<MIDIScriptManager | null>(null);
+  const {
+    midiAPI,
+    requestAccess: midiRequestAccess,
+    openCustomScriptEditor: midiOpenScriptEditor,
+  } = useMidiController();
 
   const { getHistory, addHistory, removeHistory, clearHistory, onChange } = useHistory();
 
@@ -103,7 +109,8 @@ export const ControllerAPIProvider = ({
         libraryAPI,
         setLibraryAPI,
         midiAPI,
-        setMidiAPI,
+        midiRequestAccess,
+        midiOpenScriptEditor,
         historyAPI,
 
         settings,
