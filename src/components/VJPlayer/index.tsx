@@ -1,4 +1,4 @@
-import { DEFAULT_VALUES } from "@/constants";
+import { DEFAULT_VALUES, INITIAL_SYNC_DATA } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import YouTubePlayer from "./components/YouTubePlayer";
@@ -101,19 +101,18 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       [notifySyncData]
     );
 
-    const {
-      dataRef: syncDataRef,
-      setData: setSyncData,
-      onChange: onChangeSyncData,
-    } = useStorageSync<VJSyncData>(syncKey);
+    const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(
+      syncKey,
+      INITIAL_SYNC_DATA as VJSyncData
+    );
+    const syncDataRef = useRef(syncData);
+    syncDataRef.current = syncData;
 
     useEffect(() => {
-      return onChangeSyncData((syncData) => {
-        if (syncData) {
-          handleSyncData(syncData);
-        }
-      });
-    }, [onChangeSyncData, handleSyncData]);
+      if (syncData) {
+        handleSyncData(syncData);
+      }
+    }, [syncData, handleSyncData]);
 
     const handleReady = useCallback(
       (event: YTPlayerEvent) => {
@@ -129,7 +128,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           console.error("[VJPlayer] Failed to initialize player:", error);
         }
       },
-      [handleSyncData, syncDataRef]
+      [handleSyncData]
     );
 
     useEffect(() => {
@@ -145,22 +144,19 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
       eventsRef.current = events;
     }, [events]);
 
-    const handlePlayerStateEvents = useCallback(
-      (playerState: number) => {
-        if (playerState === YT_PLAYER_STATE.PAUSED && !syncDataRef.current?.paused) {
-          eventsRef.current?.onPaused?.();
-        }
+    const handlePlayerStateEvents = useCallback((playerState: number) => {
+      if (playerState === YT_PLAYER_STATE.PAUSED && !syncDataRef.current?.paused) {
+        eventsRef.current?.onPaused?.();
+      }
 
-        if (playerState !== YT_PLAYER_STATE.PAUSED && syncDataRef.current?.paused) {
-          eventsRef.current?.onUnpaused?.();
-        }
+      if (playerState !== YT_PLAYER_STATE.PAUSED && syncDataRef.current?.paused) {
+        eventsRef.current?.onUnpaused?.();
+      }
 
-        if (playerState === YT_PLAYER_STATE.ENDED) {
-          eventsRef.current?.onEnded?.();
-        }
-      },
-      [syncDataRef]
-    );
+      if (playerState === YT_PLAYER_STATE.ENDED) {
+        eventsRef.current?.onEnded?.();
+      }
+    }, []);
 
     const handleStateChange = useCallback(
       (e: YTPlayerEvent) => {

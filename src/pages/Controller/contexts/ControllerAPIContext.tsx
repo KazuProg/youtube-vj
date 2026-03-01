@@ -3,7 +3,7 @@ import { useStorageSync } from "@/hooks/useStorageSync";
 import type { DeckAPI } from "@/pages/Controller/components/Deck/types";
 import type { LibraryAPI } from "@/pages/Controller/components/Library/types";
 import type { MixerAPI } from "@/pages/Controller/components/Mixer/types";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { DEFAULT_SETTINGS } from "../constants";
 import type { MIDIScriptManager } from "../types/MIDIScriptManager";
 import type { SettingsData } from "../types/settings";
@@ -78,20 +78,10 @@ export const ControllerAPIProvider = ({
     window.library = library;
   }, []);
 
-  const {
-    setData: _setSettings,
-    dataRef: settingsRef,
-    onChange: settingsOnChange,
-  } = useStorageSync<SettingsData>(LOCAL_STORAGE_KEY.settings, DEFAULT_SETTINGS);
-  const [settings, setSettings] = useState<SettingsData>(settingsRef.current);
-
-  useEffect(() => {
-    return settingsOnChange(setSettings);
-  }, [settingsOnChange]);
-
-  useEffect(() => {
-    _setSettings(settings);
-  }, [_setSettings, settings]);
+  const { data: settings, setData: setSettings } = useStorageSync<SettingsData>(
+    LOCAL_STORAGE_KEY.settings,
+    DEFAULT_SETTINGS
+  );
 
   return (
     <ControllerAPIContext.Provider

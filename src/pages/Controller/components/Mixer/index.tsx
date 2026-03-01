@@ -8,7 +8,7 @@ import {
   urlParser,
 } from "@/pages/Controller/utils/youtube";
 import type { MixerData } from "@/types";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useControllerAPIContext } from "../../contexts/ControllerAPIContext";
 import { useMixerAPI } from "./hooks/useMixerAPI";
 import styles from "./index.module.css";
@@ -19,16 +19,12 @@ interface MixerProps {
 
 const Mixer = ({ className }: MixerProps) => {
   const { deckAPIs, setMixerAPI, libraryAPI, settings } = useControllerAPIContext();
-  const {
-    dataRef: mixerDataRef,
-    setData: setMixerData,
-    onChange: onChangeMixerData,
-  } = useStorageSync<MixerData>(LOCAL_STORAGE_KEY.mixer, { crossfader: 0 });
-  const [mixerData, _setMixerData] = useState<MixerData>(mixerDataRef.current);
-
-  useEffect(() => {
-    return onChangeMixerData(_setMixerData);
-  }, [onChangeMixerData]);
+  const { data: mixerData, setData: setMixerData } = useStorageSync<MixerData>(
+    LOCAL_STORAGE_KEY.mixer,
+    { crossfader: 0 }
+  );
+  const mixerDataRef = useRef(mixerData);
+  mixerDataRef.current = mixerData;
 
   const inputRef = useRef<HTMLInputElement>(null);
 
