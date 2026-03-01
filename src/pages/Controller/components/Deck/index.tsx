@@ -18,11 +18,13 @@ interface DeckProps {
 
 const Deck = ({ localStorageKey, deckId, className, initialPaused = false }: DeckProps) => {
   const vjPlayerRef = useRef<VJPlayerRef | null>(null);
-  const { dataRef: syncDataRef, setData: setSyncData } = useStorageSync<VJSyncData>(
+  const { data: syncData, setData: setSyncData } = useStorageSync<VJSyncData>(
     localStorageKey,
     { ...INITIAL_SYNC_DATA, paused: initialPaused },
     { overwrite: true }
   );
+  const syncDataRef = useRef(syncData);
+  syncDataRef.current = syncData;
   const { mixerAPI } = useControllerAPIContext();
 
   // UI用のstate
@@ -58,7 +60,7 @@ const Deck = ({ localStorageKey, deckId, className, initialPaused = false }: Dec
         [newSyncData.loopStart, newSyncData.loopEnd].filter((v): v is number => v !== null)
       );
     },
-    [setSyncData, syncDataRef]
+    [setSyncData]
   );
 
   const handleMuteChange = useCallback(

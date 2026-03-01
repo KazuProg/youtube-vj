@@ -10,20 +10,11 @@ const ProjectionPage = () => {
   const [ch1Filters, setCh1Filters] = useState<Record<string, string>>({});
   const [crossfader, setCrossfader] = useState<number>(0);
 
-  const { dataRef: mixerDataRef, onChange: onChangeMixerData } = useStorageSync<MixerData>(
-    LOCAL_STORAGE_KEY.mixer
-  );
-
-  // 初期値を設定
-  useEffect(() => {
-    setCrossfader(mixerDataRef.current?.crossfader ?? 0);
-  }, [mixerDataRef]);
+  const { data: mixerData } = useStorageSync<MixerData>(LOCAL_STORAGE_KEY.mixer, { crossfader: 0 });
 
   useEffect(() => {
-    return onChangeMixerData((mixerData) => {
-      setCrossfader(mixerData?.crossfader ?? 0);
-    });
-  }, [onChangeMixerData]);
+    setCrossfader(mixerData?.crossfader ?? 0);
+  }, [mixerData]);
 
   const [initialized, setInitialized] = useState(false);
 
