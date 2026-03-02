@@ -10,11 +10,10 @@ import type { SettingsData } from "../types/settings";
 import { useHistory } from "./hooks/useHistory";
 
 interface HistoryAPI {
-  get: () => string[];
+  history: string[];
   add: (videoId: string) => void;
   remove: (index: number) => void;
   clear: () => void;
-  onChange: (callback: (history: string[]) => void) => () => void;
 }
 
 interface ControllerAPIContextValue {
@@ -44,17 +43,16 @@ export const ControllerAPIProvider = ({
   const [libraryAPI, _setLibraryAPI] = useState<LibraryAPI | null>(null);
   const [midiAPI, setMidiAPI] = useState<MIDIScriptManager | null>(null);
 
-  const { getHistory, addHistory, removeHistory, clearHistory, onChange } = useHistory();
+  const { history, addHistory, removeHistory, clearHistory } = useHistory();
 
   const historyAPI: HistoryAPI = useMemo(
     () => ({
-      get: getHistory,
+      history,
       add: addHistory,
       remove: removeHistory,
       clear: clearHistory,
-      onChange,
     }),
-    [getHistory, addHistory, removeHistory, clearHistory, onChange]
+    [history, addHistory, removeHistory, clearHistory]
   );
 
   const setDeckAPI = useCallback((deckId: number, deckAPI: DeckAPI | null) => {
