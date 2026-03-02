@@ -27,8 +27,17 @@ type FocusType = "playlist" | "video";
 
 export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLibraryAPIReturn => {
   const { settings, historyAPI } = useControllerAPIContext();
+  const { history } = historyAPI;
 
-  const handleHistoryChange = useCallback((history: string[]) => {
+  const [playlists, setPlaylists] = useState<Map<string, VideoItem[]>>(() => {
+    const initialPlaylists = new Map([["History", history.map((videoId) => ({ id: videoId }))]]);
+    if (settings.youtubeDataAPIKey) {
+      initialPlaylists.set("Search", []);
+    }
+    return initialPlaylists;
+  });
+
+  useEffect(() => {
     setPlaylists((prev) => {
       const newMap = new Map(prev);
       newMap.set(
@@ -37,23 +46,7 @@ export const useLibraryAPI = ({ setGlobalLibrary }: UseLibraryAPIParams): UseLib
       );
       return newMap;
     });
-  }, []);
-
-  useEffect(() => {
-    handleHistoryChange(historyAPI.get());
-    return historyAPI.onChange(handleHistoryChange);
-  }, [historyAPI, handleHistoryChange]);
-
-  const [playlists, setPlaylists] = useState<Map<string, VideoItem[]>>(() => {
-    const initialHistory = historyAPI.get();
-    const initialPlaylists = new Map([
-      ["History", initialHistory.map((videoId) => ({ id: videoId }))],
-    ]);
-    if (settings.youtubeDataAPIKey) {
-      initialPlaylists.set("Search", []);
-    }
-    return initialPlaylists;
-  });
+  }, [history]);
 
   const [selectedPlaylistIndex, setSelectedPlaylistIndex] = useState<number>(0);
   const [videos, setVideos] = useState<VideoItem[]>(playlists.get("History") || []);

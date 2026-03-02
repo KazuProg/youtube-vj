@@ -1,13 +1,12 @@
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import { useStorageSync } from "@/hooks/useStorageSync";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 
 interface UseHistoryReturn {
-  getHistory: () => string[];
+  history: string[];
   addHistory: (videoId: string) => void;
   removeHistory: (index: number) => void;
   clearHistory: () => void;
-  onChange: (callback: (history: string[]) => void) => () => void;
 }
 
 export const useHistory = (): UseHistoryReturn => {
@@ -18,26 +17,12 @@ export const useHistory = (): UseHistoryReturn => {
   const historyRef = useRef(history);
   historyRef.current = history;
 
-  const callbacksRef = useRef<Set<(h: string[]) => void>>(new Set());
-  useEffect(() => {
-    for (const callback of callbacksRef.current) {
-      callback(history);
-    }
-  }, [history]);
-
-  const getHistory = useCallback(() => {
-    return historyRef.current ?? [];
-  }, []);
-
   const addHistory = useCallback(
     (videoId: string) => {
       const prevItems = historyRef.current ?? [];
-      // 直近（最後）のIDと同じだったら追加しない
-      const lastItem = prevItems[prevItems.length - 1];
-      if (lastItem === videoId) {
+      if (prevItems[prevItems.length - 1] === videoId) {
         return;
       }
-      // 新しいアイテムを後ろに追加（時系列順に保持）
       setHistory([...prevItems, videoId]);
     },
     [setHistory]
@@ -51,22 +36,12 @@ export const useHistory = (): UseHistoryReturn => {
     [setHistory]
   );
 
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-  }, [setHistory]);
-
-  const onChange = useCallback((callback: (history: string[]) => void) => {
-    callbacksRef.current.add(callback);
-    return () => {
-      callbacksRef.current.delete(callback);
-    };
-  }, []);
+  const clearHistory = useCallback(() => setHistory([]), [setHistory]);
 
   return {
-    getHistory,
+    history,
     addHistory,
     removeHistory,
     clearHistory,
-    onChange,
   };
 };
