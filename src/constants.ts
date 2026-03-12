@@ -4,6 +4,7 @@ export const LOCAL_STORAGE_KEY = {
   mixer: "ytvj_mixer",
   history: "ytvj_history",
   settings: "ytvj_settings",
+  midiScripts: "midi_script",
 };
 
 export const DEFAULT_VALUES = {
