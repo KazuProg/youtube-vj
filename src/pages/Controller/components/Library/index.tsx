@@ -1,4 +1,4 @@
-import { useTextFileReader } from "@/hooks/useTextFileReader";
+import { useFileIO } from "@/hooks/useFileIO";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import type { VideoItem } from "@/pages/Controller/types/videoItem";
 import { isYouTubeVideoId, isYouTubeVideoInfo, urlParser } from "@/pages/Controller/utils/youtube";
@@ -54,10 +54,17 @@ const Library = () => {
     [libraryAPI, addPlaylist]
   );
 
-  const { openFileDialog } = useTextFileReader({
+  const { importFile } = useFileIO<string>({
     accept: ".txt",
-    onLoad: handleFileLoad,
+    parse: (t) => t,
   });
+
+  const handleLoadClick = useCallback(async () => {
+    const result = await importFile();
+    if (result) {
+      handleFileLoad(result.data, result.filename);
+    }
+  }, [importFile, handleFileLoad]);
 
   const handleSelectPlaylist = useCallback(
     (index: number) => {
@@ -96,7 +103,7 @@ const Library = () => {
     <YouTubeDataProvider>
       <FileDropZone accept=".txt" onFileLoad={handleFileLoad} className={styles.library}>
         <div className={styles.playlist}>
-          <button type="button" onClick={openFileDialog}>
+          <button type="button" onClick={handleLoadClick}>
             Load Playlist
           </button>
           <ul>
