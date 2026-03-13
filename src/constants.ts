@@ -17,7 +17,7 @@ export const DEFAULT_VALUES = {
 } as const;
 
 export const INITIAL_SYNC_DATA = {
-  videoId: DEFAULT_VALUES.videoId,
+  source: { type: "youtube" as const, videoId: DEFAULT_VALUES.videoId },
   playbackRate: DEFAULT_VALUES.playbackRate,
   currentTime: 0,
   baseTime: 0,

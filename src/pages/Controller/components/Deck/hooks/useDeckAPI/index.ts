@@ -134,7 +134,7 @@ export const useDeckAPI = ({
       loadVideo: (video: VideoItem | string) => {
         const videoObj = typeof video === "string" ? { id: video } : video;
         const updateData: Partial<VJSyncData> = {
-          videoId: videoObj.id,
+          source: { type: "youtube", videoId: videoObj.id },
           currentTime: videoObj.start ?? 0,
           baseTime: Date.now(),
           loopStart: null,
