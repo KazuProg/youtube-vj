@@ -1,16 +1,9 @@
 import { INITIAL_SYNC_DATA, SYNC_CONFIG } from "@/constants";
 import { useCallback, useEffect, useRef } from "react";
-import type { VJSyncData } from "../../types";
+import type { RefObject } from "react";
+import type { VJPlayerInterface, VJSyncData } from "../../types";
 import { usePlaybackRateAdjustment } from "../usePlaybackRateAdjustment";
 import { useTimeSync } from "../useTimeSync";
-
-/** プレイヤー同期用のインターフェース */
-export interface PlayerSyncInterface {
-  getCurrentTime: () => number | null;
-  getDuration: () => number | null;
-  setPlaybackRate: (rate: number) => boolean;
-  seekTo: (time: number) => void;
-}
 
 /** カスタムフックの戻り値 */
 export interface UsePlayerSyncReturn {
@@ -24,10 +17,12 @@ export interface UsePlayerSyncReturn {
  * プレイヤー同期用のカスタムフック
  * 時間同期と速度調整を統合して、プレイヤーの同期を管理する
  *
- * @param playerInterface プレイヤー操作のインターフェース
+ * @param playerRef プレイヤー参照
  * @returns 同期制御用の関数群
  */
-export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSyncReturn => {
+export const usePlayerSync = (
+  playerRef: RefObject<VJPlayerInterface | null>
+): UsePlayerSyncReturn => {
   const syncDataRef = useRef<VJSyncData>(INITIAL_SYNC_DATA);
   const isSyncingRef = useRef<boolean>(false);
 
@@ -38,7 +33,7 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
   const { calculateAdjustmentRate, applyPlaybackRateAdjustment, syncPlaybackRate } =
     usePlaybackRateAdjustment({
       syncDataRef,
-      setPlaybackRate: playerInterface.setPlaybackRate,
+      setPlaybackRate: (rate: number) => playerRef.current?.setPlaybackRate(rate) ?? false,
     });
 
   /**
@@ -52,7 +47,7 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
 
     try {
       const syncData = syncDataRef.current;
-      const currentPlayerTime = playerInterface.getCurrentTime();
+      const currentPlayerTime = playerRef.current?.getCurrentTime() ?? null;
 
       if (currentPlayerTime === null) {
         return;
@@ -67,7 +62,7 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
         isSyncingRef.current = false;
       } else if (absTimeDiff >= SYNC_CONFIG.seekThreshold) {
         // 差分が閾値以上の場合は強制シーク
-        playerInterface.seekTo(expectedCurrentTime);
+        playerRef.current?.seekTo(expectedCurrentTime);
       } else {
         // その他の場合は動的速度調整
         const adjustmentRate = calculateAdjustmentRate(timeDiff, syncData.playbackRate);
@@ -78,7 +73,7 @@ export const usePlayerSync = (playerInterface: PlayerSyncInterface): UsePlayerSy
     }
   }, [
     getExpectedCurrentTime,
-    playerInterface,
+    playerRef,
     syncPlaybackRate,
     calculateAdjustmentRate,
     applyPlaybackRateAdjustment,
