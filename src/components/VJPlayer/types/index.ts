@@ -1,7 +1,11 @@
 import type { YTPlayer } from "../components/YouTubePlayer/types";
 
+export type { VJPlayerInterface } from "./player";
+
+export type VideoSource = { type: "youtube"; videoId: string };
+
 export type VJSyncData = {
-  videoId: string;
+  source: VideoSource;
   playbackRate: number;
   currentTime: number;
   baseTime: number;

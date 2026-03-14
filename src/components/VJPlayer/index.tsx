@@ -74,14 +74,15 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
           return;
         }
 
-        const changedVideoId = syncData.videoId !== beforeSyncData?.videoId;
+        const currentVideoId = syncData.source.videoId;
+        const changedVideoId = currentVideoId !== beforeSyncData?.source.videoId;
 
         if (changedVideoId) {
           isSuppressingStateEventsRef.current = true;
           if (syncData.paused) {
-            player.cueVideoById(syncData.videoId);
+            player.cueVideoById(currentVideoId);
           } else {
-            player.loadVideoById(syncData.videoId);
+            player.loadVideoById(currentVideoId);
           }
         } else {
           if (syncData.paused) {
