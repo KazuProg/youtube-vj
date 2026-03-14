@@ -1,4 +1,4 @@
-/** VJPlayer / usePlayerSync / useDeckAPI が参照するプレイヤー型（将来の拡張用） */
+/** VJPlayer / usePlayerSync / useDeckAPI が参照する唯一のプレイヤー型 */
 export interface VJPlayerInterface {
   getCurrentTime: () => number | null;
   getDuration: () => number | null;
