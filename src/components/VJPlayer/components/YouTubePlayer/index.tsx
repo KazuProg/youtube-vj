@@ -1,27 +1,148 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { DEFAULT_VALUES } from "@/constants";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import type { VJPlayerInterface, VJSyncData } from "../../types";
 import styles from "./index.module.css";
-import type { YTPlayer, YTPlayerEventHandlers, YTPlayerVars } from "./types";
+import type { YTPlayer, YTPlayerEvent, YTPlayerEventHandlers, YTPlayerVars } from "./types";
+import { YT_PLAYER_STATE } from "./types";
 import { loadYouTubeIFrameAPI } from "./utils";
 
-interface YouTubePlayerProps {
-  className?: string;
-  videoId: string;
-  playerVars?: YTPlayerVars;
-  events?: YTPlayerEventHandlers;
+const playerVars: YTPlayerVars = {
+  controls: 0,
+  disablekb: 1,
+};
+
+export interface YouTubePlayerEvents {
+  onPaused?: () => void;
+  onUnpaused?: () => void;
+  onEnded?: () => void;
 }
 
-const YouTubePlayer = ({ className, videoId, playerVars, events }: YouTubePlayerProps) => {
+export interface YouTubePlayerProps {
+  className?: string;
+  syncData: VJSyncData;
+  vjPlayerRef: React.MutableRefObject<VJPlayerInterface | null>;
+  setDuration?: (duration: number | null) => void;
+  events?: YouTubePlayerEvents;
+}
+
+const createVJPlayerInterface = (player: YTPlayer): VJPlayerInterface => ({
+  getCurrentTime: () => player.getCurrentTime() ?? null,
+  getDuration: () => player.getDuration() ?? null,
+  isPlaying: () => player.getPlayerState() === YT_PLAYER_STATE.PLAYING,
+  setPlaybackRate: (rate: number) => {
+    if (player.getPlayerState() === YT_PLAYER_STATE.PLAYING) {
+      player.setPlaybackRate(rate);
+      return true;
+    }
+    return false;
+  },
+  seekTo: (time: number) => {
+    player.seekTo(time);
+  },
+  play: () => player.playVideo(),
+  pause: () => player.pauseVideo(),
+  mute: () => player.mute(),
+  unMute: () => player.unMute(),
+  isMuted: () => player.isMuted(),
+  setVolume: (volume: number) => player.setVolume(volume),
+  destroy: () => player.destroy(),
+});
+
+const YouTubePlayer = ({
+  className,
+  syncData,
+  vjPlayerRef,
+  setDuration,
+  events,
+}: YouTubePlayerProps) => {
   const playerElementId = useId();
   const playerRef = useRef<YTPlayer | null>(null);
   const isInitializedRef = useRef(false);
+  const beforeVideoIdRef = useRef<string | null>(null);
+  const isSuppressingStateEventsRef = useRef(false);
   const eventsRef = useRef(events);
+  const syncDataRef = useRef(syncData);
 
   const [error, setError] = useState<string | null>(null);
 
-  // eventsをrefで保持（再初期化を防ぐ）
   useEffect(() => {
     eventsRef.current = events;
   }, [events]);
+
+  useEffect(() => {
+    syncDataRef.current = syncData;
+  }, [syncData]);
+
+  const videoId =
+    syncData.source.type === "youtube" ? syncData.source.videoId : DEFAULT_VALUES.videoId;
+
+  const handleReady = useCallback(
+    (event: YTPlayerEvent) => {
+      const player = event.target;
+      player.mute();
+      playerRef.current = player;
+
+      const { source, paused } = syncDataRef.current;
+      const currentVideoId = source.type === "youtube" ? source.videoId : DEFAULT_VALUES.videoId;
+      beforeVideoIdRef.current = currentVideoId;
+
+      vjPlayerRef.current = createVJPlayerInterface(player);
+
+      if (paused) {
+        player.cueVideoById(currentVideoId);
+      } else {
+        player.loadVideoById(currentVideoId);
+      }
+      isSuppressingStateEventsRef.current = true;
+    },
+    [vjPlayerRef]
+  );
+
+  const notifyStateEvents = useCallback((playerState: number) => {
+    const { paused } = syncDataRef.current;
+    const ev = eventsRef.current;
+    if (playerState === YT_PLAYER_STATE.PAUSED && !paused) {
+      ev?.onPaused?.();
+    } else if (playerState !== YT_PLAYER_STATE.PAUSED && paused) {
+      ev?.onUnpaused?.();
+    }
+    if (playerState === YT_PLAYER_STATE.ENDED) {
+      ev?.onEnded?.();
+    }
+  }, []);
+
+  const handleStateChange = useCallback(
+    (e: YTPlayerEvent) => {
+      const playerState = e.data;
+
+      if (isSuppressingStateEventsRef.current) {
+        if (playerState === YT_PLAYER_STATE.BUFFERING) {
+          isSuppressingStateEventsRef.current = false;
+        }
+        return;
+      }
+
+      if (playerState === YT_PLAYER_STATE.PLAYING) {
+        setDuration?.(playerRef.current?.getDuration() ?? null);
+      }
+
+      notifyStateEvents(playerState);
+    },
+    [setDuration, notifyStateEvents]
+  );
+
+  const playerEvents = useMemo<YTPlayerEventHandlers>(
+    () => ({
+      onReady: handleReady,
+      onStateChange: handleStateChange,
+    }),
+    [handleReady, handleStateChange]
+  );
+
+  const playerEventsRef = useRef(playerEvents);
+  useEffect(() => {
+    playerEventsRef.current = playerEvents;
+  }, [playerEvents]);
 
   const initializePlayer = useCallback(async () => {
     try {
@@ -33,9 +154,9 @@ const YouTubePlayer = ({ className, videoId, playerVars, events }: YouTubePlayer
       isInitializedRef.current = true;
 
       playerRef.current = new window.YT.Player(playerElementId, {
-        videoId,
+        videoId: DEFAULT_VALUES.videoId,
         playerVars,
-        events: eventsRef.current,
+        events: playerEventsRef.current,
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
@@ -43,7 +164,7 @@ const YouTubePlayer = ({ className, videoId, playerVars, events }: YouTubePlayer
       setError(errorMessage);
       isInitializedRef.current = false;
     }
-  }, [playerElementId, playerVars, videoId]);
+  }, [playerElementId]);
 
   useEffect(() => {
     initializePlayer();
@@ -53,10 +174,49 @@ const YouTubePlayer = ({ className, videoId, playerVars, events }: YouTubePlayer
         playerRef.current.destroy();
         playerRef.current = null;
       }
+      vjPlayerRef.current = null;
       isInitializedRef.current = false;
       setError(null);
     };
-  }, [initializePlayer]);
+  }, [initializePlayer, vjPlayerRef]);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player) {
+      return;
+    }
+
+    const changedVideoId = videoId !== beforeVideoIdRef.current;
+    if (!changedVideoId) {
+      return;
+    }
+
+    isSuppressingStateEventsRef.current = true;
+    beforeVideoIdRef.current = videoId;
+
+    const { paused } = syncDataRef.current;
+    if (paused) {
+      player.cueVideoById(videoId);
+    } else {
+      player.loadVideoById(videoId);
+    }
+  }, [videoId]);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player) {
+      return;
+    }
+    if (videoId !== beforeVideoIdRef.current) {
+      return;
+    }
+
+    if (syncData.paused) {
+      player.pauseVideo();
+    } else {
+      player.playVideo();
+    }
+  }, [videoId, syncData.paused]);
 
   return (
     <div id={playerElementId} className={className}>
