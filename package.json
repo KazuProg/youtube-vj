@@ -19,7 +19,7 @@
     "qa": "npm run fix && npm run type-check && npm run build"
   },
   "dependencies": {
-    "@11ty/eleventy": "^3.1.2",
+    "@11ty/eleventy": "^3.1.5",
     "js-video-url-parser": "^0.5.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
