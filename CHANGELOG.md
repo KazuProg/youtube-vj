@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.0](https://github.com/KazuProg/youtube-vj/compare/v1.3.0...v1.4.0) (2026-06-10)
+
+
+### Features
+
+* add local video drag-and-drop with blob lifecycle management ([9161980](https://github.com/KazuProg/youtube-vj/commit/916198005bb3dc6c7bb68efec9367789a3ad76b5))
+* add url video playback with Mixer input and sync controls ([2f97377](https://github.com/KazuProg/youtube-vj/commit/2f97377dd798ab7ba2191bffdce3d18351c0fe3b))
+* **extension:** hide YouTube controls on projection embeds ([f8721df](https://github.com/KazuProg/youtube-vj/commit/f8721dfd4c0c17be9f62423517313227e07ec048))
+
+
+### Bug Fixes
+
+* sync overwrite defaultValue to localStorage on init ([5685629](https://github.com/KazuProg/youtube-vj/commit/568562996425e4bc33098fa8fbf1ed03cb093df4))
+
 ## [1.3.0](https://github.com/KazuProg/youtube-vj/compare/v1.2.0...v1.3.0) (2026-03-13)
 
 
