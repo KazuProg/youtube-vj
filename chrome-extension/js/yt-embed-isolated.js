@@ -5,6 +5,6 @@
   }
 
   const style = document.createElement("style");
-  style.textContent = "#player-controls { display: none }";
+  style.textContent = "#player-controls, #ytp-caption-window-container { display: none }";
   document.head.appendChild(style);
 })();
