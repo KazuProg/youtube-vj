@@ -1,5 +1,6 @@
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import { useEffect } from "react";
+import discordIcon from "./discord-icon.svg";
 import styles from "./index.module.css";
 
 interface SettingsProps {
@@ -114,6 +115,17 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
               />
             </div>
           </div>
+        </div>
+        <div className={styles.footer}>
+          <a
+            href="https://discord.gg/6wNns5NXrs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.discordLink}
+          >
+            <img src={discordIcon} className={styles.discordIcon} alt="" />
+            Discordコミュニティに参加する
+          </a>
         </div>
       </div>
     </>

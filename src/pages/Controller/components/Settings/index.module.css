@@ -158,10 +158,31 @@
   padding: 16px 20px;
   border-top: 1px solid rgb(85, 85, 85);
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  align-items: center;
   gap: 8px;
 }
 
 .footer .saveButton {
   min-width: 80px;
+}
+
+.discordLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgb(88, 101, 242);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.discordLink:hover {
+  color: rgb(120, 131, 245);
+}
+
+.discordIcon {
+  width: 20px;
+  height: 20px;
 }
