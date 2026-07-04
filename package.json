@@ -21,8 +21,8 @@
   "dependencies": {
     "@11ty/eleventy": "^3.1.5",
     "js-video-url-parser": "^0.5.1",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "react-router-dom": "^7.13.1",
     "use-indexeddb": "^2.0.2"
   },
@@ -30,7 +30,7 @@
     "@biomejs/biome": "^1.9.4",
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^5.1.4",
     "archiver": "^7.0.1",
@@ -40,11 +40,7 @@
     "vite": "^7.3.3"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css}": [
-      "biome check --write --no-errors-on-unmatched"
-    ],
-    "*.{ts,tsx}": [
-      "bash -c 'tsc --noEmit --skipLibCheck --project tsconfig.app.json'"
-    ]
+    "*.{js,jsx,ts,tsx,json,css}": ["biome check --write --no-errors-on-unmatched"],
+    "*.{ts,tsx}": ["bash -c 'tsc --noEmit --skipLibCheck --project tsconfig.app.json'"]
   }
 }
