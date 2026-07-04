@@ -6,12 +6,16 @@ import useYouTubeTitleFetch from "./hooks/useYouTubeTitleFetch";
 
 interface YouTubeDataContextValue {
   fetchTitle: (id: string) => Promise<string>;
+}
+
+interface TitleCacheContextValue {
   titleCacheCount: number | null;
   refreshTitleCacheCount: () => Promise<void>;
   clearTitleCache: () => Promise<void>;
 }
 
 const YouTubeDataContext = createContext<YouTubeDataContextValue | null>(null);
+const TitleCacheContext = createContext<TitleCacheContextValue | null>(null);
 
 interface YouTubeDataProviderProps {
   children: React.ReactNode;
@@ -26,15 +30,16 @@ export const YouTubeDataProvider = ({ children }: YouTubeDataProviderProps) => {
   const { count, refresh, clear } = useTitleCache();
 
   return (
-    <YouTubeDataContext.Provider
-      value={{
-        fetchTitle,
-        titleCacheCount: count,
-        refreshTitleCacheCount: refresh,
-        clearTitleCache: clear,
-      }}
-    >
-      {children}
+    <YouTubeDataContext.Provider value={{ fetchTitle }}>
+      <TitleCacheContext.Provider
+        value={{
+          titleCacheCount: count,
+          refreshTitleCacheCount: refresh,
+          clearTitleCache: clear,
+        }}
+      >
+        {children}
+      </TitleCacheContext.Provider>
     </YouTubeDataContext.Provider>
   );
 };
@@ -43,6 +48,14 @@ export const useYouTubeDataContext = () => {
   const context = useContext(YouTubeDataContext);
   if (!context) {
     throw new Error("useYouTubeDataContext must be used within YouTubeDataProvider");
+  }
+  return context;
+};
+
+export const useTitleCacheContext = () => {
+  const context = useContext(TitleCacheContext);
+  if (!context) {
+    throw new Error("useTitleCacheContext must be used within YouTubeDataProvider");
   }
   return context;
 };
