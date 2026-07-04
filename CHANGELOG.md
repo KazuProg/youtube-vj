@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/KazuProg/youtube-vj/compare/v1.4.0...v1.5.0) (2026-07-04)
+
+
+### Features
+
+* add buttons to clear playback history and title cache ([45f8dc2](https://github.com/KazuProg/youtube-vj/commit/45f8dc29b70c822ff3ad1f364c7a03bf93d64a28))
+* add Chrome extension guide link to Settings panel ([1d6731c](https://github.com/KazuProg/youtube-vj/commit/1d6731ca3b68e38f45eccda1b1e781c9bf658684))
+* add Discord community link to Settings panel ([7c81417](https://github.com/KazuProg/youtube-vj/commit/7c81417cc603c9664fd03e1566a3adb6ecde3435))
+* default deck state to blank screen instead of a fixed video ([c2bcf75](https://github.com/KazuProg/youtube-vj/commit/c2bcf75ad636026b97f17da013c2ab5279bfc7ce))
+* display app version in settings panel ([82c3bcf](https://github.com/KazuProg/youtube-vj/commit/82c3bcf5e2e1bbbc82f3450a56d9d2d5170eb23c))
+* **extension:** hide caption window on projection embeds ([5511f4d](https://github.com/KazuProg/youtube-vj/commit/5511f4dfcdcc803e768034d06e9e24d6ad472734))
+
 ## [1.4.0](https://github.com/KazuProg/youtube-vj/compare/v1.3.0...v1.4.0) (2026-06-10)
 
 
