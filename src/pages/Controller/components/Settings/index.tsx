@@ -178,6 +178,10 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
             Discordコミュニティに参加する
           </a>
         </div>
+        <span className={styles.version}>
+          v{__APP_VERSION__}
+          {__APP_RELEASE_DATE__ && ` (${__APP_RELEASE_DATE__})`}
+        </span>
       </div>
     </>
   );
