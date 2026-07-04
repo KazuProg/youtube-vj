@@ -161,6 +161,14 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
         </div>
         <div className={styles.footer}>
           <a
+            href="/docs/chrome-extension.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.extensionLink}
+          >
+            Chrome拡張機能ガイド
+          </a>
+          <a
             href="https://discord.gg/6wNns5NXrs"
             target="_blank"
             rel="noopener noreferrer"
