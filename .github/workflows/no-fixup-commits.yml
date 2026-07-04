@@ -1,0 +1,39 @@
+name: no-fixup-commits
+
+on:
+  pull_request:
+
+jobs:
+  no-fixup-commits:
+    name: no-fixup-commits
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check commit messages
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          mapfile -t subjects < <(git log --format=%s "${BASE_SHA}..${HEAD_SHA}")
+
+          if [ "${#subjects[@]}" -eq 0 ]; then
+            echo "No commits to check."
+            exit 0
+          fi
+
+          status=0
+
+          for s in "${subjects[@]}"; do
+            if [[ "$s" =~ ^(fixup|squash)! ]]; then
+              echo "::error::Auto-squash commit found: $s"
+              status=1
+            fi
+          done
+
+          exit $status

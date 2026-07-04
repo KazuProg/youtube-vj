@@ -10,10 +10,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install commitlint
-        run: |
-          npm install --save-dev @commitlint/config-conventional @commitlint/cli
-          echo "module.exports = {extends: ['@commitlint/config-conventional'], defaultIgnores: false};" > commitlint.config.cjs
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Validate all commits in PR
         run: |
