@@ -98,6 +98,10 @@
   margin-bottom: 24px;
 }
 
+.settingItem:last-child {
+  margin-bottom: 0;
+}
+
 .label {
   display: block;
   margin-bottom: 8px;
@@ -133,7 +137,7 @@
   color: rgb(150, 150, 150);
 }
 
-.saveButton {
+.actionButton {
   padding: 10px 16px;
   border: none;
   border-radius: 4px;
@@ -142,8 +146,11 @@
   cursor: pointer;
   transition: background-color 0.2s, opacity 0.2s;
   white-space: nowrap;
-  background-color: rgb(100, 150, 255);
   color: white;
+}
+
+.saveButton {
+  background-color: rgb(100, 150, 255);
 }
 
 .saveButton:hover {
@@ -152,6 +159,24 @@
 
 .saveButton:active {
   background-color: rgb(60, 110, 215);
+}
+
+.clearRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dangerButton {
+  background-color: rgb(200, 60, 60);
+}
+
+.dangerButton:hover {
+  background-color: rgb(180, 45, 45);
+}
+
+.dangerButton:active {
+  background-color: rgb(160, 35, 35);
 }
 
 .footer {

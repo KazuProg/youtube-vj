@@ -1,3 +1,4 @@
+import { useTitleCache } from "@/pages/Controller/components/Library/contexts/YouTubeDataContext/hooks/useTitleCache";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
 import { useEffect } from "react";
 import discordIcon from "./discord-icon.svg";
@@ -9,7 +10,18 @@ interface SettingsProps {
 }
 
 const Settings = ({ isOpen, onClose }: SettingsProps) => {
-  const { settings, setSettings } = useControllerAPIContext();
+  const { settings, setSettings, historyAPI } = useControllerAPIContext();
+  const {
+    count: titleCacheCount,
+    refresh: refreshTitleCacheCount,
+    clear: clearTitleCache,
+  } = useTitleCache();
+
+  useEffect(() => {
+    if (isOpen) {
+      refreshTitleCacheCount();
+    }
+  }, [isOpen, refreshTitleCacheCount]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -59,6 +71,20 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
       ...settings,
       youtubeDataAPIKey: e.target.value.trim() || null,
     });
+  };
+
+  const handleClearHistory = () => {
+    if (!window.confirm("再生履歴を削除しますか？")) {
+      return;
+    }
+    historyAPI.clear();
+  };
+
+  const handleClearTitleCache = async () => {
+    if (!window.confirm("動画タイトルキャッシュを削除しますか？")) {
+      return;
+    }
+    await clearTitleCache();
   };
 
   return (
@@ -113,6 +139,27 @@ const Settings = ({ isOpen, onClose }: SettingsProps) => {
                 onChange={handleChangeYoutubeDataAPIKey}
                 placeholder="APIキーを入力してください"
               />
+            </div>
+          </div>
+          <div className={styles.settingItem}>
+            <span className={styles.label}>データのクリア</span>
+            <div className={styles.clearRow}>
+              <button
+                type="button"
+                className={`${styles.actionButton} ${styles.dangerButton}`}
+                onClick={handleClearHistory}
+                title="再生履歴をクリアします"
+              >
+                履歴をクリア（{historyAPI.history.length}件）
+              </button>
+              <button
+                type="button"
+                className={`${styles.actionButton} ${styles.dangerButton}`}
+                onClick={handleClearTitleCache}
+                title="動画タイトルキャッシュをクリアします"
+              >
+                キャッシュをクリア（{titleCacheCount ?? "-"}件）
+              </button>
             </div>
           </div>
         </div>

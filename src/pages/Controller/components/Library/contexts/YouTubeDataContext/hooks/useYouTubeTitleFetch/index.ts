@@ -1,6 +1,7 @@
 import { loadYouTubeIFrameAPI } from "@/components/VJPlayer/components/YouTubePlayer/utils";
 import { useCallback, useRef } from "react";
 import { useIndexedDBStore } from "use-indexeddb";
+import { YOUTUBE_TITLE_STORE_NAME } from "../../dbConfig";
 import fetchYouTubeTitle from "./utils";
 
 interface UseYouTubeTitleFetchReturn {
@@ -8,13 +9,13 @@ interface UseYouTubeTitleFetchReturn {
   addManually: (id: string, title: string) => void;
 }
 
-interface YouTubeTitleData {
+export interface YouTubeTitleData {
   videoId: string;
   title: string;
 }
 
 export const useYouTubeTitleFetch = (): UseYouTubeTitleFetchReturn => {
-  const indexedDBStore = useIndexedDBStore<YouTubeTitleData>("YouTubeTitle");
+  const indexedDBStore = useIndexedDBStore<YouTubeTitleData>(YOUTUBE_TITLE_STORE_NAME);
 
   const pendingRef = useRef<Map<string, Promise<string>>>(new Map());
 
