@@ -10,7 +10,6 @@ import { useCallback, useState } from "react";
 import styles from "./Library.module.css";
 import FileDropZone from "./components/FileDropZone";
 import VideoList from "./components/VideoList";
-import { YouTubeDataProvider } from "./contexts/YouTubeDataContext";
 import { useLibraryAPI } from "./hooks/useLibraryAPI";
 
 const Library = () => {
@@ -133,55 +132,49 @@ const Library = () => {
   );
 
   return (
-    <YouTubeDataProvider>
-      <FileDropZone
-        accept=".txt"
-        onFileLoad={handleFileLoad}
-        onVideoFilesLoad={handleVideoFilesLoad}
-        className={styles.library}
-      >
-        <div className={styles.playlist}>
-          <button type="button" onClick={handleLoadClick}>
-            Load Playlist
-          </button>
-          <ul>
-            {Array.from(playlists.keys()).map((name, index) => (
-              <li
-                key={name}
-                title={name}
-                onClick={() => handleSelectPlaylist(index)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleSelectPlaylist(index);
-                  }
-                }}
-                className={selectedPlaylistIndex === index ? styles.focused : ""}
-              >
-                {name}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <VideoList
-          videos={videos}
-          selectedIndex={selectedVideoIndex}
-          onSelect={handleSelectVideo}
+    <FileDropZone
+      accept=".txt"
+      onFileLoad={handleFileLoad}
+      onVideoFilesLoad={handleVideoFilesLoad}
+      className={styles.library}
+    >
+      <div className={styles.playlist}>
+        <button type="button" onClick={handleLoadClick}>
+          Load Playlist
+        </button>
+        <ul>
+          {Array.from(playlists.keys()).map((name, index) => (
+            <li
+              key={name}
+              title={name}
+              onClick={() => handleSelectPlaylist(index)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleSelectPlaylist(index);
+                }
+              }}
+              className={selectedPlaylistIndex === index ? styles.focused : ""}
+            >
+              {name}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <VideoList videos={videos} selectedIndex={selectedVideoIndex} onSelect={handleSelectVideo} />
+      {Array.from(playlists.keys())[selectedPlaylistIndex] === "Search" && (
+        <input
+          className={styles.search}
+          type="text"
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+          }}
+          onKeyDown={handleSearchKeyDown}
+          value={searchQuery}
+          placeholder="検索..."
         />
-        {Array.from(playlists.keys())[selectedPlaylistIndex] === "Search" && (
-          <input
-            className={styles.search}
-            type="text"
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-            }}
-            onKeyDown={handleSearchKeyDown}
-            value={searchQuery}
-            placeholder="検索..."
-          />
-        )}
-      </FileDropZone>
-    </YouTubeDataProvider>
+      )}
+    </FileDropZone>
   );
 };
 

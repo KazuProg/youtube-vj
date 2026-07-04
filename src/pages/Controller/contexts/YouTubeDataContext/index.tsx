@@ -1,10 +1,14 @@
 import { createContext, useContext, useEffect } from "react";
 import setupIndexedDB from "use-indexeddb";
 import { dbConfig } from "./dbConfig";
+import { useTitleCache } from "./hooks/useTitleCache";
 import useYouTubeTitleFetch from "./hooks/useYouTubeTitleFetch";
 
 interface YouTubeDataContextValue {
   fetchTitle: (id: string) => Promise<string>;
+  titleCacheCount: number | null;
+  refreshTitleCacheCount: () => Promise<void>;
+  clearTitleCache: () => Promise<void>;
 }
 
 const YouTubeDataContext = createContext<YouTubeDataContextValue | null>(null);
@@ -19,11 +23,15 @@ export const YouTubeDataProvider = ({ children }: YouTubeDataProviderProps) => {
   }, []);
 
   const { fetchTitle } = useYouTubeTitleFetch();
+  const { count, refresh, clear } = useTitleCache();
 
   return (
     <YouTubeDataContext.Provider
       value={{
         fetchTitle,
+        titleCacheCount: count,
+        refreshTitleCacheCount: refresh,
+        clearTitleCache: clear,
       }}
     >
       {children}

@@ -1,5 +1,5 @@
-import { useTitleCache } from "@/pages/Controller/components/Library/contexts/YouTubeDataContext/hooks/useTitleCache";
 import { useControllerAPIContext } from "@/pages/Controller/contexts/ControllerAPIContext";
+import { useYouTubeDataContext } from "@/pages/Controller/contexts/YouTubeDataContext";
 import { useEffect } from "react";
 import discordIcon from "./discord-icon.svg";
 import styles from "./index.module.css";
@@ -11,11 +11,7 @@ interface SettingsProps {
 
 const Settings = ({ isOpen, onClose }: SettingsProps) => {
   const { settings, setSettings, historyAPI } = useControllerAPIContext();
-  const {
-    count: titleCacheCount,
-    refresh: refreshTitleCacheCount,
-    clear: clearTitleCache,
-  } = useTitleCache();
+  const { titleCacheCount, refreshTitleCacheCount, clearTitleCache } = useYouTubeDataContext();
 
   useEffect(() => {
     if (isOpen) {

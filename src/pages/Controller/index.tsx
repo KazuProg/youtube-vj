@@ -6,6 +6,7 @@ import Mixer from "./components/Mixer";
 import Settings from "./components/Settings";
 import StatusBar from "./components/StatusBar";
 import { ControllerAPIProvider, useControllerAPIContext } from "./contexts/ControllerAPIContext";
+import { YouTubeDataProvider } from "./contexts/YouTubeDataContext";
 import styles from "./index.module.css";
 
 import "./index.css";
@@ -34,9 +35,11 @@ const ControllerPageContent = () => {
           initialPaused={true}
         />
       </div>
-      {settings.openLibrary && <Library />}
-      <StatusBar onOpenSettings={() => setIsSettingsOpen(true)} />
-      <Settings isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <YouTubeDataProvider>
+        {settings.openLibrary && <Library />}
+        <StatusBar onOpenSettings={() => setIsSettingsOpen(true)} />
+        <Settings isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      </YouTubeDataProvider>
     </div>
   );
 };

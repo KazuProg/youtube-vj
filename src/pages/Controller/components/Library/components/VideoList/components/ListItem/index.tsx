@@ -1,4 +1,4 @@
-import { useYouTubeDataContext } from "@/pages/Controller/components/Library/contexts/YouTubeDataContext";
+import { useYouTubeDataContext } from "@/pages/Controller/contexts/YouTubeDataContext";
 import type { VideoItem } from "@/pages/Controller/types/videoItem";
 import { getVideoItemDisplayText, getYouTubeVideoId } from "@/pages/Controller/utils/videoItem";
 import { useEffect, useState } from "react";
