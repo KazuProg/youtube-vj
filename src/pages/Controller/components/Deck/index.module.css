@@ -18,6 +18,17 @@
   display: block;
 }
 
+.emptyLabel {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  pointer-events: none;
+}
+
 /* YouTube 表示中のファイル D&D 中のみ iframe 手前で drop を受ける */
 .playerDropCapture {
   position: absolute;

@@ -1,4 +1,3 @@
-import { DEFAULT_VALUES } from "@/constants";
 import type { VideoItem } from "@/pages/Controller/types/videoItem";
 import { getPreparedVideoUrl, getYouTubeVideoId } from "@/pages/Controller/utils/videoItem";
 import styles from "./index.module.css";
@@ -27,13 +26,7 @@ const PreparedVideoThumbnail = ({ preparedVideo }: PreparedVideoThumbnailProps) 
     );
   }
 
-  return (
-    <img
-      className={styles.thumbnail}
-      alt="YouTube Thumbnail"
-      src={`https://img.youtube.com/vi/${DEFAULT_VALUES.videoId}/default.jpg`}
-    />
-  );
+  return <div className={styles.thumbnail} />;
 };
 
 export default PreparedVideoThumbnail;

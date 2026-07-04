@@ -8,7 +8,6 @@ export const LOCAL_STORAGE_KEY = {
 };
 
 export const DEFAULT_VALUES = {
-  videoId: "BLeUas72Mzk",
   syncKey: "vj-player-default",
   playbackRate: 1,
   volume: 100,
@@ -17,7 +16,7 @@ export const DEFAULT_VALUES = {
 } as const;
 
 export const INITIAL_SYNC_DATA = {
-  source: { type: "youtube" as const, videoId: DEFAULT_VALUES.videoId },
+  source: { type: "none" as const },
   playbackRate: DEFAULT_VALUES.playbackRate,
   currentTime: 0,
   baseTime: 0,

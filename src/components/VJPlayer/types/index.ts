@@ -23,7 +23,11 @@ export type PlaybackIntent = {
   playbackRate: number;
 };
 
-export type VideoSource = { type: "youtube"; videoId: string } | { type: "url"; url: string };
+export type LoadableVideoSource =
+  | { type: "youtube"; videoId: string }
+  | { type: "url"; url: string };
+
+export type VideoSource = LoadableVideoSource | { type: "none" };
 
 export type VJSyncData = {
   source: VideoSource;

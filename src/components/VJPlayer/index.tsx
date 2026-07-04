@@ -42,6 +42,7 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     syncDataRef.current = syncData;
+    const isYouTubeSource = syncData.source.type === "youtube";
     const isUrlSource = syncData.source.type === "url";
     isUrlSourceRef.current = isUrlSource;
 
@@ -135,12 +136,13 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     }, []);
 
     useLayoutEffect(() => {
-      if (isUrlSource) {
+      if (!isYouTubeSource) {
         youtubePlayerRef.current?.pause();
-      } else {
+      }
+      if (!isUrlSource) {
         urlPlayerRef.current?.pause();
       }
-    }, [isUrlSource]);
+    }, [isYouTubeSource, isUrlSource]);
 
     useLayoutEffect(() => {
       notifySyncData(syncData);
@@ -164,14 +166,15 @@ const VJPlayer = forwardRef<VJPlayerRef, VJPlayerProps>(
     );
 
     const youtubeVideoId =
-      !isUrlSource && syncData.source.type === "youtube" ? syncData.source.videoId : null;
+      isYouTubeSource && syncData.source.type === "youtube" ? syncData.source.videoId : null;
     const urlSource = isUrlSource && syncData.source.type === "url" ? syncData.source.url : null;
 
     return (
       <div className={className}>
-        <div className={styles.playerLayer} style={{ display: isUrlSource ? "none" : "block" }}>
+        <div className={styles.blackLayer} />
+        <div className={styles.playerLayer} style={{ display: isYouTubeSource ? "block" : "none" }}>
           <YouTubePlayer
-            active={!isUrlSource}
+            active={isYouTubeSource}
             videoId={youtubeVideoId}
             playbackIntent={playbackIntent}
             onInterfaceReady={handleYouTubeInterfaceReady}

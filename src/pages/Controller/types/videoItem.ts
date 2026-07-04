@@ -1,7 +1,7 @@
-import type { VideoSource } from "@/components/VJPlayer/types";
+import type { LoadableVideoSource } from "@/components/VJPlayer/types";
 
 export type VideoItem = {
-  source: VideoSource;
+  source: LoadableVideoSource;
   title?: string;
   start?: number;
 };

@@ -47,6 +47,7 @@ const Deck = ({ localStorageKey, deckId, className, initialPaused = false }: Dec
     onDropStart: handleVideoDropStart,
   } = useFileDropOverlay({ filesOnly: true });
   const isYouTubeSource = syncData.source.type === "youtube";
+  const isEmptySource = syncData.source.type === "none";
 
   const getCurrentTime = (): number => {
     return vjPlayerRef.current?.getCurrentTime() ?? 0;
@@ -163,6 +164,7 @@ const Deck = ({ localStorageKey, deckId, className, initialPaused = false }: Dec
           events={vjPlayerEvents}
           syncKey={localStorageKey}
         />
+        {isEmptySource && <div className={styles.emptyLabel}>Load a video to start</div>}
         {isFileDragActive && isYouTubeSource && (
           <div
             className={styles.playerDropCapture}

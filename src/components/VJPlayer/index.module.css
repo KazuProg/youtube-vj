@@ -1,3 +1,9 @@
+.blackLayer {
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+
 .playerLayer {
   position: absolute;
   inset: 0;
