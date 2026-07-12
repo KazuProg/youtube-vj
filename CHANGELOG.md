@@ -1,5 +1,6 @@
 # Changelog
 
+- - -
 ## [1.5.0](https://github.com/KazuProg/youtube-vj/compare/v1.4.0...v1.5.0) (2026-07-04)
 
 
