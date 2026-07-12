@@ -1,0 +1,73 @@
+name: Bump Level Label
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    branches: [main]
+
+concurrency:
+  group: bump-level-label-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'no-release') }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Allow cocogitto dry-run on non-main ref
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'no-release') }}
+        run: git checkout -B main
+
+      - name: Install cocogitto
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'no-release') }}
+        run: |
+          curl -fsSL -o /tmp/cog.tar.gz https://github.com/cocogitto/cocogitto/releases/download/7.0.0/cocogitto-7.0.0-x86_64-unknown-linux-musl.tar.gz
+          tar xzf /tmp/cog.tar.gz -C /tmp
+          echo "/tmp/x86_64-unknown-linux-musl" >> "$GITHUB_PATH"
+
+      - name: Determine bump level
+        id: bump
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'no-release') }}
+        run: |
+          CURRENT="$(cog get-version)"
+          NEXT_RAW="$(cog bump --auto --dry-run --skip-untracked)"
+          case "$NEXT_RAW" in
+            v*)
+              NEXT="${NEXT_RAW#v}"
+              CUR_MAJOR=$(echo "$CURRENT" | cut -d. -f1)
+              CUR_MINOR=$(echo "$CURRENT" | cut -d. -f2)
+              NEXT_MAJOR=$(echo "$NEXT" | cut -d. -f1)
+              NEXT_MINOR=$(echo "$NEXT" | cut -d. -f2)
+              if [ "$NEXT_MAJOR" != "$CUR_MAJOR" ]; then
+                echo "level=major-update" >> "$GITHUB_OUTPUT"
+              elif [ "$NEXT_MINOR" != "$CUR_MINOR" ]; then
+                echo "level=minor-update" >> "$GITHUB_OUTPUT"
+              else
+                echo "level=patch-update" >> "$GITHUB_OUTPUT"
+              fi
+              ;;
+            *)
+              echo "level=none" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Apply label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          LEVEL: ${{ steps.bump.outputs.level || 'none' }}
+        run: |
+          gh pr edit "$PR_NUMBER" --remove-label major-update --remove-label minor-update --remove-label patch-update || true
+          if [ "$LEVEL" != "none" ]; then
+            gh pr edit "$PR_NUMBER" --add-label "$LEVEL"
+          fi

@@ -1,0 +1,68 @@
+tag_prefix = "v"
+branch_whitelist = ["main"]
+
+pre_bump_hooks = [
+  "npm version {{version}} --no-git-tag-version --allow-same-version",
+]
+
+post_bump_hooks = [
+  "git push",
+  "git push origin {{version_tag}}",
+]
+
+[changelog]
+path = "CHANGELOG.md"
+template = "remote"
+remote = "github.com"
+owner = "KazuProg"
+repository = "youtube-vj"
+
+[commit_types.feat]
+changelog_title = "Features"
+bump_minor = true
+order = 1
+
+[commit_types.fix]
+changelog_title = "Bug Fixes"
+bump_patch = true
+order = 2
+
+[commit_types.perf]
+changelog_title = "Performance Improvements"
+bump_patch = true
+order = 3
+
+[commit_types.revert]
+changelog_title = "Reverts"
+bump_patch = true
+order = 4
+
+[commit_types.refactor]
+changelog_title = "Code Refactoring"
+bump_patch = true
+order = 5
+
+[commit_types.build]
+changelog_title = "Build System"
+bump_patch = true
+order = 6
+
+[commit_types.docs]
+changelog_title = "Documentation"
+order = 7
+
+[commit_types.style]
+changelog_title = "Styles"
+order = 8
+
+[commit_types.test]
+changelog_title = "Tests"
+order = 9
+
+[commit_types.ci]
+changelog_title = "Continuous Integration"
+order = 10
+
+[commit_types.chore]
+changelog_title = "Chores"
+order = 11

@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'no-release'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
+
+      - name: Record pre-bump HEAD
+        id: pre_bump
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Bump version, changelog and tag (cocogitto)
+        id: release
+        uses: cocogitto/cocogitto-action@v4.1.0
+        with:
+          command: bump
+          args: --auto
+
+      - name: Detect whether a release actually happened
+        id: bumped
+        run: |
+          if [ "$(git rev-parse HEAD)" != "${{ steps.pre_bump.outputs.sha }}" ]; then
+            echo "released=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "released=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract release notes for the new tag
+        id: changelog
+        if: steps.bumped.outputs.released == 'true'
+        uses: cocogitto/cocogitto-action@v4.1.0
+        with:
+          command: changelog
+          args: "--at ${{ steps.release.outputs.version }}"
+
+      - name: Create GitHub Release
+        if: steps.bumped.outputs.released == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.version }}
+          name: ${{ steps.release.outputs.version }}
+          body: ${{ steps.changelog.outputs.stdout }}
