@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./index.module.css";
-import { formatTime } from "./utils";
+import { formatTime, toPercentage } from "./utils";
 
 interface SeekBarProps {
   currentTimeFunc: () => number;
@@ -39,7 +39,7 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
       currentTimeRef.current = time;
 
       const currentDuration = durationFunc();
-      const position = currentDuration > 0 ? (time / currentDuration) * 100 : 0;
+      const position = toPercentage(time, currentDuration);
 
       if (barRef.current) {
         barRef.current.style.width = `${position}%`;
@@ -100,7 +100,7 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
           <span
             key={cueId}
             className={styles.hotcue}
-            style={{ left: `${(time / duration) * 100}%` }}
+            style={{ left: `${toPercentage(time, duration)}%` }}
           >
             {cueId}
           </span>
@@ -111,7 +111,7 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
           <span
             key={marker}
             className={styles.loopMarker}
-            style={{ left: `${(marker / duration) * 100}%` }}
+            style={{ left: `${toPercentage(marker, duration)}%` }}
           >
             |
           </span>
