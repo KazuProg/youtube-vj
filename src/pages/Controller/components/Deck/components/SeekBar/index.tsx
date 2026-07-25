@@ -12,7 +12,6 @@ interface SeekBarProps {
 
 const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }: SeekBarProps) => {
   const [isHovering, setIsHovering] = useState(false);
-  const [cursorPosition, setCursorPosition] = useState(0);
   const [displayTime, setDisplayTime] = useState(currentTimeFunc());
   const duration = durationFunc();
 
@@ -20,6 +19,7 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
   const indicatorRef = useRef<HTMLDivElement>(null);
   const currentTimeRef = useRef(displayTime);
   const isHoveringRef = useRef(isHovering);
+  const cursorPositionRef = useRef(0);
 
   useEffect(() => {
     isHoveringRef.current = isHovering;
@@ -31,6 +31,14 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
     let animationId: number;
     let lastDisplaySecond = Math.floor(currentTimeFunc());
 
+    const updateIndicator = (position: number) => {
+      if (!indicatorRef.current) {
+        return;
+      }
+      const indicatorPosition = isHoveringRef.current ? cursorPositionRef.current * 100 : position;
+      indicatorRef.current.style.left = `${indicatorPosition}%`;
+    };
+
     const update = () => {
       const time = currentTimeFunc();
       currentTimeRef.current = time;
@@ -41,9 +49,7 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
       if (barRef.current) {
         barRef.current.style.width = `${position}%`;
       }
-      if (indicatorRef.current && !isHoveringRef.current) {
-        indicatorRef.current.style.left = `${position}%`;
-      }
+      updateIndicator(position);
 
       const currentSecond = Math.floor(time);
       if (currentSecond !== lastDisplaySecond) {
@@ -60,18 +66,9 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
     };
   }, [currentTimeFunc, durationFunc]);
 
-  // hover中はカーソル位置、非hover中は再生位置をindicatorに反映する
-  useEffect(() => {
-    if (!indicatorRef.current || !isHovering) {
-      return;
-    }
-    indicatorRef.current.style.left = `${cursorPosition * 100}%`;
-  }, [isHovering, cursorPosition]);
-
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { width, left } = e.currentTarget.getBoundingClientRect();
-    const position = (e.clientX - left) / width;
-    setCursorPosition(position);
+    cursorPositionRef.current = (e.clientX - left) / width;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -85,7 +82,7 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
       className={styles.seekBar}
       onMouseEnter={() => setIsHovering(true)}
       onMouseMove={handleMouseMove}
-      onClick={() => onSeek(cursorPosition * duration)}
+      onClick={() => onSeek(cursorPositionRef.current * duration)}
       onMouseLeave={() => setIsHovering(false)}
       onKeyDown={handleKeyDown}
       tabIndex={0}
