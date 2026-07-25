@@ -11,19 +11,13 @@ interface SeekBarProps {
 }
 
 const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }: SeekBarProps) => {
-  const [isHovering, setIsHovering] = useState(false);
   const [displayTime, setDisplayTime] = useState(currentTimeFunc());
   const duration = durationFunc();
 
   const barRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
   const currentTimeRef = useRef(displayTime);
-  const isHoveringRef = useRef(isHovering);
-  const cursorPositionRef = useRef(0);
-
-  useEffect(() => {
-    isHoveringRef.current = isHovering;
-  }, [isHovering]);
+  const cursorPositionRef = useRef<number | null>(null);
 
   // barの幅とindicatorの再生位置は毎フレーム変化するため、
   // Reactの再レンダリングを介さずrefで直接DOM操作する
@@ -35,7 +29,8 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
       if (!indicatorRef.current) {
         return;
       }
-      const indicatorPosition = isHoveringRef.current ? cursorPositionRef.current * 100 : position;
+      const indicatorPosition =
+        cursorPositionRef.current !== null ? cursorPositionRef.current * 100 : position;
       indicatorRef.current.style.left = `${indicatorPosition}%`;
     };
 
@@ -66,9 +61,9 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
     };
   }, [currentTimeFunc, durationFunc]);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const getPositionFromEvent = (e: React.MouseEvent<HTMLDivElement>): number => {
     const { width, left } = e.currentTarget.getBoundingClientRect();
-    cursorPositionRef.current = (e.clientX - left) / width;
+    return (e.clientX - left) / width;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -80,10 +75,13 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
   return (
     <div
       className={styles.seekBar}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseMove={handleMouseMove}
-      onClick={() => onSeek(cursorPositionRef.current * duration)}
-      onMouseLeave={() => setIsHovering(false)}
+      onMouseMove={(e) => {
+        cursorPositionRef.current = getPositionFromEvent(e);
+      }}
+      onClick={(e) => onSeek(getPositionFromEvent(e) * duration)}
+      onMouseLeave={() => {
+        cursorPositionRef.current = null;
+      }}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="slider"
