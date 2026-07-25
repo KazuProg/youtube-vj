@@ -49,9 +49,9 @@ const Deck = ({ localStorageKey, deckId, className, initialPaused = false }: Dec
   const isYouTubeSource = syncData.source.type === "youtube";
   const isEmptySource = syncData.source.type === "none";
 
-  const getCurrentTime = (): number => {
+  const getCurrentTime = useCallback((): number => {
     return vjPlayerRef.current?.getCurrentTime() ?? 0;
-  };
+  }, []);
 
   const updateSyncData = useCallback(
     (partialSyncData: Partial<VJSyncData>) => {
@@ -122,6 +122,10 @@ const Deck = ({ localStorageKey, deckId, className, initialPaused = false }: Dec
     deckAPIRef.current?.setPlaybackRate(playbackRate);
   }, [playbackRate, deckAPIRef]);
 
+  const getDuration = useCallback((): number => {
+    return deckAPIRef.current?.getDuration() ?? 0;
+  }, [deckAPIRef]);
+
   const vjPlayerEvents = useMemo(
     () => ({
       onPaused: () => {
@@ -176,7 +180,7 @@ const Deck = ({ localStorageKey, deckId, className, initialPaused = false }: Dec
       </div>
       <SeekBar
         currentTimeFunc={getCurrentTime}
-        durationFunc={() => deckAPIRef.current?.getDuration() ?? 0}
+        durationFunc={getDuration}
         hotCues={hotCues}
         loopMarkers={loopMarkers}
         onSeek={(time: number) => deckAPIRef.current?.seekTo(time)}
