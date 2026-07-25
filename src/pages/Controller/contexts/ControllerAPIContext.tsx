@@ -87,27 +87,39 @@ export const ControllerAPIProvider = ({
     DEFAULT_SETTINGS
   );
 
-  return (
-    <ControllerAPIContext.Provider
-      value={{
-        deckAPIs,
-        setDeckAPI,
-        mixerAPI,
-        setMixerAPI,
-        libraryAPI,
-        setLibraryAPI,
-        midiAPI,
-        midiRequestAccess,
-        midiOpenScriptEditor,
-        historyAPI,
+  const value = useMemo<ControllerAPIContextValue>(
+    () => ({
+      deckAPIs,
+      setDeckAPI,
+      mixerAPI,
+      setMixerAPI,
+      libraryAPI,
+      setLibraryAPI,
+      midiAPI,
+      midiRequestAccess,
+      midiOpenScriptEditor,
+      historyAPI,
 
-        settings,
-        setSettings,
-      }}
-    >
-      {children}
-    </ControllerAPIContext.Provider>
+      settings,
+      setSettings,
+    }),
+    [
+      deckAPIs,
+      setDeckAPI,
+      mixerAPI,
+      setMixerAPI,
+      libraryAPI,
+      setLibraryAPI,
+      midiAPI,
+      midiRequestAccess,
+      midiOpenScriptEditor,
+      historyAPI,
+      settings,
+      setSettings,
+    ]
   );
+
+  return <ControllerAPIContext.Provider value={value}>{children}</ControllerAPIContext.Provider>;
 };
 
 export const useControllerAPIContext = () => {
