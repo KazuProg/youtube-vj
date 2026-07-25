@@ -16,7 +16,7 @@ export const useTimeSync = (syncDataRef: RefObject<VJSyncData>) => {
   const getExpectedCurrentTime = useCallback((): number | null => {
     const syncData = syncDataRef.current;
 
-    if (syncData.baseTime === 0) {
+    if (syncData.source.type === "none" || syncData.baseTime === 0) {
       return null;
     }
 
