@@ -1,6 +1,16 @@
 # Changelog
 
 - - -
+## [v1.5.2](https://github.com/KazuProg/youtube-vj/compare/6291f2d189e3131cbf278c2112a4f36dc3ca9641..v1.5.2) - 2026-07-26
+#### Bug Fixes
+- parse cocogitto CHANGELOG format for app version/date - ([a1abacf](https://github.com/KazuProg/youtube-vj/commit/a1abacfe46b26b35a622a4fb6a2cf203d50886fc)) - KazuProg
+#### Build System
+- bump @vitejs/plugin-react from 5.2.0 to 6.0.4 - ([c35a1cf](https://github.com/KazuProg/youtube-vj/commit/c35a1cfa8c2e71fc48797449910917cb51aff389)) - dependabot[bot]
+- bump the npm_and_yarn group across 1 directory with 2 updates - ([a0716e1](https://github.com/KazuProg/youtube-vj/commit/a0716e1b1e5d6c88ba7ab8e18c54839868c50023)) - dependabot[bot]
+- bump @11ty/eleventy from 3.1.5 to 3.1.6 - ([6291f2d](https://github.com/KazuProg/youtube-vj/commit/6291f2d189e3131cbf278c2112a4f36dc3ca9641)) - dependabot[bot]
+
+- - -
+
 ## [v1.5.1](https://github.com/KazuProg/youtube-vj/compare/a38c7be6f403e66816c0afe9e8263f8547939244..v1.5.1) - 2026-07-26
 #### Bug Fixes
 - stop currentTime drift when deck has no video loaded - ([a3a7236](https://github.com/KazuProg/youtube-vj/commit/a3a723633bc918140a543a4b8c529f82b6143812)) - KazuProg
