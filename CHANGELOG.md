@@ -1,6 +1,21 @@
 # Changelog
 
 - - -
+## [v1.5.1](https://github.com/KazuProg/youtube-vj/compare/a38c7be6f403e66816c0afe9e8263f8547939244..v1.5.1) - 2026-07-26
+#### Bug Fixes
+- stop currentTime drift when deck has no video loaded - ([a3a7236](https://github.com/KazuProg/youtube-vj/commit/a3a723633bc918140a543a4b8c529f82b6143812)) - KazuProg
+#### Performance Improvements
+- avoid SeekBar re-render on hover enter/leave - ([276b849](https://github.com/KazuProg/youtube-vj/commit/276b849dcf75c4cb317021f5716c29194f4363ac)) - KazuProg
+- avoid SeekBar re-render on hover move - ([56dadba](https://github.com/KazuProg/youtube-vj/commit/56dadbaab52062975df8ac030e5952079ca005e0)) - KazuProg
+- reduce SeekBar re-renders during playback - ([66abe66](https://github.com/KazuProg/youtube-vj/commit/66abe66f2c304fd76be454de3533573ebf455c5b)) - KazuProg
+#### Code Refactoring
+- extract toPercentage helper in SeekBar - ([c19a97d](https://github.com/KazuProg/youtube-vj/commit/c19a97dfbf8f1ee68af174d9a2843daae034c9aa)) - KazuProg
+#### Continuous Integration
+- replace release-please with cocogitto-based release automation - ([9f8d28f](https://github.com/KazuProg/youtube-vj/commit/9f8d28fd275ba75e96473545fb3a825d47f4d44e)) - KazuProg
+- pin dependabot target branch to main - ([a38c7be](https://github.com/KazuProg/youtube-vj/commit/a38c7be6f403e66816c0afe9e8263f8547939244)) - KazuProg
+
+- - -
+
 ## [1.5.0](https://github.com/KazuProg/youtube-vj/compare/v1.4.0...v1.5.0) (2026-07-04)
 
 
