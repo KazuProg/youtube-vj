@@ -7,8 +7,8 @@ const packageJson = JSON.parse(readFileSync(new URL('./package.json', import.met
 const changelog = readFileSync(new URL('./CHANGELOG.md', import.meta.url), 'utf-8')
 const releaseLine = changelog
   .split('\n')
-  .find((line) => line.startsWith(`## [${packageJson.version}]`))
-const releaseDateMatch = releaseLine?.match(/\((\d{4}-\d{2}-\d{2})\)/)
+  .find((line) => line.startsWith(`## [v${packageJson.version}]`))
+const releaseDateMatch = releaseLine?.match(/(\d{4}-\d{2}-\d{2})\s*$/)
 
 // https://vite.dev/config/
 export default defineConfig({
