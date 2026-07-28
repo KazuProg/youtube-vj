@@ -1,6 +1,16 @@
 # Changelog
 
 - - -
+## [v1.5.3](https://github.com/KazuProg/youtube-vj/compare/218f315e0c0a4a3d2531f3541247002ac2b6073a..v1.5.3) - 2026-07-28
+#### Performance Improvements
+- memoize context provider values to avoid unnecessary re-renders - ([588c5f9](https://github.com/KazuProg/youtube-vj/commit/588c5f9baec67656d3b0ac24df55d0715aecf979)) - KazuProg
+#### Build System
+- bump @commitlint/config-conventional from 20.5.0 to 21.2.0 - ([4a3a2cb](https://github.com/KazuProg/youtube-vj/commit/4a3a2cb2a191284bb706e11f8986d49a3b0366db)) - dependabot[bot]
+#### Continuous Integration
+- add Discord notification on release - ([218f315](https://github.com/KazuProg/youtube-vj/commit/218f315e0c0a4a3d2531f3541247002ac2b6073a)) - KazuProg
+
+- - -
+
 ## [v1.5.2](https://github.com/KazuProg/youtube-vj/compare/6291f2d189e3131cbf278c2112a4f36dc3ca9641..v1.5.2) - 2026-07-26
 #### Bug Fixes
 - parse cocogitto CHANGELOG format for app version/date - ([a1abacf](https://github.com/KazuProg/youtube-vj/commit/a1abacfe46b26b35a622a4fb6a2cf203d50886fc)) - KazuProg
