@@ -29,7 +29,9 @@ jobs:
 
       - name: Record pre-bump HEAD
         id: pre_bump
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -67,3 +69,35 @@ jobs:
           tag_name: ${{ steps.release.outputs.version }}
           name: ${{ steps.release.outputs.version }}
           body: ${{ steps.changelog.outputs.stdout }}
+
+      - name: Determine bump type
+        id: bump_type
+        if: steps.bumped.outputs.released == 'true'
+        env:
+          PRE_VERSION: ${{ steps.pre_bump.outputs.version }}
+          NEW_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          IFS='.' read -r prev_major prev_minor _ <<< "${PRE_VERSION#v}"
+          IFS='.' read -r new_major new_minor _ <<< "${NEW_VERSION#v}"
+          if [ "$new_major" != "$prev_major" ] || [ "$new_minor" != "$prev_minor" ]; then
+            echo "type=major_minor" >> "$GITHUB_OUTPUT"
+          else
+            echo "type=patch" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Notify Discord
+        if: steps.bumped.outputs.released == 'true'
+        env:
+          DISCORD_WEBHOOK_URL_MAJOR_MINOR: ${{ secrets.DISCORD_RELEASE_WEBHOOK_URL_MAJOR_MINOR }}
+          DISCORD_WEBHOOK_URL_PATCH: ${{ secrets.DISCORD_RELEASE_WEBHOOK_URL_PATCH }}
+          BUMP_TYPE: ${{ steps.bump_type.outputs.type }}
+        run: |
+          if [ "$BUMP_TYPE" = "patch" ]; then
+            WEBHOOK_URL="$DISCORD_WEBHOOK_URL_PATCH"
+          else
+            WEBHOOK_URL="$DISCORD_WEBHOOK_URL_MAJOR_MINOR"
+          fi
+          curl --fail --silent --show-error \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"バージョン ${{ steps.release.outputs.version }} がリリースされました!\"}" \
+            "$WEBHOOK_URL"
