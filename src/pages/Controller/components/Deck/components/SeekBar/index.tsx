@@ -16,6 +16,7 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
 
   const barRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
+  const timeRef = useRef<HTMLSpanElement>(null);
   const currentTimeRef = useRef(displayTime);
   const cursorPositionRef = useRef<number | null>(null);
 
@@ -24,14 +25,19 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
   useEffect(() => {
     let animationId: number;
     let lastDisplaySecond = Math.floor(currentTimeFunc());
+    let lastTimeTextSecond: number | null = null;
 
-    const updateIndicator = (position: number) => {
-      if (!indicatorRef.current) {
-        return;
+    const updateIndicatorAndTime = (effectiveRatio: number, currentDuration: number) => {
+      if (indicatorRef.current) {
+        indicatorRef.current.style.left = `${effectiveRatio * 100}%`;
       }
-      const indicatorPosition =
-        cursorPositionRef.current !== null ? cursorPositionRef.current * 100 : position;
-      indicatorRef.current.style.left = `${indicatorPosition}%`;
+      if (timeRef.current) {
+        const flooredSecond = Math.floor(effectiveRatio * currentDuration);
+        if (flooredSecond !== lastTimeTextSecond) {
+          lastTimeTextSecond = flooredSecond;
+          timeRef.current.textContent = formatTime(flooredSecond);
+        }
+      }
     };
 
     const update = () => {
@@ -39,12 +45,13 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
       currentTimeRef.current = time;
 
       const currentDuration = durationFunc();
-      const position = toPercentage(time, currentDuration);
+      const actualRatio = currentDuration > 0 ? time / currentDuration : 0;
+      const effectiveRatio = cursorPositionRef.current ?? actualRatio;
 
       if (barRef.current) {
-        barRef.current.style.width = `${position}%`;
+        barRef.current.style.width = `${actualRatio * 100}%`;
       }
-      updateIndicator(position);
+      updateIndicatorAndTime(effectiveRatio, currentDuration);
 
       const currentSecond = Math.floor(time);
       if (currentSecond !== lastDisplaySecond) {
@@ -92,7 +99,7 @@ const SeekBar = ({ currentTimeFunc, durationFunc, hotCues, loopMarkers, onSeek }
       <div className={styles.bar} data-seek-bar ref={barRef} />
       <div className={styles.indicator} data-seek-indicator ref={indicatorRef} />
       <div className={styles.time} data-seek-time>
-        <span>{formatTime(displayTime)}</span>
+        <span ref={timeRef} />
         <span>{formatTime(duration)}</span>
       </div>
       <div className={styles.hotcues}>
