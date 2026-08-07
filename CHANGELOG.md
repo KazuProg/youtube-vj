@@ -1,6 +1,12 @@
 # Changelog
 
 - - -
+## [v1.6.0](https://github.com/KazuProg/youtube-vj/compare/26f3e97779d04feb708fb2de2e70dbf45666ddf8..v1.6.0) - 2026-08-07
+#### Features
+- sync seek bar time display with cursor position on hover - ([26f3e97](https://github.com/KazuProg/youtube-vj/commit/26f3e97779d04feb708fb2de2e70dbf45666ddf8)) - KazuProg
+
+- - -
+
 ## [v1.5.3](https://github.com/KazuProg/youtube-vj/compare/218f315e0c0a4a3d2531f3541247002ac2b6073a..v1.5.3) - 2026-07-28
 #### Performance Improvements
 - memoize context provider values to avoid unnecessary re-renders - ([588c5f9](https://github.com/KazuProg/youtube-vj/commit/588c5f9baec67656d3b0ac24df55d0715aecf979)) - KazuProg
