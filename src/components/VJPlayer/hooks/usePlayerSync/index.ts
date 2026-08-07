@@ -100,6 +100,11 @@ export const usePlayerSync = (
     return (syncData.loopEnd - syncData.loopStart) * 1000 * (1 / syncData.playbackRate);
   }, []);
 
+  const hasLoopRange = useCallback(() => {
+    const syncData = syncDataRef.current;
+    return syncData.loopStart != null && syncData.loopEnd != null;
+  }, []);
+
   const loop = useCallback(() => {
     const syncData = syncDataRef.current;
 
@@ -113,8 +118,13 @@ export const usePlayerSync = (
         _sync();
       }
     }
-    animationFrameIdRef.current = requestAnimationFrame(loop);
-  }, [_sync, isNeedLoopAdjust, calculateLoopAdjustTime]);
+
+    if (hasLoopRange() || isSyncingRef.current) {
+      animationFrameIdRef.current = requestAnimationFrame(loop);
+    } else {
+      animationFrameIdRef.current = null;
+    }
+  }, [_sync, isNeedLoopAdjust, calculateLoopAdjustTime, hasLoopRange]);
 
   const startLoop = useCallback(() => {
     if (animationFrameIdRef.current !== null) {
@@ -131,29 +141,21 @@ export const usePlayerSync = (
     animationFrameIdRef.current = null;
   }, []);
 
-  const hasLoopRange = useCallback(() => {
-    const syncData = syncDataRef.current;
-    return syncData.loopStart != null && syncData.loopEnd != null;
-  }, []);
-
   useEffect(() => {
     if (hasLoopRange()) {
       startLoop();
     }
 
     const interval = setInterval(() => {
-      if (animationFrameIdRef.current !== null) {
-        isSyncingRef.current = true;
-      } else {
-        _sync();
-      }
+      isSyncingRef.current = true;
+      startLoop();
     }, SYNC_CONFIG.interval);
 
     return () => {
       stopLoop();
       clearInterval(interval);
     };
-  }, [_sync, startLoop, stopLoop, hasLoopRange]);
+  }, [startLoop, stopLoop, hasLoopRange]);
 
   const markSourceLoaded = useCallback(() => {
     isSourceLoadingRef.current = false;
@@ -181,7 +183,8 @@ export const usePlayerSync = (
         }
       }
 
-      if (syncData.loopStart != null && syncData.loopEnd != null) {
+      const isLoopSet = syncData.loopStart != null && syncData.loopEnd != null;
+      if (isLoopSet || isSyncingRef.current) {
         startLoop();
       } else {
         stopLoop();
